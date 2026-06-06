@@ -1,0 +1,204 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { BoltIcon } from '@heroicons/react/24/solid';
+import { formatPrice, calculateNights, getWhatsAppUrl } from '@/lib/utils';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { calculateBookingPrice } from '@/graphql/queries';
+
+interface Props {
+  property: {
+    propertyId: string;
+    title: string;
+    nightlyRate: number;
+    currency: string;
+    cleaningFee: number | null;
+    maxGuests: number | null;
+    instantBookEnabled: boolean;
+    minimumStay: number | null;
+    host: { firstName: string; phoneNumber: string } | null;
+  };
+  initialCheckIn: string;
+  initialCheckOut: string;
+}
+
+interface PriceBreakdown {
+  nightlyRate: number;
+  numberOfNights: number;
+  subtotal: number;
+  cleaningFee: number;
+  serviceFee: number;
+  taxes: number;
+  total: number;
+  currency: string;
+}
+
+export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
+  const [checkIn, setCheckIn] = useState(initialCheckIn);
+  const [checkOut, setCheckOut] = useState(initialCheckOut);
+  const [guests, setGuests] = useState(1);
+  const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(false);
+  const [bookingInProgress, setBookingInProgress] = useState(false);
+
+  const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
+  const minStay = property.minimumStay || 1;
+
+  // Get today's date for min date
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+
+  // Fetch price when dates/guests change
+  useEffect(() => {
+    if (checkIn && checkOut && nights >= minStay) {
+      fetchPrice();
+    } else {
+      setPricing(null);
+    }
+  }, [checkIn, checkOut, guests]);
+
+  async function fetchPrice() {
+    setLoadingPrice(true);
+    try {
+      const data = await GraphQLClient.executePublic<{ calculateBookingPrice: PriceBreakdown }>(
+        calculateBookingPrice,
+        {
+          propertyId: property.propertyId,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
+          numberOfGuests: guests,
+        }
+      );
+      setPricing(data.calculateBookingPrice);
+    } catch (err) {
+      console.error('Price calculation error:', err);
+      // Fallback to simple calculation
+      const fallback: PriceBreakdown = {
+        nightlyRate: property.nightlyRate,
+        numberOfNights: nights,
+        subtotal: property.nightlyRate * nights,
+        cleaningFee: property.cleaningFee || 0,
+        serviceFee: 0,
+        taxes: 0,
+        total: (property.nightlyRate * nights) + (property.cleaningFee || 0),
+        currency: property.currency,
+      };
+      setPricing(fallback);
+    } finally {
+      setLoadingPrice(false);
+    }
+  }
+
+  function handleBook() {
+    if (!checkIn || !checkOut) return;
+
+    // For now, redirect to WhatsApp with booking details
+    const message = `Hi, I'd like to book "${property.title}" from ${checkIn} to ${checkOut} for ${guests} guest(s). Total: ${pricing ? formatPrice(pricing.total, pricing.currency) : formatPrice(property.nightlyRate * nights, property.currency)}`;
+    window.open(getWhatsAppUrl(message), '_blank');
+  }
+
+  return (
+    <div className="sticky top-24">
+      <div className="rounded-2xl border border-ink-200 shadow-lg p-6">
+        {/* Price header */}
+        <div className="flex items-baseline gap-1 mb-6">
+          <span className="text-2xl font-bold text-ink-900">
+            {formatPrice(property.nightlyRate, property.currency)}
+          </span>
+          <span className="text-ink-500 text-sm">/ night</span>
+        </div>
+
+        {/* Date & guest inputs */}
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-medium text-ink-500 block mb-1">Check-in</label>
+              <input
+                type="date"
+                value={checkIn}
+                min={minDate}
+                onChange={(e) => setCheckIn(e.target.value)}
+                className="input text-sm py-2.5"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-ink-500 block mb-1">Check-out</label>
+              <input
+                type="date"
+                value={checkOut}
+                min={checkIn || minDate}
+                onChange={(e) => setCheckOut(e.target.value)}
+                className="input text-sm py-2.5"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-ink-500 block mb-1">Guests</label>
+            <select
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+              className="input text-sm py-2.5"
+            >
+              {Array.from({ length: property.maxGuests || 10 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? 'guest' : 'guests'}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Minimum stay warning */}
+        {nights > 0 && nights < minStay && (
+          <p className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+            Minimum stay: {minStay} {minStay === 1 ? 'night' : 'nights'}
+          </p>
+        )}
+
+        {/* Price breakdown */}
+        {pricing && (
+          <div className="mt-5 space-y-2 text-sm">
+            <div className="flex justify-between text-ink-600">
+              <span>{formatPrice(pricing.nightlyRate, pricing.currency)} × {pricing.numberOfNights} nights</span>
+              <span>{formatPrice(pricing.subtotal, pricing.currency)}</span>
+            </div>
+            {pricing.cleaningFee > 0 && (
+              <div className="flex justify-between text-ink-600">
+                <span>Cleaning fee</span>
+                <span>{formatPrice(pricing.cleaningFee, pricing.currency)}</span>
+              </div>
+            )}
+            {pricing.serviceFee > 0 && (
+              <div className="flex justify-between text-ink-600">
+                <span>Service fee</span>
+                <span>{formatPrice(pricing.serviceFee, pricing.currency)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
+              <span>Total</span>
+              <span>{formatPrice(pricing.total, pricing.currency)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Book button */}
+        <button
+          onClick={handleBook}
+          disabled={!checkIn || !checkOut || nights < minStay || bookingInProgress}
+          className="btn-primary w-full mt-6 gap-2"
+        >
+          {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
+          {property.instantBookEnabled ? 'Book Instantly' : 'Request to Book'}
+        </button>
+
+        {/* Reassurance */}
+        <p className="mt-3 text-center text-xs text-ink-400">
+          You won&apos;t be charged yet
+        </p>
+      </div>
+    </div>
+  );
+}

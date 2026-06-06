@@ -1,0 +1,143 @@
+'use client';
+
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { searchShortTermProperties } from '@/graphql/queries';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import { SearchFilters } from './SearchFilters';
+
+interface ShortTermProperty {
+  propertyId: string;
+  title: string;
+  nightlyRate: number;
+  currency: string;
+  propertyType: string;
+  region: string;
+  district: string;
+  thumbnail: string;
+  images: string[];
+  averageRating: number | null;
+  ratingSummary: { averageRating: number; totalReviews: number } | null;
+  maxGuests: number;
+  instantBookEnabled: boolean;
+}
+
+export function SearchContent() {
+  const searchParams = useSearchParams();
+  const [properties, setProperties] = useState<ShortTermProperty[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const region = searchParams.get('region') || 'Dar es Salaam';
+  const checkIn = searchParams.get('checkIn') || getDefaultCheckIn();
+  const checkOut = searchParams.get('checkOut') || getDefaultCheckOut();
+  const guests = parseInt(searchParams.get('guests') || '1');
+  const propertyType = searchParams.get('propertyType') || undefined;
+
+  useEffect(() => {
+    fetchProperties();
+  }, [region, checkIn, checkOut, guests, propertyType]);
+
+  async function fetchProperties() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await GraphQLClient.executePublic<{
+        searchShortTermProperties: { properties: ShortTermProperty[]; nextToken: string | null };
+      }>(searchShortTermProperties, {
+        input: {
+          region,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
+          numberOfGuests: guests,
+          ...(propertyType && { propertyType }),
+          limit: 20,
+        },
+      });
+
+      setProperties(data.searchShortTermProperties?.properties || []);
+    } catch (err: any) {
+      console.error('Search error:', err);
+      setError('Failed to load properties. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      {/* Filters */}
+      <SearchFilters
+        region={region}
+        checkIn={checkIn}
+        checkOut={checkOut}
+        guests={guests}
+      />
+
+      {/* Results header */}
+      <div className="mt-6 mb-4">
+        <h1 className="text-xl font-semibold text-ink-900">
+          {loading ? 'Searching...' : `${properties.length} places in ${region}`}
+        </h1>
+      </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-center text-red-600">
+          {error}
+        </div>
+      )}
+
+      {/* Results grid */}
+      {!loading && !error && properties.length === 0 && (
+        <div className="text-center py-16">
+          <p className="text-2xl mb-2">🏠</p>
+          <h3 className="text-lg font-semibold text-ink-700">No places found</h3>
+          <p className="text-ink-500 mt-1">
+            Try changing your dates or searching a different area.
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {properties.map((property) => (
+          <PropertyCard
+            key={property.propertyId}
+            property={property}
+            checkIn={checkIn}
+            checkOut={checkOut}
+          />
+        ))}
+      </div>
+
+      {/* Loading skeleton */}
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            <div key={i} className="animate-pulse rounded-2xl overflow-hidden border border-ink-100">
+              <div className="h-48 bg-ink-100" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-3/4 bg-ink-100 rounded" />
+                <div className="h-3 w-1/2 bg-ink-100 rounded" />
+                <div className="h-5 w-1/3 bg-ink-100 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getDefaultCheckIn(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split('T')[0];
+}
+
+function getDefaultCheckOut(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 2);
+  return d.toISOString().split('T')[0];
+}

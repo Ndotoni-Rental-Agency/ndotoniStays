@@ -1,0 +1,64 @@
+import type { Metadata, Viewport } from 'next';
+import { DM_Sans } from 'next/font/google';
+import './globals.css';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { ClientProviders } from '@/components/providers/ClientProviders';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-dm-sans',
+  weight: ['300', '400', '500', '600', '700', '800'],
+});
+
+export const metadata: Metadata = {
+  title: 'ndotoni Stays – Short-Term Rentals in Tanzania',
+  description:
+    'Book nightly stays, party venues, photoshoot locations, and event spaces across Tanzania. Instant booking, flexible cancellation.',
+  keywords: [
+    'short-term rentals Tanzania',
+    'nightly stays Dar es Salaam',
+    'party venue Tanzania',
+    'photoshoot location',
+    'event space booking',
+    'Airbnb Tanzania',
+    'vacation rental',
+    'daily rental',
+  ],
+  openGraph: {
+    title: 'ndotoni Stays – Short-Term Rentals in Tanzania',
+    description:
+      'Book places to stay, celebrate, and create. Nightly stays, party venues, and more.',
+    siteName: 'ndotoni Stays',
+    type: 'website',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${dmSans.variable} font-sans bg-white text-ink-900`}
+        suppressHydrationWarning
+      >
+        <ClientProviders>
+          <Header />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </ClientProviders>
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,164 @@
+import { StarIcon, MapPinIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/solid';
+import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+
+interface Props {
+  property: {
+    title: string;
+    description: string;
+    propertyType: string;
+    region: string;
+    district: string;
+    host: { firstName: string; lastName: string } | null;
+    amenities: string[];
+    maxGuests: number | null;
+    checkInTime: string | null;
+    checkOutTime: string | null;
+    cancellationPolicy: string | null;
+    allowsPets: boolean | null;
+    allowsSmoking: boolean | null;
+    houseRules: string[] | null;
+    instantBookEnabled: boolean;
+    ratingSummary: {
+      averageRating: number;
+      totalReviews: number;
+      cleanliness: number;
+      accuracy: number;
+      communication: number;
+      location: number;
+      value: number;
+    } | null;
+  };
+}
+
+export function PropertyInfo({ property }: Props) {
+  const hostName = property.host
+    ? `${property.host.firstName} ${property.host.lastName}`
+    : 'Host';
+
+  return (
+    <div className="space-y-8">
+      {/* Title & meta */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
+          {property.title}
+        </h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-ink-500">
+          <span className="flex items-center gap-1">
+            <MapPinIcon className="h-4 w-4" />
+            {property.district}, {property.region}
+          </span>
+          {property.maxGuests && (
+            <span className="flex items-center gap-1">
+              <UserGroupIcon className="h-4 w-4" />
+              Up to {property.maxGuests} guests
+            </span>
+          )}
+          {property.ratingSummary && property.ratingSummary.totalReviews > 0 && (
+            <span className="flex items-center gap-1">
+              <StarIcon className="h-4 w-4 text-amber-500" />
+              {property.ratingSummary.averageRating.toFixed(1)} ({property.ratingSummary.totalReviews} reviews)
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Hosted by */}
+      <div className="flex items-center gap-3 p-4 bg-ink-50 rounded-xl">
+        <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-semibold">
+          {hostName.charAt(0)}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-ink-900">Hosted by {hostName}</p>
+          {property.instantBookEnabled && (
+            <p className="text-xs text-brand-600 flex items-center gap-1">
+              <ShieldCheckIcon className="h-3.5 w-3.5" />
+              Instant booking available
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Description */}
+      {property.description && (
+        <div>
+          <h2 className="text-lg font-semibold text-ink-900 mb-2">About this place</h2>
+          <p className="text-ink-600 text-sm leading-relaxed whitespace-pre-line">
+            {property.description}
+          </p>
+        </div>
+      )}
+
+      {/* Amenities */}
+      {property.amenities?.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-ink-900 mb-3">What&apos;s included</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {property.amenities.map((amenity) => (
+              <span
+                key={amenity}
+                className="flex items-center gap-2 text-sm text-ink-600 py-2 px-3 bg-ink-50 rounded-lg"
+              >
+                <span className="h-1.5 w-1.5 bg-brand-500 rounded-full" />
+                {amenity}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Check-in/out & policies */}
+      <div>
+        <h2 className="text-lg font-semibold text-ink-900 mb-3">Things to know</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {property.checkInTime && (
+            <div className="flex items-start gap-3">
+              <ClockIcon className="h-5 w-5 text-ink-400 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-ink-900">Check-in: {property.checkInTime}</p>
+                {property.checkOutTime && (
+                  <p className="text-sm text-ink-500">Check-out: {property.checkOutTime}</p>
+                )}
+              </div>
+            </div>
+          )}
+          {property.cancellationPolicy && (
+            <div className="flex items-start gap-3">
+              <ShieldCheckIcon className="h-5 w-5 text-ink-400 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-ink-900">Cancellation</p>
+                <p className="text-sm text-ink-500 capitalize">{property.cancellationPolicy.toLowerCase()}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* House Rules */}
+      {property.houseRules && property.houseRules.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-ink-900 mb-3">House rules</h2>
+          <ul className="space-y-1.5">
+            {property.houseRules.map((rule, i) => (
+              <li key={i} className="text-sm text-ink-600 flex items-start gap-2">
+                <span className="text-ink-400">•</span>
+                {rule}
+              </li>
+            ))}
+            {property.allowsPets === false && (
+              <li className="text-sm text-ink-600 flex items-start gap-2">
+                <span className="text-ink-400">•</span>
+                No pets allowed
+              </li>
+            )}
+            {property.allowsSmoking === false && (
+              <li className="text-sm text-ink-600 flex items-start gap-2">
+                <span className="text-ink-400">•</span>
+                No smoking
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}

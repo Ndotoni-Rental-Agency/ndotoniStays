@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 const REGIONS = [
   'Dar es Salaam', 'Arusha', 'Dodoma', 'Mwanza', 'Zanzibar',
@@ -48,23 +49,25 @@ export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
       </div>
 
       <div className="min-w-[140px]">
-        <label className="block text-xs font-medium text-ink-500 mb-1">Check-in</label>
-        <input
-          type="date"
+        <CalendarDatePicker
           value={localCheckIn}
-          onChange={(e) => setLocalCheckIn(e.target.value)}
-          className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+          onChange={setLocalCheckIn}
+          label="Check-in"
+          placeholder="Check-in"
+          rangeStart={localCheckIn}
+          rangeEnd={localCheckOut}
         />
       </div>
 
       <div className="min-w-[140px]">
-        <label className="block text-xs font-medium text-ink-500 mb-1">Check-out</label>
-        <input
-          type="date"
+        <CalendarDatePicker
           value={localCheckOut}
+          onChange={setLocalCheckOut}
           min={localCheckIn}
-          onChange={(e) => setLocalCheckOut(e.target.value)}
-          className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+          label="Check-out"
+          placeholder="Check-out"
+          rangeStart={localCheckIn}
+          rangeEnd={localCheckOut}
         />
       </div>
 

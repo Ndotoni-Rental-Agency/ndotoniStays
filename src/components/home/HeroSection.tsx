@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, MapPinIcon, CalendarDaysIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { MagnifyingGlassIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 const REGIONS = [
   'Dar es Salaam',
@@ -132,30 +133,24 @@ export function HeroSection() {
               </div>
 
               {/* Check-in */}
-              <div className="relative">
-                <CalendarDaysIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400 pointer-events-none" />
-                <input
-                  type="date"
-                  value={checkIn}
-                  min={minCheckIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-sm text-ink-900 font-medium focus:ring-2 focus:ring-brand-500"
-                  aria-label="Check-in date"
-                />
-              </div>
+              <CalendarDatePicker
+                value={checkIn}
+                onChange={setCheckIn}
+                min={minCheckIn}
+                placeholder="Check-in"
+                rangeStart={checkIn}
+                rangeEnd={checkOut}
+              />
 
               {/* Check-out */}
-              <div className="relative">
-                <CalendarDaysIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400 pointer-events-none" />
-                <input
-                  type="date"
-                  value={checkOut}
-                  min={checkIn || minCheckIn}
-                  onChange={(e) => setCheckOut(e.target.value)}
-                  className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-sm text-ink-900 font-medium focus:ring-2 focus:ring-brand-500"
-                  aria-label="Check-out date"
-                />
-              </div>
+              <CalendarDatePicker
+                value={checkOut}
+                onChange={setCheckOut}
+                min={checkIn || minCheckIn}
+                placeholder="Check-out"
+                rangeStart={checkIn}
+                rangeEnd={checkOut}
+              />
 
               {/* Guests */}
               <div className="relative">

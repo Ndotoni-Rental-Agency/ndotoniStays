@@ -28,7 +28,7 @@ export function Header() {
                 priority
                 className="object-contain"
               />
-              <span className="text-lg font-bold text-ink-900 hidden sm:inline">
+              <span className="text-lg font-bold text-ink-900">
                 Stays
               </span>
             </Link>

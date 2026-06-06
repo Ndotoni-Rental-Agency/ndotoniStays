@@ -5,6 +5,7 @@ import { BoltIcon } from '@heroicons/react/24/solid';
 import { formatPrice, calculateNights, getWhatsAppUrl } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { calculateBookingPrice } from '@/graphql/queries';
+import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 interface Props {
   property: {
@@ -113,26 +114,24 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         {/* Date & guest inputs */}
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-medium text-ink-500 block mb-1">Check-in</label>
-              <input
-                type="date"
-                value={checkIn}
-                min={minDate}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="input text-sm py-2.5"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-ink-500 block mb-1">Check-out</label>
-              <input
-                type="date"
-                value={checkOut}
-                min={checkIn || minDate}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="input text-sm py-2.5"
-              />
-            </div>
+            <CalendarDatePicker
+              value={checkIn}
+              onChange={setCheckIn}
+              min={minDate}
+              label="Check-in"
+              placeholder="Add date"
+              rangeStart={checkIn}
+              rangeEnd={checkOut}
+            />
+            <CalendarDatePicker
+              value={checkOut}
+              onChange={setCheckOut}
+              min={checkIn || minDate}
+              label="Check-out"
+              placeholder="Add date"
+              rangeStart={checkIn}
+              rangeEnd={checkOut}
+            />
           </div>
 
           <div>

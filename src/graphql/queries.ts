@@ -171,14 +171,47 @@ export const getPropertyReviews = /* GraphQL */ `
 export const getMe = /* GraphQL */ `
   query GetMe {
     getMe {
-      userId
-      email
-      firstName
-      lastName
-      phoneNumber
-      profileImage
-      userType
-      createdAt
+      ... on Tenant {
+        firstName
+        lastName
+        email
+        phoneNumber
+        profileImage
+        userType
+        createdAt
+        accountStatus
+      }
+      ... on Landlord {
+        firstName
+        lastName
+        email
+        phoneNumber
+        profileImage
+        userType
+        createdAt
+        accountStatus
+        businessName
+      }
+      ... on Agent {
+        firstName
+        lastName
+        email
+        phoneNumber
+        profileImage
+        userType
+        createdAt
+        accountStatus
+      }
+      ... on Admin {
+        firstName
+        lastName
+        email
+        phoneNumber
+        profileImage
+        userType
+        createdAt
+        accountStatus
+      }
     }
   }
 `;

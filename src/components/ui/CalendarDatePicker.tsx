@@ -33,21 +33,16 @@ export default function CalendarDatePicker({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (value) {
-      setCurrentMonth(new Date(value));
-    }
-  }, [value]);
-
-  useEffect(() => {
     if (isOpen) {
       if (rangeStart && !value) {
-        const startDate = new Date(rangeStart);
-        setCurrentMonth(new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1));
+        // For checkout with no value: show same month as check-in (not next month)
+        // User can navigate forward if needed
+        setCurrentMonth(new Date(rangeStart));
       } else if (value) {
         setCurrentMonth(new Date(value));
       }
     }
-  }, [isOpen, rangeStart, value]);
+  }, [isOpen]);
 
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return placeholder;

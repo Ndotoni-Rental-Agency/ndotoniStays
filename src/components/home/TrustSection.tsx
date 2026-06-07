@@ -25,15 +25,36 @@ const TRUST_POINTS = [
 
 export function TrustSection() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-10 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-ink-900">
+        <div className="text-center mb-6 sm:mb-12">
+          <h2 className="text-2xl sm:text-4xl font-bold text-ink-900">
             Why people choose us
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Mobile: compact horizontal list */}
+        <div className="sm:hidden space-y-3">
+          {TRUST_POINTS.map((point) => (
+            <div
+              key={point.title}
+              className="flex items-start gap-3 p-3 rounded-xl bg-white border border-ink-100"
+            >
+              <div className="h-9 w-9 shrink-0 rounded-lg bg-brand-50 flex items-center justify-center">
+                <point.icon className="h-5 w-5 text-brand-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-ink-900 text-sm">{point.title}</h3>
+                <p className="text-xs text-ink-500 leading-relaxed mt-0.5">
+                  {point.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: grid cards */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {TRUST_POINTS.map((point) => (
             <div
               key={point.title}

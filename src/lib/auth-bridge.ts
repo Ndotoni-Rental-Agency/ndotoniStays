@@ -169,7 +169,20 @@ export class AuthBridge {
    * Sign in with Google via Cognito Hosted UI
    */
   static async signInWithGoogle() {
-    await signInWithRedirect({ provider: 'Google' });
+    try {
+      // Clear any stale OAuth state before initiating new sign-in
+      await cognitoSignOut().catch(() => {});
+      await signInWithRedirect({ provider: 'Google' });
+    } catch (error: any) {
+      // If there's already a session, the user is actually signed in
+      const hasSession = await AuthBridge.hasSession();
+      if (hasSession) {
+        // Force refresh the page to pick up the session
+        window.location.reload();
+        return;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -177,7 +190,7 @@ export class AuthBridge {
    */
   static async signOut() {
     try {
-      await cognitoSignOut();
+      await cognitoSignOut({ global: true });
     } catch {
       // Silent
     }

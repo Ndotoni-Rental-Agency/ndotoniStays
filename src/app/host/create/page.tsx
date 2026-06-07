@@ -7,6 +7,7 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { createShortTermPropertyDraft } from '@/graphql/mutations';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { ImageUpload } from '@/components/media/ImageUpload';
 
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
@@ -39,6 +40,7 @@ export default function CreatePropertyPage() {
     nightlyRate: '',
     currency: 'TZS',
     maxGuests: '2',
+    images: [] as string[],
   });
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function CreatePropertyPage() {
           nightlyRate: parseFloat(form.nightlyRate),
           currency: form.currency,
           maxGuests: parseInt(form.maxGuests),
+          images: form.images.length > 0 ? form.images : undefined,
         },
       });
 
@@ -212,6 +215,17 @@ export default function CreatePropertyPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Photos */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-2">Photos</label>
+            <ImageUpload
+              images={form.images}
+              onChange={(imgs) => setForm(prev => ({ ...prev, images: imgs }))}
+              maxImages={10}
+            />
+            <p className="text-xs text-ink-400 mt-1.5">Add at least 1 photo. First photo becomes the cover.</p>
           </div>
 
           {/* Error */}

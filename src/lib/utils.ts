@@ -55,3 +55,10 @@ export function getWhatsAppUrl(message: string): string {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '255756502853';
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
+
+/**
+ * Convert string to title case
+ */
+export function toTitleCase(str: string): string {
+  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}

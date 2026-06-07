@@ -4,28 +4,24 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 /**
- * OAuth callback handler
- * Processes the token from Google/social sign-in and communicates back to the opener
+ * OAuth callback handler for signInWithRedirect
+ * 
+ * After Cognito redirects back here with the authorization code,
+ * Amplify automatically processes it (exchanges code for tokens).
+ * We just need to wait a moment for the session to be established,
+ * then redirect to the home page where AuthContext will pick up the session.
  */
 export default function AuthCallbackPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get('access_token');
-    const state = params.get('state');
+    // Give Amplify a moment to process the OAuth code from the URL
+    // Then redirect to home where AuthContext.initializeAuth() will detect the session
+    const timer = setTimeout(() => {
+      router.replace('/');
+    }, 1500);
 
-    if (accessToken && window.opener) {
-      const type = state === 'google' ? 'GOOGLE_AUTH_SUCCESS' : 'FACEBOOK_AUTH_SUCCESS';
-      window.opener.postMessage({ type, accessToken }, window.location.origin);
-    } else if (window.opener) {
-      const type = state === 'google' ? 'GOOGLE_AUTH_ERROR' : 'FACEBOOK_AUTH_ERROR';
-      window.opener.postMessage({ type, error: 'No access token received' }, window.location.origin);
-    } else {
-      // If no opener (e.g., direct navigation), redirect home
-      router.push('/');
-    }
+    return () => clearTimeout(timer);
   }, [router]);
 
   return (

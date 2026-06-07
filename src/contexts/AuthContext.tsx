@@ -47,13 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const stored = localStorage.getItem('user');
         if (stored) {
           setUser(JSON.parse(stored));
-        } else {
-          await refreshUser();
+          setIsLoading(false);
         }
+        // Always refresh from backend to ensure data is current
+        await refreshUser();
+      } else {
+        setIsLoading(false);
       }
     } catch {
       localStorage.removeItem('user');
-    } finally {
       setIsLoading(false);
     }
   }
@@ -65,8 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(data.getMe);
         localStorage.setItem('user', JSON.stringify(data.getMe));
       }
-    } catch {
-      // Not authenticated
+    } catch (err) {
+      console.error('Error refreshing user:', err);
+    } finally {
+      setIsLoading(false);
     }
   }
 

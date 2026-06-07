@@ -7,9 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "codegen": "graphql-codegen --config codegen.yml",
+    "amplify:statements": "pnpm amplify codegen statements",
+    "amplify:types": "pnpm amplify codegen types",
+    "amplify:codegen": "pnpm run amplify:statements && pnpm run amplify:types",
     "schema:download": "aws appsync get-introspection-schema --api-id tpxpbec6e5crxhu277uknqxoqi --region us-west-2 --format SDL schema.graphql",
-    "schema:generate": "pnpm run codegen",
+    "schema:clean": "node -e \"const fs=require('fs');let s=fs.readFileSync('schema.graphql','utf8');s=s.replace(/@aws_[a-z_]+/g,'').replace(/@[a-z]+\\\\([^)]*\\\\)/g,'');fs.writeFileSync('schema.graphql',s);\"",
+    "schema:generate": "pnpm run amplify:codegen",
     "schema:update": "pnpm run schema:download && pnpm run schema:generate"
   },
   "dependencies": {
@@ -27,6 +30,7 @@
     "typescript": "^5.0.0"
   },
   "devDependencies": {
+    "@aws-amplify/cli": "^14.5.0",
     "@graphql-codegen/cli": "^7.1.2",
     "@graphql-codegen/typescript": "^6.0.2",
     "@graphql-codegen/typescript-operations": "^6.0.3",

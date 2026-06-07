@@ -106,6 +106,15 @@ export default function PropertyDetailPage() {
       {/* Gallery */}
       <PropertyGallery images={property.images} title={property.title} />
 
+      {/* Mobile booking card - shown above property details on small screens */}
+      <div className="mt-6 lg:hidden">
+        <BookingSidebar
+          property={property}
+          initialCheckIn={checkIn}
+          initialCheckOut={checkOut}
+        />
+      </div>
+
       {/* Content grid */}
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Property info */}
@@ -113,8 +122,8 @@ export default function PropertyDetailPage() {
           <PropertyInfo property={property} />
         </div>
 
-        {/* Right: Booking sidebar (sticky) */}
-        <div className="lg:col-span-1">
+        {/* Right: Booking sidebar (sticky) - desktop only */}
+        <div className="hidden lg:block lg:col-span-1">
           <BookingSidebar
             property={property}
             initialCheckIn={checkIn}

@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights, getCdnUrl } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { BoltIcon } from '@heroicons/react/24/solid';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 type PaymentOption = 'full' | 'deposit';
 type BookingStep = 'summary' | 'payment' | 'processing' | 'confirmed' | 'failed';
@@ -32,17 +33,54 @@ export default function BookingPage() {
   const [step, setStep] = useState<BookingStep>('summary');
   const [paymentOption, setPaymentOption] = useState<PaymentOption>('full');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [guestName, setGuestName] = useState(user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : '');
+  const [guestEmail, setGuestEmail] = useState(user?.email || '');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [paymentMessage, setPaymentMessage] = useState('');
 
-  // Redirect if not authenticated
+  // Redirect if not authenticated — show guest form instead
+  const needsGuestInfo = !authLoading && !isAuthenticated;
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authChoice, setAuthChoice] = useState<'none' | 'guest' | 'signin'>('none');
+
+  // On mount, check if we're returning from auth (redirect back)
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/');
+    if (isAuthenticated && typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ndotoni_booking_redirect');
+      if (saved) {
+        localStorage.removeItem('ndotoni_booking_redirect');
+        // We're already on the right page, just pre-fill from user
+        setGuestName(`${user?.firstName || ''} ${user?.lastName || ''}`.trim());
+        setGuestEmail(user?.email || '');
+        setAuthChoice('signin');
+      }
     }
-  }, [authLoading, isAuthenticated, router]);
+  }, [isAuthenticated, user]);
+
+  // If authenticated, skip the choice
+  useEffect(() => {
+    if (isAuthenticated && authChoice === 'none') {
+      setAuthChoice('signin');
+    }
+  }, [isAuthenticated, authChoice]);
+
+  function handleSignIn() {
+    // Save current URL to localStorage so we can redirect back after auth
+    localStorage.setItem('ndotoni_booking_redirect', window.location.href);
+    setShowAuthModal(true);
+  }
+
+  function handleContinueAsGuest() {
+    setAuthChoice('guest');
+  }
+
+  function handleAuthSuccess() {
+    setShowAuthModal(false);
+    setAuthChoice('signin');
+    // User data will be set via the useEffect above
+  }
 
   // Redirect if missing params
   useEffect(() => {
@@ -114,14 +152,27 @@ export default function BookingPage() {
       setError('Enter a valid phone number (e.g., 0712 345 678)');
       return;
     }
+    if (!guestName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!guestEmail.trim() || !guestEmail.includes('@')) {
+      setError('Please enter a valid email');
+      return;
+    }
 
     setIsProcessing(true);
     setError('');
     setStep('processing');
 
     try {
+      // Use authenticated or public based on auth status
+      const executeGql = isAuthenticated
+        ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
+        : GraphQLClient.executePublic.bind(GraphQLClient);
+
       // 1. Create booking
-      const bookingResponse = await GraphQLClient.executeAuthenticated<{ createBooking: any }>(
+      const bookingResponse = await executeGql<{ createBooking: any }>(
         createBooking,
         {
           input: {
@@ -133,6 +184,7 @@ export default function BookingPage() {
             numberOfChildren: 0,
             numberOfInfants: 0,
             paymentMethodId: 'snippe_mpesa',
+            specialRequests: !isAuthenticated ? `Guest: ${guestName}, Email: ${guestEmail}` : undefined,
           },
         }
       );
@@ -143,7 +195,7 @@ export default function BookingPage() {
       setBookingId(createdBooking.bookingId);
 
       // 2. Initiate payment
-      const paymentResponse = await GraphQLClient.executeAuthenticated<{ initiatePayment: any }>(
+      const paymentResponse = await executeGql<{ initiatePayment: any }>(
         initiatePayment,
         {
           input: {
@@ -328,7 +380,8 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* Payment option */}
+        {/* Payment option — only show after auth choice */}
+        {authChoice !== 'none' && (
         <div className="rounded-2xl border border-ink-100 p-5">
           <h3 className="font-semibold text-ink-900 mb-3">How would you like to pay?</h3>
           <div className="space-y-2">
@@ -377,8 +430,77 @@ export default function BookingPage() {
             </label>
           </div>
         </div>
+        )}
 
-        {/* Phone number input */}
+        {/* Auth choice — sign in or continue as guest */}
+        {authChoice === 'none' && !isAuthenticated && (
+          <div className="rounded-2xl border border-ink-100 p-5">
+            <h3 className="font-semibold text-ink-900 mb-3">How would you like to book?</h3>
+            <div className="space-y-2">
+              <button
+                onClick={handleSignIn}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-ink-100 hover:border-brand-500 transition-all text-left"
+              >
+                <div className="h-10 w-10 rounded-full bg-brand-50 flex items-center justify-center shrink-0">
+                  <svg className="h-5 w-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-ink-900">Sign in</p>
+                  <p className="text-xs text-ink-500">Track your bookings and earn rewards</p>
+                </div>
+              </button>
+              <button
+                onClick={handleContinueAsGuest}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-ink-100 hover:border-ink-200 transition-all text-left"
+              >
+                <div className="h-10 w-10 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
+                  <svg className="h-5 w-5 text-ink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-ink-900">Continue as guest</p>
+                  <p className="text-xs text-ink-500">Just enter your details below</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Guest details (shown after choice or if signed in) */}
+        {(authChoice !== 'none') && (
+          <div className="rounded-2xl border border-ink-100 p-5">
+            <h3 className="font-semibold text-ink-900 mb-3">Your details</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Full name</label>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="John Doe"
+                  className="input"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="input"
+                  required
+                />
+              </div>
+            </div>
+            {authChoice === 'guest' && (
+              <p className="text-xs text-ink-400 mt-2">We&apos;ll send your booking confirmation here.</p>
+            )}
+          </div>
+        )}
+
+        {/* Phone number input — only show after auth choice */}
+        {authChoice !== 'none' && (
         <div className="rounded-2xl border border-ink-100 p-5">
           <h3 className="font-semibold text-ink-900 mb-1">Mobile Money</h3>
           <p className="text-xs text-ink-500 mb-3">M-Pesa, Airtel Money, Tigo Pesa, or Halotel</p>
@@ -393,6 +515,7 @@ export default function BookingPage() {
             <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
           )}
         </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -401,19 +524,24 @@ export default function BookingPage() {
           </div>
         )}
 
-        {/* Pay button */}
-        <button
-          onClick={handlePay}
-          disabled={!isValidPhone || isProcessing}
-          className="btn-primary w-full text-base py-4"
-        >
-          {isProcessing ? 'Processing...' : `Pay ${formatPrice(payNowAmount, property.currency)}`}
-        </button>
+        {/* Pay button — only show after auth choice */}
+        {authChoice !== 'none' && (
+          <button
+            onClick={handlePay}
+            disabled={!isValidPhone || isProcessing}
+            className="btn-primary w-full text-base py-4"
+          >
+            {isProcessing ? 'Processing...' : `Pay ${formatPrice(payNowAmount, property.currency)}`}
+          </button>
+        )}
 
         <p className="text-center text-xs text-ink-400">
           By booking, you agree to the host&apos;s cancellation policy ({property.cancellationPolicy?.toLowerCase() || 'flexible'}).
         </p>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => { setShowAuthModal(false); handleAuthSuccess(); }} />
     </div>
   );
 }

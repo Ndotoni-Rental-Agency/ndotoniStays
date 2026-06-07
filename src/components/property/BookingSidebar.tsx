@@ -7,8 +7,6 @@ import { formatPrice, calculateNights } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { calculateBookingPrice } from '@/graphql/queries';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/auth/AuthModal';
 
 interface Props {
   property: {
@@ -38,7 +36,6 @@ interface PriceBreakdown {
 }
 
 export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
-  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
@@ -46,7 +43,6 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(false);
   const [bookingInProgress, setBookingInProgress] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const minStay = property.minimumStay || 1;
@@ -101,13 +97,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   function handleBook() {
     if (!checkIn || !checkOut) return;
 
-    // Require authentication before booking
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
-
-    // Navigate to booking page with dates and guests
+    // Navigate to booking page with dates and guests (auth handled there)
     const params = new URLSearchParams({
       checkIn,
       checkOut,
@@ -214,9 +204,6 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
           You won&apos;t be charged yet
         </p>
       </div>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 }

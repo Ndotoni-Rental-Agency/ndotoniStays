@@ -1,0 +1,17 @@
+overwrite: true
+schema: "./schema.graphql"
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+    config:
+      scalars:
+        AWSDateTime: string
+        AWSDate: string
+        AWSJSON: string
+        AWSEmail: string
+        AWSPhone: string
+        AWSURL: string
+      enumsAsTypes: true
+      constEnums: true

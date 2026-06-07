@@ -1,7 +1,16 @@
 /**
  * GraphQL queries for ndotoniStays
- * These hit the same AppSync API as ndotoniWeb
+ * 
+ * Uses auto-generated queries from ndotoniWeb for shared operations (auth, etc.)
+ * Custom lightweight queries for stays-specific operations (search, property detail)
  */
+
+// Re-export the auto-generated getMe (correct union type handling)
+export { getMe } from './queries.generated';
+
+// ============================================
+// Short-Term Stays Queries (custom/lightweight)
+// ============================================
 
 export const searchShortTermProperties = /* GraphQL */ `
   query SearchShortTermProperties($input: ShortTermSearchInput!) {
@@ -99,6 +108,29 @@ export const getShortTermProperty = /* GraphQL */ `
   }
 `;
 
+export const listMyShortTermProperties = /* GraphQL */ `
+  query ListMyShortTermProperties($limit: Int, $nextToken: String) {
+    listMyShortTermProperties(limit: $limit, nextToken: $nextToken) {
+      properties {
+        propertyId
+        title
+        propertyType
+        region
+        district
+        nightlyRate
+        currency
+        thumbnail
+        status
+        instantBookEnabled
+        maxGuests
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
+
 export const getBlockedDates = /* GraphQL */ `
   query GetBlockedDates($propertyId: ID!, $startDate: AWSDate, $endDate: AWSDate) {
     getBlockedDates(propertyId: $propertyId, startDate: $startDate, endDate: $endDate) {
@@ -168,54 +200,6 @@ export const getPropertyReviews = /* GraphQL */ `
   }
 `;
 
-export const getMe = /* GraphQL */ `
-  query GetMe {
-    getMe {
-      ... on Tenant {
-        firstName
-        lastName
-        email
-        phoneNumber
-        profileImage
-        userType
-        createdAt
-        accountStatus
-      }
-      ... on Landlord {
-        firstName
-        lastName
-        email
-        phoneNumber
-        profileImage
-        userType
-        createdAt
-        accountStatus
-        businessName
-      }
-      ... on Agent {
-        firstName
-        lastName
-        email
-        phoneNumber
-        profileImage
-        userType
-        createdAt
-        accountStatus
-      }
-      ... on Admin {
-        firstName
-        lastName
-        email
-        phoneNumber
-        profileImage
-        userType
-        createdAt
-        accountStatus
-      }
-    }
-  }
-`;
-
 export const getPayment = /* GraphQL */ `
   query GetPayment($paymentId: ID!) {
     getPayment(paymentId: $paymentId) {
@@ -228,29 +212,6 @@ export const getPayment = /* GraphQL */ `
       errorMessage
       completedAt
       createdAt
-    }
-  }
-`;
-
-export const listMyShortTermProperties = /* GraphQL */ `
-  query ListMyShortTermProperties($limit: Int, $nextToken: String) {
-    listMyShortTermProperties(limit: $limit, nextToken: $nextToken) {
-      properties {
-        propertyId
-        title
-        propertyType
-        region
-        district
-        nightlyRate
-        currency
-        thumbnail
-        status
-        instantBookEnabled
-        maxGuests
-        createdAt
-        updatedAt
-      }
-      nextToken
     }
   }
 `;

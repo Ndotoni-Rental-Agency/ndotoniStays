@@ -68,6 +68,27 @@ export const createShortTermPropertyDraft = /* GraphQL */ `
   }
 `;
 
+export const updateShortTermProperty = /* GraphQL */ `
+  mutation UpdateShortTermProperty($propertyId: ID!, $input: UpdateShortTermPropertyInput!) {
+    updateShortTermProperty(propertyId: $propertyId, input: $input) {
+      propertyId
+      title
+      status
+      updatedAt
+    }
+  }
+`;
+
+export const publishShortTermProperty = /* GraphQL */ `
+  mutation PublishShortTermProperty($propertyId: ID!) {
+    publishShortTermProperty(propertyId: $propertyId) {
+      propertyId
+      status
+      publishedAt
+    }
+  }
+`;
+
 export const initiatePayment = /* GraphQL */ `
   mutation InitiatePayment($input: InitiatePaymentInput!) {
     initiatePayment(input: $input) {

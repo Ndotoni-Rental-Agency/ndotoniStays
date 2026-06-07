@@ -72,6 +72,9 @@ export function Header() {
                         <Link href="/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           My Bookings
                         </Link>
+                        <Link href="/host" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
+                          My Properties
+                        </Link>
                         <button
                           onClick={() => { signOut(); setUserMenuOpen(false); }}
                           className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
@@ -136,6 +139,13 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       My Bookings
+                    </Link>
+                    <Link
+                      href="/host"
+                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      My Properties
                     </Link>
                     <button
                       onClick={() => { signOut(); setMobileMenuOpen(false); }}

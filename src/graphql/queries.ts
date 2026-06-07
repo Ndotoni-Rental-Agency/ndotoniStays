@@ -198,3 +198,26 @@ export const getPayment = /* GraphQL */ `
     }
   }
 `;
+
+export const listMyShortTermProperties = /* GraphQL */ `
+  query ListMyShortTermProperties($limit: Int, $nextToken: String) {
+    listMyShortTermProperties(limit: $limit, nextToken: $nextToken) {
+      properties {
+        propertyId
+        title
+        propertyType
+        region
+        district
+        nightlyRate
+        currency
+        thumbnail
+        status
+        instantBookEnabled
+        maxGuests
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;

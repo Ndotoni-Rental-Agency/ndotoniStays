@@ -29,7 +29,7 @@ const ROTATING_WORDS = [
 
 export function HeroSection() {
   const router = useRouter();
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState('Dar es Salaam');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(1);

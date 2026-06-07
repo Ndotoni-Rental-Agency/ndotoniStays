@@ -103,10 +103,6 @@ export function HeroSection() {
             </span>
           </h1>
 
-          <p className="mt-5 text-lg sm:text-xl text-white max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            Apartments, villas, party venues, and event spaces across Tanzania.
-            Pick your dates, book instantly, show up.
-          </p>
         </div>
 
         {/* Search Card */}

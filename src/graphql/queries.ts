@@ -40,13 +40,6 @@ export const getShortTermProperty = /* GraphQL */ `
     getShortTermProperty(propertyId: $propertyId) {
       propertyId
       hostId
-      host {
-        userId
-        firstName
-        lastName
-        profileImage
-        phoneNumber
-      }
       title
       description
       propertyType

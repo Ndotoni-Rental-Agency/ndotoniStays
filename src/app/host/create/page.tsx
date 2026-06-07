@@ -8,6 +8,7 @@ import { createShortTermPropertyDraft } from '@/graphql/mutations';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/media/ImageUpload';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
@@ -27,7 +28,7 @@ const REGIONS = [
 ];
 
 export default function CreatePropertyPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,15 @@ export default function CreatePropertyPage() {
     currency: 'TZS',
     maxGuests: '2',
     images: [] as string[],
+    phoneNumber: '',
   });
+
+  // Pre-fill phone from user profile
+  useEffect(() => {
+    if (user?.phoneNumber && !form.phoneNumber) {
+      setForm(prev => ({ ...prev, phoneNumber: user.phoneNumber || '' }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -71,6 +80,8 @@ export default function CreatePropertyPage() {
           currency: form.currency,
           maxGuests: parseInt(form.maxGuests),
           images: form.images.length > 0 ? form.images : undefined,
+          guestPhoneNumber: form.phoneNumber || undefined,
+          guestWhatsappNumber: form.phoneNumber || undefined,
         },
       });
 
@@ -226,6 +237,18 @@ export default function CreatePropertyPage() {
               maxImages={10}
             />
             <p className="text-xs text-ink-400 mt-1.5">Add at least 1 photo. First photo becomes the cover.</p>
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Your WhatsApp / phone number</label>
+            <PhoneInput
+              value={form.phoneNumber}
+              onChange={(val) => setForm(prev => ({ ...prev, phoneNumber: val }))}
+              placeholder="Phone number"
+              required
+            />
+            <p className="text-xs text-ink-400 mt-1">So we can reach you about your listing.</p>
           </div>
 
           {/* Error */}

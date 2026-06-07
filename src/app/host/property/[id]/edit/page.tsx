@@ -62,10 +62,12 @@ interface PropertyData {
   status: string;
 }
 
-function CollapsibleSection({ title, defaultOpen = false, children }: {
+function CollapsibleSection({ title, defaultOpen = false, children, onSave, saving }: {
   title: string;
   defaultOpen?: boolean;
   children: React.ReactNode;
+  onSave?: () => void;
+  saving?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -79,7 +81,21 @@ function CollapsibleSection({ title, defaultOpen = false, children }: {
         <span className="text-sm font-semibold text-ink-800">{title}</span>
         {open ? <ChevronUpIcon className="h-4 w-4 text-ink-400" /> : <ChevronDownIcon className="h-4 w-4 text-ink-400" />}
       </button>
-      {open && <div className="px-5 py-5 space-y-4">{children}</div>}
+      {open && (
+        <div className="px-5 py-5 space-y-4">
+          {children}
+          {onSave && (
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving}
+              className="btn-primary text-sm py-2 px-4 mt-2"
+            >
+              {saving ? 'Saving...' : `Save ${title}`}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -193,8 +209,8 @@ export default function EditPropertyPage() {
     setSuccess(null);
   }
 
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSave(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     setSaving(true);
     setError(null);
     setSuccess(null);
@@ -317,7 +333,7 @@ export default function EditPropertyPage() {
       {/* Form */}
       <form onSubmit={handleSave} className="space-y-4">
         {/* Basic Info */}
-        <CollapsibleSection title="Basic Info" defaultOpen>
+        <CollapsibleSection title="Basic Info" defaultOpen onSave={handleSave} saving={saving}>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Title</label>
             <input
@@ -361,7 +377,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Location */}
-        <CollapsibleSection title="Location">
+        <CollapsibleSection title="Location" onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-1.5">Region</label>
@@ -412,7 +428,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Pricing */}
-        <CollapsibleSection title="Pricing">
+        <CollapsibleSection title="Pricing" onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-1.5">Nightly rate</label>
@@ -459,7 +475,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Capacity */}
-        <CollapsibleSection title="Capacity">
+        <CollapsibleSection title="Capacity" onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-1.5">Max guests</label>
@@ -501,7 +517,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Amenities */}
-        <CollapsibleSection title="Amenities">
+        <CollapsibleSection title="Amenities" onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
             {AMENITIES.map((amenity) => (
               <label
@@ -525,7 +541,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Policies */}
-        <CollapsibleSection title="Policies">
+        <CollapsibleSection title="Policies" onSave={handleSave} saving={saving}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-1.5">Minimum stay (nights)</label>
@@ -593,7 +609,7 @@ export default function EditPropertyPage() {
         </CollapsibleSection>
 
         {/* Settings */}
-        <CollapsibleSection title="Settings">
+        <CollapsibleSection title="Settings" onSave={handleSave} saving={saving}>
           <label className="flex items-center gap-3 cursor-pointer">
             <div className="relative">
               <input

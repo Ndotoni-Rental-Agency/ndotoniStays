@@ -76,7 +76,7 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
         <div className="text-center max-w-4xl mx-auto">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
@@ -112,7 +112,7 @@ export function HeroSection() {
         {/* Search Card */}
         <form
           onSubmit={handleSearch}
-          className="mt-10 max-w-4xl mx-auto"
+          className="mt-8 max-w-4xl mx-auto"
         >
           <div className="bg-white rounded-2xl shadow-2xl p-3 sm:p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">

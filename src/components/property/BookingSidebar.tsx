@@ -6,6 +6,8 @@ import { formatPrice, calculateNights, getWhatsAppUrl } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { calculateBookingPrice } from '@/graphql/queries';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
+import { useAuth } from '@/contexts/AuthContext';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 interface Props {
   property: {
@@ -35,12 +37,14 @@ interface PriceBreakdown {
 }
 
 export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
+  const { isAuthenticated } = useAuth();
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
   const [guests, setGuests] = useState(1);
   const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(false);
   const [bookingInProgress, setBookingInProgress] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const minStay = property.minimumStay || 1;
@@ -94,6 +98,12 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
 
   function handleBook() {
     if (!checkIn || !checkOut) return;
+
+    // Require authentication before booking
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
 
     // For now, redirect to WhatsApp with booking details
     const message = `Hi, I'd like to book "${property.title}" from ${checkIn} to ${checkOut} for ${guests} guest(s). Total: ${pricing ? formatPrice(pricing.total, pricing.currency) : formatPrice(property.nightlyRate * nights, property.currency)}`;
@@ -198,6 +208,9 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
           You won&apos;t be charged yet
         </p>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     </div>
   );
 }

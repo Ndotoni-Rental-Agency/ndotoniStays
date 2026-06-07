@@ -58,6 +58,10 @@
   .input {
     @apply block w-full rounded-xl border border-ink-200 px-4 py-3 text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all;
   }
+
+  .field-input {
+    @apply block w-full rounded-xl border border-ink-200 px-4 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all disabled:bg-ink-50 disabled:text-ink-500 disabled:cursor-default;
+  }
 }
 
 @layer utilities {

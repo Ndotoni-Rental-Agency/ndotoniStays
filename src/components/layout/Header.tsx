@@ -69,6 +69,9 @@ export function Header() {
                           <p className="text-sm font-medium text-ink-900 truncate">{user?.firstName} {user?.lastName}</p>
                           <p className="text-xs text-ink-500 truncate">{user?.email}</p>
                         </div>
+                        <Link href="/profile" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
+                          Profile
+                        </Link>
                         <Link href="/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           My Bookings
                         </Link>
@@ -133,6 +136,13 @@ export function Header() {
 
                 {isAuthenticated ? (
                   <>
+                    <Link
+                      href="/profile"
+                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
                     <Link
                       href="/bookings"
                       className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"

@@ -13,12 +13,27 @@ export interface UserProfile {
   phoneNumber?: string;
   profileImage?: string;
   userType?: string;
+  whatsappNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  occupation?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  nationalIdLast4?: string;
+  address?: string;
+  region?: string;
+  district?: string;
+  ward?: string;
+  street?: string;
+  city?: string;
+  accountStatus?: string;
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  refreshUser: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: { email: string; password: string; firstName: string; lastName: string; phoneNumber: string }) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -117,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isAuthenticated: !!user,
         isLoading,
+        refreshUser,
         signIn,
         signUp,
         signInWithGoogle,
@@ -140,6 +156,7 @@ export function useAuth() {
         user: null,
         isAuthenticated: false,
         isLoading: true,
+        refreshUser: async () => {},
         signIn: async () => {},
         signUp: async () => {},
         signInWithGoogle: async () => {},

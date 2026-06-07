@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { BoltIcon } from '@heroicons/react/24/solid';
-import { formatPrice, calculateNights, getWhatsAppUrl } from '@/lib/utils';
+import { formatPrice, calculateNights } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { calculateBookingPrice } from '@/graphql/queries';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
@@ -38,6 +39,7 @@ interface PriceBreakdown {
 
 export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
   const [guests, setGuests] = useState(1);
@@ -105,9 +107,13 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
       return;
     }
 
-    // For now, redirect to WhatsApp with booking details
-    const message = `Hi, I'd like to book "${property.title}" from ${checkIn} to ${checkOut} for ${guests} guest(s). Total: ${pricing ? formatPrice(pricing.total, pricing.currency) : formatPrice(property.nightlyRate * nights, property.currency)}`;
-    window.open(getWhatsAppUrl(message), '_blank');
+    // Navigate to booking page with dates and guests
+    const params = new URLSearchParams({
+      checkIn,
+      checkOut,
+      guests: guests.toString(),
+    });
+    router.push(`/booking/${property.propertyId}?${params.toString()}`);
   }
 
   return (

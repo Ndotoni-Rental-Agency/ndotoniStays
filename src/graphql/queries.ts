@@ -182,3 +182,19 @@ export const getMe = /* GraphQL */ `
     }
   }
 `;
+
+export const getPayment = /* GraphQL */ `
+  query GetPayment($paymentId: ID!) {
+    getPayment(paymentId: $paymentId) {
+      paymentId
+      bookingId
+      amount
+      currency
+      status
+      transactionID
+      errorMessage
+      completedAt
+      createdAt
+    }
+  }
+`;

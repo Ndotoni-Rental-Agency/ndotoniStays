@@ -67,3 +67,15 @@ export const createShortTermPropertyDraft = /* GraphQL */ `
     }
   }
 `;
+
+export const initiatePayment = /* GraphQL */ `
+  mutation InitiatePayment($input: InitiatePaymentInput!) {
+    initiatePayment(input: $input) {
+      reference
+      status
+      amount
+      currency
+      message
+    }
+  }
+`;

@@ -494,7 +494,12 @@ export default function BookingPage() {
               </div>
             </div>
             {authChoice === 'guest' && (
-              <p className="text-xs text-ink-400 mt-2">We&apos;ll send your booking confirmation here.</p>
+              <p className="text-xs text-ink-400 mt-2">
+                We&apos;ll send your booking confirmation here.{' '}
+                <button type="button" onClick={handleSignIn} className="text-brand-600 hover:underline font-medium">
+                  Sign in instead
+                </button>
+              </p>
             )}
           </div>
         )}

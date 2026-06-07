@@ -16,9 +16,17 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     // Give Amplify a moment to process the OAuth code from the URL
-    // Then redirect to home where AuthContext.initializeAuth() will detect the session
+    // Then redirect to saved location or home
     const timer = setTimeout(() => {
-      router.replace('/');
+      const savedRedirect = localStorage.getItem('ndotoni_booking_redirect');
+      if (savedRedirect) {
+        localStorage.removeItem('ndotoni_booking_redirect');
+        // Use the full URL path from the saved redirect
+        const url = new URL(savedRedirect);
+        router.replace(url.pathname + url.search);
+      } else {
+        router.replace('/');
+      }
     }, 1500);
 
     return () => clearTimeout(timer);

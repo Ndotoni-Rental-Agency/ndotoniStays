@@ -35,18 +35,21 @@ export default function CalendarDatePicker({
   useEffect(() => {
     if (isOpen) {
       if (rangeStart && !value) {
-        // For checkout with no value: show same month as check-in (not next month)
-        // User can navigate forward if needed
-        setCurrentMonth(new Date(rangeStart));
+        // Parse as local date to avoid timezone shift
+        const [y, m] = rangeStart.split('-').map(Number);
+        setCurrentMonth(new Date(y, m - 1, 1));
       } else if (value) {
-        setCurrentMonth(new Date(value));
+        const [y, m] = value.split('-').map(Number);
+        setCurrentMonth(new Date(y, m - 1, 1));
       }
     }
   }, [isOpen]);
 
   const formatDisplayDate = (dateString: string) => {
     if (!dateString) return placeholder;
-    const date = new Date(dateString);
+    // Parse as local date to avoid UTC timezone shift
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',

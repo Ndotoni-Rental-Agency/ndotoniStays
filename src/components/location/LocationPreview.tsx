@@ -22,22 +22,22 @@ export default function LocationPreview({
   }
 
   return (
-    <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors ${className}`}>
+    <div className={`bg-brand-50 border border-brand-200 rounded-xl p-4 ${className}`}>
       <div className="flex items-start space-x-3">
         <div className="flex-shrink-0">
-          <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-brand-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </div>
         <div className="flex-1">
-          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1 transition-colors">Selected Location</h4>
-          <p className="text-sm text-blue-700 dark:text-blue-300 transition-colors">
+          <h4 className="text-sm font-medium text-brand-900 mb-1">Selected Location</h4>
+          <p className="text-sm text-brand-700">
             {locationParts.join(', ')}
           </p>
           
           {/* Breakdown */}
-          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-blue-600 dark:text-blue-400 transition-colors">
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-brand-600">
             {region && (
               <div>
                 <span className="font-medium">Region:</span> {region}

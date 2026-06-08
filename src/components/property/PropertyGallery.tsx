@@ -51,13 +51,19 @@ export function PropertyGallery({ images, title }: Props) {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStart === null) return;
-    setTouchDelta(e.touches[0].clientX - touchStart);
+    const delta = e.touches[0].clientX - touchStart;
+    // Clamp delta to prevent over-scrolling past first/last image
+    const clamped =
+      (currentIndex === 0 && delta > 0) ? delta * 0.3 :
+      (currentIndex === imageCount - 1 && delta < 0) ? delta * 0.3 :
+      delta;
+    setTouchDelta(clamped);
   };
 
   const handleTouchEnd = () => {
-    if (Math.abs(touchDelta) > 60) {
-      if (touchDelta > 0) goPrev();
-      else goNext();
+    if (Math.abs(touchDelta) > 50) {
+      if (touchDelta > 0 && currentIndex > 0) goPrev();
+      else if (touchDelta < 0 && currentIndex < imageCount - 1) goNext();
     }
     setTouchStart(null);
     setTouchDelta(0);
@@ -185,30 +191,33 @@ export function PropertyGallery({ images, title }: Props) {
       {/* Mobile: Swipeable full-bleed carousel */}
       <div
         ref={containerRef}
-        className="sm:hidden relative rounded-2xl overflow-hidden aspect-[4/3]"
+        className="sm:hidden relative rounded-2xl overflow-hidden aspect-[4/3] touch-pan-y"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div
-          className="absolute inset-0 flex transition-transform duration-400 ease-out"
-          style={{
-            transform: `translateX(calc(-${currentIndex * 100}% + ${touchDelta}px))`,
-            transition: touchStart !== null ? 'none' : undefined,
-          }}
-        >
-          {displayImages.map((img, i) => (
-            <div key={i} className="relative min-w-full h-full flex-shrink-0">
-              <Image
-                src={getCdnUrl(img)}
-                alt={`${title} photo ${i + 1}`}
-                fill
-                className="object-cover"
-                priority={i === 0}
-                sizes="100vw"
-              />
-            </div>
-          ))}
+        <div className="absolute inset-0 overflow-hidden">
+          <div
+            className="flex h-full will-change-transform"
+            style={{
+              transform: `translateX(calc(-${currentIndex * 100}% + ${touchDelta}px))`,
+              transition: touchStart !== null ? 'none' : 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
+            }}
+          >
+            {displayImages.map((img, i) => (
+              <div key={i} className="relative min-w-full h-full flex-shrink-0">
+                <Image
+                  src={getCdnUrl(img)}
+                  alt={`${title} photo ${i + 1}`}
+                  fill
+                  className="object-cover pointer-events-none"
+                  priority={i === 0}
+                  sizes="100vw"
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Mobile dot indicators */}

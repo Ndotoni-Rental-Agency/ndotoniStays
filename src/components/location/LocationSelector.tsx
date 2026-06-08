@@ -129,8 +129,8 @@ export default function LocationSelector({
     return (
       <div className={`space-y-4 ${className}`}>
         <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-10 bg-ink-100 rounded-xl"></div>
+          <div className="h-10 bg-ink-100 rounded-xl"></div>
         </div>
       </div>
     );
@@ -139,27 +139,32 @@ export default function LocationSelector({
   if (error) {
     return (
       <div className={`space-y-4 ${className}`}>
-        <div className="p-4 bg-gray-50 dark:bg-emerald-900/20 border border-gray-200 dark:border-emerald-800 rounded-lg text-gray-900 dark:text-emerald-400 text-sm">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
           {error}
         </div>
       </div>
     );
   }
 
+  const selectClass = (hasError?: string) =>
+    `w-full px-3 py-2.5 bg-ink-50 text-ink-900 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors ${
+      hasError ? 'border-red-400 focus:ring-red-400' : 'border-ink-200'
+    }`;
+
+  const disabledClass = 'opacity-50 cursor-not-allowed';
+
   return (
     <div className={`space-y-4 ${className}`}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Region */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Region {required && '*'}
+          <label className="block text-sm font-medium text-ink-700 mb-1.5">
+            Region {required && <span className="text-red-500">*</span>}
           </label>
           <select
             value={value.region}
             onChange={(e) => handleRegionChange(e.target.value)}
-            className={`w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors ${
-              errors.region ? 'border-gray-900 dark:border-emerald-500 focus:ring-gray-900 dark:focus:ring-emerald-500' : 'border-gray-300 dark:border-gray-600'
-            }`}
+            className={selectClass(errors.region)}
           >
             <option value="">Select Region</option>
             {regions.map((region) => (
@@ -169,22 +174,20 @@ export default function LocationSelector({
             ))}
           </select>
           {errors.region && (
-            <p className="text-sm text-gray-900 dark:text-emerald-400 mt-1">{errors.region}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.region}</p>
           )}
         </div>
 
         {/* District */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            District {required && '*'}
+          <label className="block text-sm font-medium text-ink-700 mb-1.5">
+            District {required && <span className="text-red-500">*</span>}
           </label>
           <select
             value={value.district}
             onChange={(e) => handleDistrictChange(e.target.value)}
             disabled={!value.region || districts.length === 0}
-            className={`w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors ${
-              errors.district ? 'border-gray-900 dark:border-emerald-500 focus:ring-gray-900 dark:focus:ring-emerald-500' : 'border-gray-300 dark:border-gray-600'
-            } ${!value.region ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`${selectClass(errors.district)} ${!value.region ? disabledClass : ''}`}
           >
             <option value="">Select District</option>
             {districts.map((district) => (
@@ -194,7 +197,7 @@ export default function LocationSelector({
             ))}
           </select>
           {errors.district && (
-            <p className="text-sm text-gray-900 dark:text-emerald-400 mt-1">{errors.district}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.district}</p>
           )}
         </div>
       </div>
@@ -203,16 +206,14 @@ export default function LocationSelector({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Ward */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Ward 
+          <label className="block text-sm font-medium text-ink-700 mb-1.5">
+            Ward
           </label>
           <select
             value={value.ward || ''}
             onChange={(e) => handleWardChange(e.target.value)}
             disabled={!value.district || wards.length === 0}
-            className={`w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors ${
-              errors.ward ? 'border-gray-900 dark:border-emerald-500 focus:ring-gray-900 dark:focus:ring-emerald-500' : 'border-gray-300 dark:border-gray-600'
-            } ${!value.district ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`${selectClass(errors.ward)} ${!value.district ? disabledClass : ''}`}
           >
             <option value="">Select Ward</option>
             {wards.map((ward) => (
@@ -222,20 +223,20 @@ export default function LocationSelector({
             ))}
           </select>
           {errors.ward && (
-            <p className="text-sm text-gray-900 dark:text-emerald-400 mt-1">{errors.ward}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.ward}</p>
           )}
         </div>
 
         {/* Street */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-ink-700 mb-1.5">
             Street Address
           </label>
           {value.ward && streets.length > 0 && !showCustomStreet ? (
             <select
               value={value.street || ''}
               onChange={(e) => handleStreetDropdownChange(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
+              className={selectClass()}
             >
               <option value="">Select Street</option>
               {streets.map((street) => (
@@ -250,7 +251,7 @@ export default function LocationSelector({
               type="text"
               value={value.street || ''}
               onChange={(e) => handleStreetChange(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+              className="w-full px-3 py-2.5 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 transition-colors"
               placeholder="e.g., Haile Selassie Road"
             />
           )}

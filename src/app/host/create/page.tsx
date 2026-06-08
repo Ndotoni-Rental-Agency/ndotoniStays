@@ -9,6 +9,8 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/media/ImageUpload';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import LocationSelector from '@/components/location/LocationSelector';
+import LocationMapPicker from '@/components/location/LocationMapPicker';
 
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
@@ -22,11 +24,6 @@ const PROPERTY_TYPES = [
   { value: 'BUNGALOW', label: 'Bungalow', icon: '🌴' },
 ];
 
-const REGIONS = [
-  'Dar es Salaam', 'Arusha', 'Dodoma', 'Mwanza', 'Zanzibar',
-  'Mbeya', 'Morogoro', 'Tanga', 'Kilimanjaro', 'Iringa',
-];
-
 export default function CreatePropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -38,11 +35,15 @@ export default function CreatePropertyPage() {
     propertyType: '',
     region: 'Dar es Salaam',
     district: '',
+    ward: '',
+    street: '',
     nightlyRate: '',
     currency: 'TZS',
     maxGuests: '2',
     images: [] as string[],
     phoneNumber: '',
+    lat: 0,
+    lng: 0,
   });
 
   // Pre-fill phone from user profile
@@ -160,30 +161,45 @@ export default function CreatePropertyPage() {
           </div>
 
           {/* Location */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-2">Location</label>
+            <LocationSelector
+              value={{
+                region: form.region,
+                district: form.district,
+                ward: form.ward,
+                street: form.street,
+              }}
+              onChange={(loc) =>
+                setForm((prev) => ({
+                  ...prev,
+                  region: loc.region,
+                  district: loc.district,
+                  ward: loc.ward || '',
+                  street: loc.street || '',
+                }))
+              }
+              required
+            />
+          </div>
+
+          {/* Map */}
+          {form.region && form.district && (
             <div>
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">Region</label>
-              <select
-                value={form.region}
-                onChange={(e) => updateField('region', e.target.value)}
-                className="input"
-              >
-                {REGIONS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">District / Area</label>
-              <input
-                type="text"
-                value={form.district}
-                onChange={(e) => updateField('district', e.target.value)}
-                placeholder="e.g. Msasani, Mikocheni"
-                className="input"
+              <label className="block text-sm font-medium text-ink-700 mb-2">Pin location on map</label>
+              <LocationMapPicker
+                location={{
+                  region: form.region,
+                  district: form.district,
+                  ward: form.ward,
+                  street: form.street,
+                }}
+                onChange={(coords) =>
+                  setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }))
+                }
               />
             </div>
-          </div>
+          )}
 
           {/* Price + Guests */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

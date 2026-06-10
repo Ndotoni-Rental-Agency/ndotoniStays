@@ -18,10 +18,10 @@ export function LongTermBanner() {
           {/* Text */}
           <div className="flex-1 text-center sm:text-left">
             <h3 className="text-lg sm:text-xl font-bold text-ink-900 mb-1.5">
-              Unatafuta nyumba ya muda mrefu?
+              Looking for a long-term rental?
             </h3>
             <p className="text-ink-500 text-sm sm:text-base leading-relaxed max-w-lg">
-              Pata nyumba za kupanga kwa mwezi — apartments, nyumba, vyumba, na zaidi ndotoni.
+              Find apartments, houses, rooms, and more for monthly rent on Ndotoni.
             </p>
           </div>
 
@@ -33,7 +33,7 @@ export function LongTermBanner() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-600/20"
             >
-              Tembelea ndotoni
+              Browse Ndotoni
               <ArrowRight size={16} strokeWidth={2.5} />
             </a>
           </div>

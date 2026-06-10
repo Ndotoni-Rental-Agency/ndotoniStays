@@ -178,6 +178,9 @@ type Booking @aws_cognito_user_pools {
   createdAt: AWSDateTime! @aws_cognito_user_pools @aws_iam
   guest: PropertyUser @aws_cognito_user_pools @aws_iam
   guestId: ID! @aws_cognito_user_pools @aws_iam
+  guestName: String @aws_cognito_user_pools @aws_iam
+  guestEmail: String @aws_cognito_user_pools @aws_iam
+  guestPhone: String @aws_cognito_user_pools @aws_iam
   hostNotes: String @aws_cognito_user_pools @aws_iam
   numberOfAdults: Int! @aws_cognito_user_pools @aws_iam
   numberOfChildren: Int! @aws_cognito_user_pools @aws_iam
@@ -646,7 +649,7 @@ type Mutation {
   blockDates(input: BlockDatesInput!): SuccessResponse! @aws_cognito_user_pools
   cancelBooking(bookingId: ID!, reason: String): CancelBookingResponse! @aws_cognito_user_pools
   confirmWhatsAppAssociation(code: String!, whatsappNumber: String!): AssociateWhatsAppResponse! @aws_cognito_user_pools
-  createBooking(input: CreateBookingInput!): CreateBookingResponse! @aws_cognito_user_pools
+  createBooking(input: CreateBookingInput!): CreateBookingResponse! @aws_cognito_user_pools @aws_api_key
   createHousingRequest(bedrooms: Int, contactName: String, currency: String, description: String!, district: String, maxBudget: Float, minBudget: Float, moveInDate: String, phone: String!, propertyType: String, region: String, source: HousingRequestSource!, street: String, ward: String): HousingRequest! @aws_api_key @aws_cognito_user_pools
   createLocation(input: CreateLocationInput!): LocationCreateResponse! @aws_cognito_user_pools
   createProperty(input: CreatePropertyInput!): CreatePropertyResponse! @aws_cognito_user_pools
@@ -1526,6 +1529,9 @@ input CreateBookingInput {
   paymentMethodId: String!
   propertyId: ID!
   specialRequests: String
+  guestName: String
+  guestEmail: String
+  guestPhone: String
 }
 
 input CreateLocationInput {

@@ -21,7 +21,7 @@ export function LongTermBanner() {
               Unatafuta nyumba ya muda mrefu?
             </h3>
             <p className="text-ink-500 text-sm sm:text-base leading-relaxed max-w-lg">
-              Pata nyumba za kupanga kwa mwezi — apartments, nyumba, vyumba, na zaidi kwenye ndotoni.
+              Pata nyumba za kupanga kwa mwezi — apartments, nyumba, vyumba, na zaidi ndotoni.
             </p>
           </div>
 

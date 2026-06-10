@@ -249,7 +249,7 @@ export function HeroSection() {
 
           {/* Quick filters below search */}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {['Instant Book', 'Under TZS 50K', 'Zanzibar', 'Party Venues', 'Beachfront'].map((tag) => (
+            {['Instant Book', 'Under TZS 50K', 'Zanzibar', 'Beachfront', 'Muda Mrefu 🏠'].map((tag) => (
               <button
                 key={tag}
                 type="button"
@@ -260,10 +260,14 @@ export function HeroSection() {
                   }
                   if (tag === 'Instant Book') router.push('/search?instantBook=true');
                   if (tag === 'Under TZS 50K') router.push('/search?maxPrice=50000');
-                  if (tag === 'Party Venues') router.push('/search?propertyType=VILLA');
                   if (tag === 'Beachfront') router.push('/search?amenities=Beachfront');
+                  if (tag === 'Muda Mrefu 🏠') window.open('https://www.ndotoni.com', '_blank');
                 }}
-                className="px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-sm border border-white/25 text-sm text-white/90 hover:bg-white/25 transition-colors"
+                className={`px-3.5 py-1.5 rounded-full backdrop-blur-sm border text-sm transition-colors ${
+                  tag === 'Muda Mrefu 🏠'
+                    ? 'bg-brand-500/20 border-brand-300/30 text-white hover:bg-brand-500/30'
+                    : 'bg-white/15 border-white/25 text-white/90 hover:bg-white/25'
+                }`}
               >
                 {tag}
               </button>

@@ -5,7 +5,6 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getBooking, getPayment } from '@/graphql/queries';
 import { initiatePayment } from '@/graphql/mutations';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 
@@ -18,7 +17,6 @@ export default function PayBookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const bookingId = params?.id as string;
   const token = searchParams?.get('token') || '';
@@ -30,17 +28,13 @@ export default function PayBookingPage() {
   const [error, setError] = useState('');
   const [paymentMessage, setPaymentMessage] = useState('');
 
-  // Fetch booking details
+  // Fetch booking details — always public (anyone with the link can pay)
   useEffect(() => {
-    if (!bookingId || authLoading) return;
+    if (!bookingId) return;
 
     async function fetchBooking() {
       try {
-        const executeGql = isAuthenticated
-          ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
-          : GraphQLClient.executePublic.bind(GraphQLClient);
-
-        const data = await executeGql<{ getBooking: any }>(getBooking, { bookingId });
+        const data = await GraphQLClient.executePublic<{ getBooking: any }>(getBooking, { bookingId });
         const b = data.getBooking;
 
         if (!b) {
@@ -66,7 +60,7 @@ export default function PayBookingPage() {
     }
 
     fetchBooking();
-  }, [bookingId, isAuthenticated, authLoading]);
+  }, [bookingId]);
 
   // Phone number formatting
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,6 +79,7 @@ export default function PayBookingPage() {
   const payNowAmount = paymentOption === 'full' ? total : depositAmount;
   const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
   const nights = booking ? calculateNights(booking.checkInDate, booking.checkOutDate) : 0;
+  const guestName = booking?.guestName || booking?.guest?.firstName || 'Guest';
 
   async function handlePay() {
     if (!isValidPhone) {
@@ -96,11 +91,7 @@ export default function PayBookingPage() {
     setError('');
 
     try {
-      const executeGql = isAuthenticated
-        ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
-        : GraphQLClient.executePublic.bind(GraphQLClient);
-
-      const response = await executeGql<{ initiatePayment: any }>(initiatePayment, {
+      const response = await GraphQLClient.executePublic<{ initiatePayment: any }>(initiatePayment, {
         input: {
           bookingId,
           phoneNumber,
@@ -131,11 +122,7 @@ export default function PayBookingPage() {
     const interval = setInterval(async () => {
       attempts++;
       try {
-        const executeGql = isAuthenticated
-          ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
-          : GraphQLClient.executePublic.bind(GraphQLClient);
-
-        const response = await executeGql<{ getPayment: any }>(getPayment, { paymentId: paymentRef });
+        const response = await GraphQLClient.executePublic<{ getPayment: any }>(getPayment, { paymentId: paymentRef });
         const payment = response.getPayment;
 
         if (payment?.status === 'CAPTURED' || payment?.status === 'AUTHORIZED') {
@@ -158,7 +145,7 @@ export default function PayBookingPage() {
   }
 
   // Loading
-  if (state === 'loading' || authLoading) {
+  if (state === 'loading') {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 animate-pulse">
         <div className="h-8 w-48 bg-ink-100 rounded mb-4" />
@@ -176,7 +163,7 @@ export default function PayBookingPage() {
         </div>
         <h1 className="text-2xl font-bold text-ink-900 mb-2">Already Paid!</h1>
         <p className="text-ink-500 text-sm mb-6">
-          This booking has already been paid. The host will contact you with check-in details.
+          The booking for <strong>{guestName}</strong> has already been paid. The host will share check-in details.
         </p>
         <button onClick={() => router.push('/')} className="btn-primary">
           Back to Home
@@ -194,17 +181,17 @@ export default function PayBookingPage() {
         </div>
         <h1 className="text-2xl font-bold text-ink-900 mb-2">Payment Confirmed!</h1>
         <p className="text-ink-500 text-sm mb-2">
-          <strong>{booking?.property?.title || 'Your stay'}</strong>
+          Booking for <strong>{guestName}</strong>
         </p>
         <p className="text-ink-500 text-sm mb-6">
-          {booking?.checkInDate} – {booking?.checkOutDate} · {nights} night{nights > 1 ? 's' : ''}
+          {booking?.property?.title || booking?.propertyTitle} · {booking?.checkInDate} – {booking?.checkOutDate}
         </p>
         {paymentOption === 'deposit' && (
           <p className="text-sm text-amber-600 bg-amber-50 rounded-xl px-4 py-2 mb-6">
             Deposit paid. Balance of {formatPrice(balanceDue, currency)} due at check-in.
           </p>
         )}
-        <p className="text-sm text-ink-400 mb-8">The host will send you check-in details via WhatsApp.</p>
+        <p className="text-sm text-ink-400 mb-8">The host will send check-in details via WhatsApp.</p>
         <button onClick={() => router.push('/')} className="btn-primary">
           Back to Home
         </button>
@@ -260,15 +247,19 @@ export default function PayBookingPage() {
         <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-brand-50 mb-3">
           <CreditCardIcon className="h-6 w-6 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900">Complete Payment</h1>
-        <p className="text-sm text-ink-500 mt-1">Pay to secure your booking</p>
+        <h1 className="text-2xl font-bold text-ink-900">Pay for {guestName}</h1>
+        <p className="text-sm text-ink-500 mt-1">Complete payment to secure this booking</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5">
         {/* Booking summary */}
         <div className="rounded-2xl border border-ink-100 p-5">
-          <h3 className="font-semibold text-ink-900 mb-3">{booking?.property?.title || 'Property'}</h3>
+          <h3 className="font-semibold text-ink-900 mb-3">{booking?.property?.title || booking?.propertyTitle || 'Property'}</h3>
           <div className="space-y-2 text-sm text-ink-600">
+            <div className="flex justify-between">
+              <span>👤 Guest</span>
+              <span className="font-medium text-ink-900">{guestName}</span>
+            </div>
             <div className="flex justify-between">
               <span>📅 Dates</span>
               <span>{booking?.checkInDate} – {booking?.checkOutDate}</span>
@@ -340,6 +331,9 @@ export default function PayBookingPage() {
           {phoneNumber && !isValidPhone && (
             <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
           )}
+          <p className="text-xs text-ink-400 mt-2">
+            You can pay from any number — it doesn&apos;t have to be the guest&apos;s phone.
+          </p>
         </div>
 
         {/* Error */}
@@ -359,7 +353,7 @@ export default function PayBookingPage() {
         </button>
 
         <p className="text-center text-xs text-ink-400">
-          A payment prompt will be sent to your phone. Confirm on your phone to complete.
+          A payment prompt will be sent to the phone above. Share this link with anyone paying on your behalf.
         </p>
       </div>
     </div>

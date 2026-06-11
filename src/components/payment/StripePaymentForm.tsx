@@ -47,9 +47,10 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-3">
-        <div className="h-12 bg-ink-100 rounded-lg" />
-        <div className="h-12 bg-ink-100 rounded-lg" />
+      <div className="space-y-3 py-4">
+        <div className="h-11 bg-ink-100 rounded-lg animate-pulse" />
+        <div className="h-11 bg-ink-100 rounded-lg animate-pulse" />
+        <div className="h-11 bg-ink-50 rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -59,7 +60,51 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
   }
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe' } }}>
+    <Elements
+      stripe={stripePromise}
+      options={{
+        clientSecret,
+        appearance: {
+          theme: 'flat',
+          variables: {
+            colorPrimary: '#2563eb',
+            colorBackground: '#ffffff',
+            colorText: '#1f2937',
+            colorDanger: '#ef4444',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            spacingUnit: '4px',
+            borderRadius: '12px',
+            fontSizeBase: '15px',
+          },
+          rules: {
+            '.Input': {
+              border: '1.5px solid #e5e7eb',
+              boxShadow: 'none',
+              padding: '12px 14px',
+            },
+            '.Input:focus': {
+              border: '1.5px solid #2563eb',
+              boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
+            },
+            '.Label': {
+              fontSize: '13px',
+              fontWeight: '500',
+              color: '#6b7280',
+              marginBottom: '6px',
+            },
+            '.Tab': {
+              border: '1.5px solid #e5e7eb',
+              borderRadius: '12px',
+              padding: '12px 16px',
+            },
+            '.Tab--selected': {
+              border: '1.5px solid #2563eb',
+              backgroundColor: '#eff6ff',
+            },
+          },
+        },
+      }}
+    >
       <CheckoutForm amount={amount} currency={currency} onSuccess={onSuccess} onError={onError} />
     </Elements>
   );
@@ -82,7 +127,6 @@ function CheckoutForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     if (!stripe || !elements) return;
 
     setIsProcessing(true);
@@ -109,14 +153,29 @@ function CheckoutForm({
   }).format(amount);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <PaymentElement />
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <PaymentElement
+        options={{
+          layout: 'tabs',
+          wallets: {
+            applePay: 'auto',
+            googlePay: 'auto',
+          },
+        }}
+      />
       <button
         type="submit"
         disabled={!stripe || isProcessing}
-        className="btn-primary w-full text-base py-4"
+        className="btn-primary w-full text-base py-4 mt-2"
       >
-        {isProcessing ? 'Processing...' : `Pay ${currency} ${formattedAmount}`}
+        {isProcessing ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+            Processing...
+          </span>
+        ) : (
+          `Pay ${currency} ${formattedAmount}`
+        )}
       </button>
     </form>
   );

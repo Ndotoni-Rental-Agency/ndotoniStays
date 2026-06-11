@@ -77,7 +77,8 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
           }
         }
         setBlockedDates(blocked);
-      } catch {
+      } catch(e) {
+        console.log('error when getting blocked dates', e)
         // Non-critical — don't block the UI
       }
     }

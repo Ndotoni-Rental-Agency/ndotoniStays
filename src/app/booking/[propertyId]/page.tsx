@@ -44,6 +44,7 @@ export default function BookingPage() {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authChoice, setAuthChoice] = useState<'none' | 'guest' | 'signin'>('none');
+  const [countryCode, setCountryCode] = useState('255'); // Default Tanzania
 
   // Pre-fill from user if authenticated
   useEffect(() => {
@@ -132,8 +133,6 @@ export default function BookingPage() {
   const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
 
   // Phone number formatting — international support
-  const [countryCode, setCountryCode] = useState('255'); // Default Tanzania
-  
   function handleGuestPhoneInput(value: string) {
     // Strip non-digits, limit to 15 chars
     const cleaned = value.replace(/\D/g, '').slice(0, 12);

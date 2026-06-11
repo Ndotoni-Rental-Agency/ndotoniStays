@@ -477,7 +477,7 @@ export default function BookingPage() {
   // ═══════════════════════════════════════════════
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-      <h1 className="text-2xl font-bold text-ink-900 mb-6">Book your stay</h1>
+      <h1 className="text-2xl font-bold text-ink-900 mb-6">Complete your booking</h1>
 
       <div className="grid grid-cols-1 gap-6">
         {/* Property summary card */}
@@ -656,7 +656,7 @@ export default function BookingPage() {
             disabled={isProcessing || !guestName.trim() || !guestEmail.includes('@')}
             className="btn-primary w-full text-base py-4"
           >
-            {isProcessing ? 'Creating booking...' : property.instantBookEnabled ? 'Book Now' : 'Request to Book'}
+            {isProcessing ? 'Creating booking...' : property.instantBookEnabled ? 'Confirm & Book' : 'Send Booking Request'}
           </button>
         )}
 

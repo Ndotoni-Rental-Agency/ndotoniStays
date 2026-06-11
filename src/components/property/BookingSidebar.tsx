@@ -331,7 +331,7 @@ export function BookingSidebar({
           className="btn-primary w-full mt-6 gap-2"
         >
           {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
-          {property.instantBookEnabled ? "Book Instantly" : "Request to Book"}
+          {property.instantBookEnabled ? "Continue to Book" : "Continue to Request"}
         </button>
 
         {/* Reassurance */}

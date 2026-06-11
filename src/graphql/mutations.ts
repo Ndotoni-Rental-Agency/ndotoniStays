@@ -647,6 +647,9 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         __typename
       }
       guestId
+      guestName
+      guestEmail
+      guestPhone
       hostNotes
       numberOfAdults
       numberOfChildren

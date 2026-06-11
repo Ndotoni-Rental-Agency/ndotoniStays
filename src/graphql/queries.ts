@@ -322,6 +322,9 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       __typename
     }
     guestId
+    guestName
+    guestEmail
+    guestPhone
     hostNotes
     numberOfAdults
     numberOfChildren

@@ -928,7 +928,7 @@ type Query {
   getMediaLibrary: MediaItem @aws_cognito_user_pools
   getMyBusyBlocks: [BusyBlock!]! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   getMyLandlordApplication: LandlordApplication @aws_cognito_user_pools
-  getPayment(paymentId: ID!): Payment @aws_cognito_user_pools
+  getPayment(paymentId: ID!): Payment @aws_cognito_user_pools @aws_api_key
   getPropertiesByCategory(category: PropertyCategory!, limit: Int, nextToken: String): CategoryPropertyResponse! @aws_api_key @aws_cognito_user_pools
   getPropertiesByLocation(bathrooms: Int, bedrooms: Int, district: String, limit: Int, maxPrice: Float, minPrice: Float, moveInDate: AWSDate, nextToken: String, propertyType: PropertyType, region: String!, sortBy: PropertySortOption): PropertyCardsResponse! @aws_api_key @aws_cognito_user_pools
   getProperty(propertyId: ID!): Property @aws_api_key @aws_cognito_user_pools

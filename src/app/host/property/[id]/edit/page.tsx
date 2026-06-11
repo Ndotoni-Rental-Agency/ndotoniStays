@@ -37,7 +37,17 @@ export default function EditPropertyPage() {
   const params = useParams();
   const propertyId = params.id as string;
 
-  const [activeTab, setActiveTab] = useState<Tab>('details');
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    // Check if navigated from dashboard with a specific tab intent
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('host-edit-tab') as Tab | null;
+      if (stored && ['details', 'photos', 'calendar', 'settings'].includes(stored)) {
+        sessionStorage.removeItem('host-edit-tab');
+        return stored;
+      }
+    }
+    return 'details';
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);

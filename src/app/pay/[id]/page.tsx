@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getBooking, getPayment } from '@/graphql/queries';
 import { initiatePayment } from '@/graphql/mutations';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 
@@ -17,6 +18,7 @@ export default function PayBookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   const bookingId = params?.id as string;
   const token = searchParams?.get('token') || '';
@@ -28,13 +30,17 @@ export default function PayBookingPage() {
   const [error, setError] = useState('');
   const [paymentMessage, setPaymentMessage] = useState('');
 
+  // Use authenticated client when logged in, public otherwise
+  const executeGql = isAuthenticated
+    ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
+    : GraphQLClient.executePublic.bind(GraphQLClient);
   // Fetch booking details — always public (anyone with the link can pay)
   useEffect(() => {
     if (!bookingId) return;
 
     async function fetchBooking() {
       try {
-        const data = await GraphQLClient.executePublic<{ getBooking: any }>(getBooking, { bookingId });
+        const data = await executeGql<{ getBooking: any }>(getBooking, { bookingId });
         const b = data.getBooking;
 
         if (!b) {
@@ -91,7 +97,7 @@ export default function PayBookingPage() {
     setError('');
 
     try {
-      const response = await GraphQLClient.executePublic<{ initiatePayment: any }>(initiatePayment, {
+      const response = await executeGql<{ initiatePayment: any }>(initiatePayment, {
         input: {
           bookingId,
           phoneNumber,
@@ -122,7 +128,7 @@ export default function PayBookingPage() {
     const interval = setInterval(async () => {
       attempts++;
       try {
-        const response = await GraphQLClient.executePublic<{ getPayment: any }>(getPayment, { paymentId: paymentRef });
+        const response = await executeGql<{ getPayment: any }>(getPayment, { paymentId: paymentRef });
         const payment = response.getPayment;
 
         if (payment?.status === 'CAPTURED' || payment?.status === 'AUTHORIZED') {

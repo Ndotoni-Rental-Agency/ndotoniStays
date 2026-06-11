@@ -126,8 +126,8 @@ export function HostBookings({ propertyIds }: Props) {
   useEffect(() => {
     fetchBookings();
 
-    // Poll every 30 seconds for new booking requests
-    const interval = setInterval(() => fetchBookings(true), 30000);
+    // Poll every 10 seconds for new booking requests
+    const interval = setInterval(() => fetchBookings(true), 10000);
     return () => clearInterval(interval);
   }, [fetchBookings]);
 

@@ -12,6 +12,7 @@ import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outl
 import { BoltIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
+import { PaymentFlow } from '@/components/payment/PaymentFlow';
 
 type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
@@ -419,90 +420,21 @@ export default function BookingPage() {
           </div>
 
           {/* Payment section — only for confirmed/instant bookings */}
-          {bookingData?.status === 'CONFIRMED' && (
+          {bookingData?.status === 'CONFIRMED' && bookingId && (
             <div className="mt-2">
-              {/* Amount badge */}
               <div className="text-center mb-6">
                 <p className="text-2xl font-bold text-ink-900">{formatPrice(total, property.currency)}</p>
                 <p className="text-xs text-ink-500 mt-1">Pay now to secure your dates</p>
               </div>
 
-              {/* Payment method — big clear choice */}
-              <div className="grid grid-cols-2 gap-3 mb-6">
-                <button
-                  onClick={() => setPaymentMethod('mobile_money')}
-                  className={`p-5 rounded-2xl border-2 text-center transition-all ${
-                    paymentMethod === 'mobile_money'
-                      ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
-                      : 'border-ink-100 hover:border-ink-200'
-                  }`}
-                >
-                  <span className="text-3xl block mb-2">📱</span>
-                  <span className="text-sm font-semibold text-ink-900 block">M-Pesa</span>
-                  <span className="text-xs text-ink-500">Airtel · Tigo</span>
-                </button>
-                <button
-                  onClick={() => setPaymentMethod('card')}
-                  className={`p-5 rounded-2xl border-2 text-center transition-all ${
-                    paymentMethod === 'card'
-                      ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
-                      : 'border-ink-100 hover:border-ink-200'
-                  }`}
-                >
-                  <span className="text-3xl block mb-2">💳</span>
-                  <span className="text-sm font-semibold text-ink-900 block">Card</span>
-                  <span className="text-xs text-ink-500">Visa · Apple Pay</span>
-                </button>
-              </div>
+              <PaymentFlow
+                bookingId={bookingId}
+                amount={total}
+                currency={property.currency}
+                onSuccess={() => setStep('confirmed')}
+                onError={(msg) => setError(msg)}
+              />
 
-              {/* Mobile Money */}
-              {paymentMethod === 'mobile_money' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-ink-500 mb-1.5">Phone number</label>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => {
-                        let v = e.target.value.replace(/\D/g, '');
-                        if (v.startsWith('0')) v = '255' + v.substring(1);
-                        else if (v.startsWith('7') || v.startsWith('6')) v = '255' + v;
-                        setPhoneNumber(v.slice(0, 12));
-                      }}
-                      placeholder="0712 345 678"
-                      className="input text-lg tracking-wide"
-                      autoFocus
-                    />
-                    {phoneNumber && !/^255[67]\d{8}$/.test(phoneNumber) && (
-                      <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handlePay}
-                    disabled={(!phoneNumber || !/^255[67]\d{8}$/.test(phoneNumber)) || isProcessing}
-                    className="btn-primary w-full text-base py-4"
-                  >
-                    {isProcessing ? 'Sending...' : /^255[67]\d{8}$/.test(phoneNumber)
-                      ? `Send ${formatPrice(total, property.currency)} request`
-                      : 'Enter number to continue'
-                    }
-                  </button>
-                </div>
-              )}
-
-              {/* Card / Apple Pay */}
-              {paymentMethod === 'card' && bookingId && (
-                <StripePaymentForm
-                  bookingId={bookingId}
-                  amount={total}
-                  currency={property.currency}
-                  onSuccess={() => setStep('confirmed')}
-                  onError={(msg) => setError(msg)}
-                />
-              )}
-
-              {/* Error */}
               {error && (
                 <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
                   {error}

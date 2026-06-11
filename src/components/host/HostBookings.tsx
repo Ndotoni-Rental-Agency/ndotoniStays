@@ -68,7 +68,7 @@ export function HostBookings({ propertyIds }: Props) {
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = useCallback(async (isPolling = false) => {
     if (propertyIds.length === 0) {
       console.log('[HostBookings] No property IDs provided');
       setBookings([]);
@@ -77,7 +77,7 @@ export function HostBookings({ propertyIds }: Props) {
     }
 
     try {
-      setLoading(true);
+      if (!isPolling) setLoading(true);
       console.log('[HostBookings] Fetching bookings for', propertyIds.length, 'properties:', propertyIds);
       const allBookings: Booking[] = [];
 
@@ -125,6 +125,10 @@ export function HostBookings({ propertyIds }: Props) {
 
   useEffect(() => {
     fetchBookings();
+
+    // Poll every 30 seconds for new booking requests
+    const interval = setInterval(() => fetchBookings(true), 30000);
+    return () => clearInterval(interval);
   }, [fetchBookings]);
 
   async function handleApprove(bookingId: string) {

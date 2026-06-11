@@ -131,16 +131,17 @@ export default function BookingPage() {
   const payNowAmount = paymentOption === 'full' ? total : depositAmount;
   const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
 
-  // Phone number formatting (Tanzania)
-  function handlePhoneChange(value: string, setter: (v: string) => void) {
-    let cleaned = value.replace(/\D/g, '');
-    if (cleaned.startsWith('0')) cleaned = '255' + cleaned.substring(1);
-    else if (cleaned.startsWith('7') || cleaned.startsWith('6')) cleaned = '255' + cleaned;
-    if (cleaned.length > 12) cleaned = cleaned.substring(0, 12);
-    setter(cleaned);
+  // Phone number formatting — international support
+  const [countryCode, setCountryCode] = useState('255'); // Default Tanzania
+  
+  function handleGuestPhoneInput(value: string) {
+    // Strip non-digits, limit to 15 chars
+    const cleaned = value.replace(/\D/g, '').slice(0, 12);
+    setGuestPhone(cleaned);
   }
 
-  const isValidGuestPhone = /^255[67]\d{8}$/.test(guestPhone);
+  const fullGuestPhone = guestPhone ? `${countryCode}${guestPhone.replace(/^0+/, '')}` : '';
+  const isValidGuestPhone = fullGuestPhone.length >= 10 && fullGuestPhone.length <= 15;
 
   // ═══════════════════════════════════════════════
   // STEP 1: Create booking
@@ -181,7 +182,7 @@ export default function BookingPage() {
             paymentMethodId: 'snippe_mpesa',
             guestName: guestName.trim(),
             guestEmail: guestEmail.trim(),
-            guestPhone: guestPhone || undefined,
+            guestPhone: fullGuestPhone || undefined,
           },
         }
       );
@@ -204,9 +205,9 @@ export default function BookingPage() {
   // STEP 2: Initiate payment
   // ═══════════════════════════════════════════════
   async function handlePay() {
-    const payPhone = phoneNumber || guestPhone;
-    if (!/^255[67]\d{8}$/.test(payPhone)) {
-      setError('Enter a valid M-Pesa phone number (e.g., 0712 345 678)');
+    const payPhone = phoneNumber || fullGuestPhone;
+    if (!payPhone || payPhone.length < 10) {
+      setError('Enter a valid M-Pesa phone number');
       return;
     }
 
@@ -463,7 +464,12 @@ export default function BookingPage() {
                 <input
                   type="tel"
                   value={phoneNumber}
-                  onChange={(e) => handlePhoneChange(e.target.value, setPhoneNumber)}
+                  onChange={(e) => {
+                    let v = e.target.value.replace(/\D/g, '');
+                    if (v.startsWith('0')) v = '255' + v.substring(1);
+                    else if (v.startsWith('7') || v.startsWith('6')) v = '255' + v;
+                    setPhoneNumber(v.slice(0, 12));
+                  }}
                   placeholder="0712 345 678"
                   className="input"
                 />
@@ -489,7 +495,7 @@ export default function BookingPage() {
               </button>
 
               <p className="text-center text-xs text-ink-400">
-                Pay within 2 hours to secure your dates. A payment prompt will be sent to your phone.
+                You&apos;ll receive a payment prompt on your phone. Confirm to complete.
               </p>
             </>
           )}
@@ -636,16 +642,38 @@ export default function BookingPage() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-ink-500 mb-1">Phone number (WhatsApp)</label>
-                <input
-                  type="tel"
-                  value={guestPhone}
-                  onChange={(e) => handlePhoneChange(e.target.value, setGuestPhone)}
-                  placeholder="0712 345 678"
-                  className="input"
-                  required
-                />
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="input w-24 text-sm"
+                  >
+                    <option value="255">🇹🇿 +255</option>
+                    <option value="254">🇰🇪 +254</option>
+                    <option value="256">🇺🇬 +256</option>
+                    <option value="250">🇷🇼 +250</option>
+                    <option value="243">🇨🇩 +243</option>
+                    <option value="258">🇲🇿 +258</option>
+                    <option value="265">🇲🇼 +265</option>
+                    <option value="260">🇿🇲 +260</option>
+                    <option value="27">🇿🇦 +27</option>
+                    <option value="234">🇳🇬 +234</option>
+                    <option value="44">🇬🇧 +44</option>
+                    <option value="1">🇺🇸 +1</option>
+                    <option value="971">🇦🇪 +971</option>
+                    <option value="91">🇮🇳 +91</option>
+                  </select>
+                  <input
+                    type="tel"
+                    value={guestPhone}
+                    onChange={(e) => handleGuestPhoneInput(e.target.value)}
+                    placeholder="712 345 678"
+                    className="input flex-1"
+                    required
+                  />
+                </div>
                 {guestPhone && !isValidGuestPhone && (
-                  <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
+                  <p className="text-xs text-red-500 mt-1">Enter a valid phone number</p>
                 )}
               </div>
             </div>

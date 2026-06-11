@@ -79,27 +79,76 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
 
       const today = new Date().toISOString().split('T')[0];
 
-      // Paid = payment captured (money received)
-      const paid = allBookings.filter(
-        (b) => b.paymentStatus === 'CAPTURED'
+      // === EARNINGS CALCULATION ===
+      // Each date can only contribute to ONE booking's revenue.
+      // If multiple bookings overlap a date, pick the highest-paying one.
+      // Paid (CAPTURED) bookings take priority; then confirmed unpaid for potential.
+
+      // Step 1: Build a map of date → best booking (highest nightly rate wins)
+      const dateMap = new Map<string, { total: number; perNight: number; paid: boolean; bookingId: string }>();
+
+      // Only consider active bookings (not cancelled/declined)
+      const activeBookings = allBookings.filter(
+        (b) => b.status === 'CONFIRMED' || b.status === 'COMPLETED' || b.status === 'PENDING'
       );
 
-      // Potential = confirmed but not yet paid (authorized or pending payment)
-      const potential = allBookings.filter(
-        (b) => (b.status === 'CONFIRMED' || b.status === 'COMPLETED') && b.paymentStatus !== 'CAPTURED'
-      );
+      for (const booking of activeBookings) {
+        if (!booking.checkInDate || !booking.checkOutDate || !booking.pricing) continue;
 
-      const totalPaid = paid.reduce((sum, b) => sum + (b.pricing?.total || 0), 0);
-      const totalPotential = potential.reduce((sum, b) => sum + (b.pricing?.total || 0), 0);
+        const isPaid = booking.paymentStatus === 'CAPTURED';
+        const nights = booking.numberOfNights || 1;
+        const perNight = (booking.pricing.total || 0) / nights;
+
+        // Expand booking into individual dates
+        const start = new Date(booking.checkInDate + 'T00:00:00');
+        const end = new Date(booking.checkOutDate + 'T00:00:00');
+        const cursor = new Date(start);
+
+        while (cursor < end) {
+          const dateStr = cursor.toISOString().split('T')[0];
+          const existing = dateMap.get(dateStr);
+
+          // Paid bookings always win over unpaid; among same tier, highest rate wins
+          const shouldReplace = !existing
+            || (isPaid && !existing.paid)
+            || (isPaid === existing.paid && perNight > existing.perNight);
+
+          if (shouldReplace) {
+            dateMap.set(dateStr, {
+              total: perNight,
+              perNight,
+              paid: isPaid,
+              bookingId: booking.bookingId,
+            });
+          }
+
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      }
+
+      // Step 2: Sum up earnings from the date map
+      let totalPaid = 0;
+      let totalPotential = 0;
+
+      for (const entry of dateMap.values()) {
+        if (entry.paid) {
+          totalPaid += entry.total;
+        } else {
+          totalPotential += entry.total;
+        }
+      }
+
       const upcoming = allBookings.filter(
         (b) => b.status === 'CONFIRMED' && b.checkInDate >= today
       ).length;
 
-      const allConfirmed = [...paid, ...potential];
-      const cur = allConfirmed[0]?.pricing?.currency || currency;
+      const allConfirmed = activeBookings.filter(
+        (b) => b.paymentStatus === 'CAPTURED'
+      );
+      const cur = allConfirmed[0]?.pricing?.currency || allBookings[0]?.pricing?.currency || currency;
 
       // Build last 6 months of data (only paid bookings for the chart)
-      const months = buildMonthlyData(paid);
+      const months = buildMonthlyData(allConfirmed);
 
       setTotalEarnings(totalPaid);
       setPotentialEarnings(totalPotential);

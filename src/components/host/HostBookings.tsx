@@ -62,6 +62,7 @@ export function HostBookings({ propertyIds }: Props) {
 
   const fetchBookings = useCallback(async () => {
     if (propertyIds.length === 0) {
+      console.log('[HostBookings] No property IDs provided');
       setBookings([]);
       setLoading(false);
       return;
@@ -69,12 +70,14 @@ export function HostBookings({ propertyIds }: Props) {
 
     try {
       setLoading(true);
+      console.log('[HostBookings] Fetching bookings for', propertyIds.length, 'properties:', propertyIds);
       const allBookings: Booking[] = [];
 
       // Fetch bookings for each property (parallel, max 5 at a time)
       const batchSize = 5;
       for (let i = 0; i < propertyIds.length; i += batchSize) {
         const batch = propertyIds.slice(i, i + batchSize);
+        console.log('[HostBookings] Fetching bookings for properties:', batch, 'filter:', filter);
         const results = await Promise.allSettled(
           batch.map((propertyId) =>
             GraphQLClient.executeAuthenticated<{
@@ -87,13 +90,19 @@ export function HostBookings({ propertyIds }: Props) {
           )
         );
 
-        for (const result of results) {
+        for (let j = 0; j < results.length; j++) {
+          const result = results[j];
           if (result.status === 'fulfilled') {
+            console.log(`[HostBookings] Property ${batch[j]} returned:`, result.value.listPropertyBookings);
             const items = result.value.listPropertyBookings?.bookings || [];
             allBookings.push(...items);
+          } else {
+            console.error(`[HostBookings] Property ${batch[j]} failed:`, result.reason);
           }
         }
       }
+
+      console.log('[HostBookings] Total bookings found:', allBookings.length, allBookings);
 
       // Sort by date (newest first)
       allBookings.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

@@ -5,5 +5,6 @@ export { HostSettingsTab } from './HostSettingsTab';
 export { HostBookings } from './HostBookings';
 export { HostEarnings } from './HostEarnings';
 export { HostReviews } from './HostReviews';
+export { HostSidebar } from './HostSidebar';
 export type { PropertyFormData, PropertyData } from './types';
 export { PROPERTY_TYPES, REGIONS, AMENITIES } from './constants';

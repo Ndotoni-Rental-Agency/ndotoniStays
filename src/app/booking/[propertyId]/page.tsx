@@ -5,15 +5,20 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty, getPayment } from '@/graphql/queries';
-import { createBooking } from '@/graphql/mutations';
+import { createBooking, initiatePayment } from '@/graphql/mutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights, getCdnUrl } from '@/lib/utils';
-import { CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
-import { BoltIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { BoltIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
 
-type BookingStep = 'form' | 'processing' | 'confirmed' | 'failed';
+type PaymentMethod = 'mobile_money' | 'card';
+type PaymentOption = 'full' | 'deposit';
+type BookingStep = 'details' | 'confirmation' | 'processing' | 'confirmed' | 'failed';
+
+const DEPOSIT_PERCENTAGE = 30;
 
 export default function BookingPage() {
   const params = useParams();
@@ -28,38 +33,55 @@ export default function BookingPage() {
 
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState<BookingStep>('form');
-
-  // Guest details
+  const [step, setStep] = useState<BookingStep>('details');
+  const [paymentOption, setPaymentOption] = useState<PaymentOption>('full');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
-  const [countryCode, setCountryCode] = useState('255');
-  const [detailsExpanded, setDetailsExpanded] = useState(true);
-
-  // Booking state
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const [bookingStatus, setBookingStatus] = useState<string>('');
+  const [bookingData, setBookingData] = useState<any>(null);
+  const [paymentMessage, setPaymentMessage] = useState('');
 
-  // Auth
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authChoice, setAuthChoice] = useState<'none' | 'guest' | 'signin'>('none');
+  const [countryCode, setCountryCode] = useState('255'); // Default Tanzania
 
-  // Pre-fill from user — collapse details if filled
+  // Pre-fill from user if authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-      setGuestName(name);
+      setGuestName(`${user.firstName || ''} ${user.lastName || ''}`.trim());
       setGuestEmail(user.email || '');
       setAuthChoice('signin');
-      // Collapse details if already filled
-      if (name && user.email) {
-        setDetailsExpanded(false);
-      }
     }
   }, [isAuthenticated, user]);
+
+  // On mount, check if we're returning from auth redirect
+  useEffect(() => {
+    if (isAuthenticated && typeof window !== 'undefined') {
+      const saved = localStorage.getItem('ndotoni_booking_redirect');
+      if (saved) {
+        localStorage.removeItem('ndotoni_booking_redirect');
+      }
+    }
+  }, [isAuthenticated]);
+
+  function handleSignIn() {
+    localStorage.setItem('ndotoni_booking_redirect', window.location.href);
+    setShowAuthModal(true);
+  }
+
+  function handleContinueAsGuest() {
+    setAuthChoice('guest');
+  }
+
+  function handleAuthSuccess() {
+    setShowAuthModal(false);
+    setAuthChoice('signin');
+  }
 
   // Redirect if missing params
   useEffect(() => {
@@ -110,24 +132,34 @@ export default function BookingPage() {
   const serviceFee = Math.round(subtotal * ((property.serviceFeePercentage || 10) / 100));
   const taxes = Math.round((subtotal + cleaningFee + serviceFee) * ((property.taxPercentage || 0) / 100));
   const total = subtotal + cleaningFee + serviceFee + taxes;
-  const isInstantBook = property.instantBookEnabled;
+  const depositAmount = Math.round(total * (DEPOSIT_PERCENTAGE / 100));
+  const payNowAmount = paymentOption === 'full' ? total : depositAmount;
+  const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
 
-  // Phone formatting
+  // Phone number formatting — international support
   function handleGuestPhoneInput(value: string) {
-    setGuestPhone(value.replace(/\D/g, '').slice(0, 12));
+    // Strip non-digits, limit to 15 chars
+    const cleaned = value.replace(/\D/g, '').slice(0, 12);
+    setGuestPhone(cleaned);
   }
+
   const fullGuestPhone = guestPhone ? `${countryCode}${guestPhone.replace(/^0+/, '')}` : '';
-
-  // Validate form
-  const isFormValid = guestName.trim().length > 0 && guestEmail.includes('@');
+  const isValidGuestPhone = fullGuestPhone.length >= 10 && fullGuestPhone.length <= 15;
 
   // ═══════════════════════════════════════════════
-  // Create booking + optionally go straight to payment
+  // STEP 1: Create booking
   // ═══════════════════════════════════════════════
-  async function handleBookAndPay() {
-    if (!isFormValid) {
-      setDetailsExpanded(true);
-      setError('Please fill in your name and email');
+  async function handleCreateBooking() {
+    if (!guestName.trim()) {
+      setError('Please enter your name');
+      return;
+    }
+    if (!guestEmail.trim() || !guestEmail.includes('@')) {
+      setError('Please enter a valid email');
+      return;
+    }
+    if (authChoice === 'guest' && !isValidGuestPhone) {
+      setError('Please enter a valid phone number');
       return;
     }
 
@@ -139,77 +171,119 @@ export default function BookingPage() {
         ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
         : GraphQLClient.executePublic.bind(GraphQLClient);
 
-      const response = await executeGql<{ createBooking: any }>(createBooking, {
-        input: {
-          propertyId,
-          checkInDate: checkIn,
-          checkOutDate: checkOut,
-          numberOfGuests: guests,
-          numberOfAdults: guests,
-          numberOfChildren: 0,
-          numberOfInfants: 0,
-          paymentMethodId: 'snippe_mpesa',
-          guestName: guestName.trim(),
-          guestEmail: guestEmail.trim(),
-          guestPhone: fullGuestPhone || undefined,
-        },
-      });
+      const bookingResponse = await executeGql<{ createBooking: any }>(
+        createBooking,
+        {
+          input: {
+            propertyId,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            numberOfGuests: guests,
+            numberOfAdults: guests,
+            numberOfChildren: 0,
+            numberOfInfants: 0,
+            paymentMethodId: 'snippe_mpesa',
+            guestName: guestName.trim(),
+            guestEmail: guestEmail.trim(),
+            guestPhone: fullGuestPhone || undefined,
+          },
+        }
+      );
 
-      const booking = response.createBooking?.booking;
-      if (!booking) throw new Error('Failed to create booking');
+      const createdBooking = bookingResponse.createBooking?.booking;
+      if (!createdBooking) throw new Error('Failed to create booking');
 
-      setBookingId(booking.bookingId);
-      setBookingStatus(booking.status);
+      setBookingId(createdBooking.bookingId);
+      setBookingData(createdBooking);
+      setStep('confirmation');
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || err?.message || 'Something went wrong. Please try again.');
+      const msg = err?.errors?.[0]?.message || err?.message || 'Something went wrong. Please try again.';
+      setError(msg);
     } finally {
       setIsProcessing(false);
     }
   }
 
-  async function handleSendPaymentLink() {
-    if (!isFormValid) {
-      setDetailsExpanded(true);
-      setError('Please fill in your name and email');
+  // ═══════════════════════════════════════════════
+  // STEP 2: Initiate payment
+  // ═══════════════════════════════════════════════
+  async function handlePay() {
+    const payPhone = phoneNumber || fullGuestPhone;
+    if (!payPhone || payPhone.length < 10) {
+      setError('Enter a valid M-Pesa phone number');
       return;
     }
 
     setIsProcessing(true);
     setError('');
+    setStep('processing');
 
     try {
       const executeGql = isAuthenticated
         ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
         : GraphQLClient.executePublic.bind(GraphQLClient);
 
-      const response = await executeGql<{ createBooking: any }>(createBooking, {
-        input: {
-          propertyId,
-          checkInDate: checkIn,
-          checkOutDate: checkOut,
-          numberOfGuests: guests,
-          numberOfAdults: guests,
-          numberOfChildren: 0,
-          numberOfInfants: 0,
-          paymentMethodId: 'snippe_mpesa',
-          guestName: guestName.trim(),
-          guestEmail: guestEmail.trim(),
-          guestPhone: fullGuestPhone || undefined,
-        },
-      });
+      const paymentResponse = await executeGql<{ initiatePayment: any }>(
+        initiatePayment,
+        {
+          input: {
+            bookingId: bookingId!,
+            phoneNumber: payPhone,
+          },
+        }
+      );
 
-      const booking = response.createBooking?.booking;
-      if (!booking) throw new Error('Failed to create booking');
+      const result = paymentResponse.initiatePayment;
 
-      // For "pay later" — just confirm the booking was created and show success
-      setBookingId(booking.bookingId);
-      setBookingStatus(booking.status);
-      setStep('confirmed');
+      if (result.status === 'PENDING') {
+        setPaymentMessage('Check your phone for the M-Pesa prompt. Confirm to complete payment.');
+        pollPaymentStatus(result.reference);
+      } else if (result.status === 'COMPLETED' || result.status === 'CAPTURED') {
+        setStep('confirmed');
+      } else {
+        setError(result.message || 'Payment failed');
+        setStep('failed');
+      }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || err?.message || 'Something went wrong.');
+      const msg = err?.errors?.[0]?.message || err?.message || 'Payment failed. Please try again.';
+      setError(msg);
+      setStep('failed');
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  // Poll payment status
+  function pollPaymentStatus(paymentRef: string) {
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const response = await GraphQLClient.executeAuthenticated<{ getPayment: any }>(
+          getPayment,
+          { paymentId: paymentRef }
+        );
+
+        const payment = response.getPayment;
+        if (payment?.status === 'CAPTURED' || payment?.status === 'AUTHORIZED') {
+          clearInterval(interval);
+          setStep('confirmed');
+        } else if (payment?.status === 'FAILED') {
+          clearInterval(interval);
+          setError(payment.errorMessage || 'Payment failed');
+          setStep('failed');
+        }
+      } catch {
+        // Silent — keep polling
+      }
+
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        setPaymentMessage('Still waiting for payment confirmation. Check your M-Pesa and try again if needed.');
+      }
+    }, 10000);
   }
 
   // ═══════════════════════════════════════════════
@@ -218,31 +292,27 @@ export default function BookingPage() {
   if (step === 'confirmed') {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-green-50 mb-6">
-          <CheckCircleIcon className="h-10 w-10 text-green-600" />
+        <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-brand-50 mb-6">
+          <CheckCircleIcon className="h-10 w-10 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-3">
-          {bookingStatus === 'CONFIRMED' ? 'Booking Confirmed!' : 'Request Sent!'}
-        </h1>
+        <h1 className="text-3xl font-bold text-ink-900 mb-3">Booking Confirmed!</h1>
         <p className="text-ink-500 mb-2"><strong>{property.title}</strong></p>
-        <p className="text-sm text-ink-500 mb-6">
-          {new Date(checkIn + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-          {new Date(checkOut + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          {' · '}{nights} night{nights > 1 ? 's' : ''}
+        <p className="text-ink-500 mb-6">
+          {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+          {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
         </p>
+        {paymentOption === 'deposit' && (
+          <p className="text-sm text-amber-600 bg-amber-50 rounded-xl px-4 py-2 mb-6">
+            Deposit of {formatPrice(depositAmount, property.currency)} paid. Balance of {formatPrice(balanceDue, property.currency)} due at check-in.
+          </p>
+        )}
         <p className="text-sm text-ink-400 mb-8">
-          {bookingStatus === 'CONFIRMED'
-            ? 'We\'ve sent a payment link to your email and WhatsApp. Pay when you\'re ready.'
-            : 'The host will review your request. You\'ll be notified once confirmed.'}
+          The host will send you check-in details on WhatsApp.
         </p>
-        <div className="flex gap-3 justify-center">
-          <button onClick={() => router.push('/bookings')} className="btn-primary">
-            View My Trips
-          </button>
-          <button onClick={() => router.push('/')} className="btn-secondary">
-            Keep Browsing
-          </button>
-        </div>
+        <button onClick={() => router.push('/')} className="btn-primary">
+          Back to Home
+        </button>
       </div>
     );
   }
@@ -257,8 +327,8 @@ export default function BookingPage() {
           <ExclamationCircleIcon className="h-10 w-10 text-red-500" />
         </div>
         <h1 className="text-2xl font-bold text-ink-900 mb-3">Payment Failed</h1>
-        <p className="text-ink-500 mb-6">{error || 'Something went wrong.'}</p>
-        <button onClick={() => { setStep('form'); setError(''); }} className="btn-primary">
+        <p className="text-ink-500 mb-6">{error || 'Something went wrong with your payment.'}</p>
+        <button onClick={() => { setStep('confirmation'); setError(''); }} className="btn-primary">
           Try Again
         </button>
       </div>
@@ -266,30 +336,164 @@ export default function BookingPage() {
   }
 
   // ═══════════════════════════════════════════════
-  // RENDER: Main form — single page flow
+  // RENDER: Processing
+  // ═══════════════════════════════════════════════
+  if (step === 'processing') {
+    return (
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+        <div className="animate-spin h-12 w-12 border-4 border-brand-600 border-t-transparent rounded-full mx-auto mb-6" />
+        <h2 className="text-xl font-bold text-ink-900 mb-2">Processing Payment</h2>
+        <p className="text-ink-500">{paymentMessage || 'Initiating payment...'}</p>
+        {paymentMessage && (
+          <p className="text-sm text-ink-400 mt-4">This page will update automatically once payment is confirmed.</p>
+        )}
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════
+  // RENDER: Step 2 — Booking Confirmation + Pay
+  // ═══════════════════════════════════════════════
+  if (step === 'confirmation') {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4">
+            <CheckCircleIcon className="h-8 w-8 text-brand-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink-900">
+            {bookingData?.status === 'CONFIRMED' ? 'Booking Confirmed!' : 'Booking Request Sent!'}
+          </h1>
+          <p className="text-ink-500 mt-1 text-sm">
+            {bookingData?.status === 'CONFIRMED'
+              ? 'Complete payment to secure your dates.'
+              : 'The host will confirm availability. You\'ll be notified once confirmed.'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6">
+          {/* Booking summary card */}
+          <div className="rounded-2xl border border-ink-100 p-5">
+            <div className="flex gap-4 mb-4">
+              <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0">
+                <Image src={getCdnUrl(property.thumbnail)} alt={property.title} fill className="object-cover" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
+                <p className="text-xs text-ink-500 mt-0.5">{property.district}, {property.region}</p>
+                <p className="text-xs text-ink-500 mt-1">
+                  {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+                  {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-ink-100 pt-3 space-y-2 text-sm">
+              <div className="flex justify-between text-ink-600">
+                <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} nights</span>
+                <span>{formatPrice(subtotal, property.currency)}</span>
+              </div>
+              {cleaningFee > 0 && (
+                <div className="flex justify-between text-ink-600">
+                  <span>Cleaning fee</span>
+                  <span>{formatPrice(cleaningFee, property.currency)}</span>
+                </div>
+              )}
+              {serviceFee > 0 && (
+                <div className="flex justify-between text-ink-600">
+                  <span>Service fee</span>
+                  <span>{formatPrice(serviceFee, property.currency)}</span>
+                </div>
+              )}
+              {taxes > 0 && (
+                <div className="flex justify-between text-ink-600">
+                  <span>Taxes</span>
+                  <span>{formatPrice(taxes, property.currency)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
+                <span>Total</span>
+                <span>{formatPrice(total, property.currency)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment section — only for confirmed/instant bookings */}
+          {bookingData?.status === 'CONFIRMED' && bookingId && (
+            <div className="mt-2">
+              <div className="text-center mb-6">
+                <p className="text-2xl font-bold text-ink-900">{formatPrice(total, property.currency)}</p>
+                <p className="text-xs text-ink-500 mt-1">Pay now to secure your dates</p>
+              </div>
+
+              <PaymentFlow
+                bookingId={bookingId}
+                amount={total}
+                currency={property.currency}
+                onSuccess={() => setStep('confirmed')}
+                onError={(msg) => setError(msg)}
+              />
+
+              {error && (
+                <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <p className="text-center text-xs text-ink-300 mt-6">
+                🔒 Secure · Encrypted · ndotoni
+              </p>
+            </div>
+          )}
+
+          {/* For pending bookings — inform guest to wait */}
+          {bookingData?.status === 'PENDING' && (
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 text-center">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-3">
+                <span className="text-xl">⏳</span>
+              </div>
+              <p className="text-sm text-amber-800 font-semibold mb-2">Almost there! Awaiting host</p>
+              <p className="text-xs text-amber-700 leading-relaxed">
+                The host will confirm availability within 1 hour. We&apos;ll notify you via WhatsApp and email when it&apos;s time to pay.
+              </p>
+              <div className="mt-4 flex items-center justify-center gap-1 text-xs text-amber-600">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Waiting for response...</span>
+              </div>
+            </div>
+          )}
+
+          <button onClick={() => router.push('/')} className="text-sm text-ink-500 hover:text-ink-700 text-center transition-colors">
+            ← Continue browsing
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════
+  // RENDER: Step 1 — Collect Guest Details
   // ═══════════════════════════════════════════════
   return (
-    <div className="mx-auto max-w-2xl px-4 py-6 sm:py-10">
-      {/* Header */}
-      <h1 className="text-xl sm:text-2xl font-bold text-ink-900 mb-6">
-        {isInstantBook ? 'Confirm & Pay' : 'Complete your booking'}
-      </h1>
+    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+      <h1 className="text-2xl font-bold text-ink-900 mb-6">Complete your booking</h1>
 
-      <div className="space-y-5">
-        {/* Property summary */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Property summary card */}
         <div className="flex gap-4 p-4 rounded-2xl border border-ink-100">
           <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0">
             <Image src={getCdnUrl(property.thumbnail)} alt={property.title} fill className="object-cover" />
           </div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0">
             <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
             <p className="text-xs text-ink-500 mt-0.5">{property.district}, {property.region}</p>
             <p className="text-xs text-ink-500 mt-1">
-              {new Date(checkIn + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-              {new Date(checkOut + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+              {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
             </p>
-            {isInstantBook && (
+            {property.instantBookEnabled && (
               <span className="inline-flex items-center gap-1 text-xs text-brand-600 mt-1">
                 <BoltIcon className="h-3 w-3" /> Instant Book
               </span>
@@ -298,7 +502,8 @@ export default function BookingPage() {
         </div>
 
         {/* Price breakdown */}
-        <div className="rounded-2xl border border-ink-100 p-4 sm:p-5">
+        <div className="rounded-2xl border border-ink-100 p-5">
+          <h3 className="font-semibold text-ink-900 mb-3">Price breakdown</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink-600">
               <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} nights</span>
@@ -322,199 +527,146 @@ export default function BookingPage() {
                 <span>{formatPrice(taxes, property.currency)}</span>
               </div>
             )}
-            <div className="flex justify-between font-bold text-ink-900 pt-2 border-t border-ink-100 text-base">
+            <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
               <span>Total</span>
               <span>{formatPrice(total, property.currency)}</span>
             </div>
           </div>
         </div>
 
-        {/* Guest details — collapsible if pre-filled */}
-        {authChoice === 'none' && !isAuthenticated ? (
-          // Auth choice for non-signed-in users
+        {/* Auth choice — sign in or continue as guest */}
+        {authChoice === 'none' && !isAuthenticated && (
           <div className="rounded-2xl border border-ink-100 p-5">
-            <h3 className="font-semibold text-ink-900 mb-3">Sign in or continue as guest</h3>
+            <h3 className="font-semibold text-ink-900 mb-3">How would you like to book?</h3>
             <div className="space-y-2">
               <button
-                onClick={() => { localStorage.setItem('ndotoni_booking_redirect', window.location.href); setShowAuthModal(true); }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-ink-100 hover:border-brand-500 transition-all text-left"
+                onClick={handleSignIn}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-ink-100 hover:border-brand-500 transition-all text-left"
               >
-                <div className="h-9 w-9 rounded-full bg-brand-50 flex items-center justify-center shrink-0">
-                  <svg className="h-4 w-4 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <div className="h-10 w-10 rounded-full bg-brand-50 flex items-center justify-center shrink-0">
+                  <svg className="h-5 w-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-ink-900">Sign in</p>
-                  <p className="text-xs text-ink-500">Faster checkout, track bookings</p>
+                  <p className="text-xs text-ink-500">Track your bookings and earn rewards</p>
                 </div>
               </button>
               <button
-                onClick={() => { setAuthChoice('guest'); setDetailsExpanded(true); }}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-ink-100 hover:border-ink-200 transition-all text-left"
+                onClick={handleContinueAsGuest}
+                className="w-full flex items-center gap-3 p-4 rounded-xl border-2 border-ink-100 hover:border-ink-200 transition-all text-left"
               >
-                <div className="h-9 w-9 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
-                  <svg className="h-4 w-4 text-ink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <div className="h-10 w-10 rounded-full bg-ink-50 flex items-center justify-center shrink-0">
+                  <svg className="h-5 w-5 text-ink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-ink-900">Continue as guest</p>
-                  <p className="text-xs text-ink-500">Enter your details below</p>
+                  <p className="text-xs text-ink-500">Just enter your details below</p>
                 </div>
               </button>
             </div>
           </div>
-        ) : (
-          // Details form — collapsible
-          <div className="rounded-2xl border border-ink-100 overflow-hidden">
-            <button
-              onClick={() => setDetailsExpanded(!detailsExpanded)}
-              className="w-full flex items-center justify-between p-4 sm:p-5 text-left"
-            >
-              <div>
-                <h3 className="font-semibold text-ink-900 text-sm">Your details</h3>
-                {!detailsExpanded && guestName && (
-                  <p className="text-xs text-ink-500 mt-0.5">{guestName} · {guestEmail}</p>
-                )}
-              </div>
-              {detailsExpanded ? (
-                <ChevronUpIcon className="h-4 w-4 text-ink-400" />
-              ) : (
-                <ChevronDownIcon className="h-4 w-4 text-ink-400" />
-              )}
-            </button>
+        )}
 
-            {detailsExpanded && (
-              <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-ink-500 mb-1">Full name</label>
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="John Doe"
-                    className="input text-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-ink-500 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="input text-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-ink-500 mb-1">
-                    WhatsApp <span className="text-ink-400 font-normal">(optional)</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
-                      className="input w-24 text-sm"
-                    >
-                      <option value="255">🇹🇿 +255</option>
-                      <option value="254">🇰🇪 +254</option>
-                      <option value="256">🇺🇬 +256</option>
-                      <option value="250">🇷🇼 +250</option>
-                      <option value="27">🇿🇦 +27</option>
-                      <option value="44">🇬🇧 +44</option>
-                      <option value="1">🇺🇸 +1</option>
-                    </select>
-                    <input
-                      type="tel"
-                      value={guestPhone}
-                      onChange={(e) => handleGuestPhoneInput(e.target.value)}
-                      placeholder="712 345 678"
-                      className="input flex-1 text-base"
-                    />
-                  </div>
-                  <p className="text-xs text-ink-400 mt-1">For booking updates via WhatsApp.</p>
-                </div>
+        {/* Guest details form (shown after choice or if signed in) */}
+        {authChoice !== 'none' && (
+          <div className="rounded-2xl border border-ink-100 p-5">
+            <h3 className="font-semibold text-ink-900 mb-3">Your details</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Full name</label>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="John Doe"
+                  className="input"
+                  required
+                />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="input"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Phone number / WhatsApp <span className="text-ink-400 font-normal">(optional)</span></label>
+                <div className="flex gap-2">
+                  <select
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="input w-24 text-sm"
+                  >
+                    <option value="255">🇹🇿 +255</option>
+                    <option value="254">🇰🇪 +254</option>
+                    <option value="256">🇺🇬 +256</option>
+                    <option value="250">🇷🇼 +250</option>
+                    <option value="243">🇨🇩 +243</option>
+                    <option value="258">🇲🇿 +258</option>
+                    <option value="265">🇲🇼 +265</option>
+                    <option value="260">🇿🇲 +260</option>
+                    <option value="27">🇿🇦 +27</option>
+                    <option value="234">🇳🇬 +234</option>
+                    <option value="44">🇬🇧 +44</option>
+                    <option value="1">🇺🇸 +1</option>
+                    <option value="971">🇦🇪 +971</option>
+                    <option value="91">🇮🇳 +91</option>
+                  </select>
+                  <input
+                    type="tel"
+                    value={guestPhone}
+                    onChange={(e) => handleGuestPhoneInput(e.target.value)}
+                    placeholder="712 345 678"
+                    className="input flex-1"
+                  />
+                </div>
+                {guestPhone && !isValidGuestPhone && (
+                  <p className="text-xs text-red-500 mt-1">Enter a valid phone number</p>
+                )}
+                <p className="text-xs text-ink-400 mt-1">Helps us send booking updates via WhatsApp in addition to email.</p>
+              </div>
+            </div>
+            {authChoice === 'guest' && (
+              <p className="text-xs text-ink-400 mt-3">
+                We&apos;ll send your booking confirmation via email and WhatsApp.{' '}
+                <button type="button" onClick={handleSignIn} className="text-brand-600 hover:underline font-medium">
+                  Sign in instead
+                </button>
+              </p>
             )}
           </div>
         )}
 
-        {/* Payment section — shows immediately for instant book when booking is created */}
-        {bookingId && bookingStatus === 'CONFIRMED' && (
-          <div className="rounded-2xl border border-brand-200 bg-brand-50/30 p-4 sm:p-5">
-            <div className="text-center mb-4">
-              <p className="text-xs text-brand-600 font-medium mb-1">Booking created — pay to secure your dates</p>
-              <p className="text-2xl font-bold text-ink-900">{formatPrice(total, property.currency)}</p>
-            </div>
-            <PaymentFlow
-              bookingId={bookingId}
-              amount={total}
-              currency={property.currency}
-              onSuccess={() => setStep('confirmed')}
-              onError={(msg) => { setError(msg); setStep('failed'); }}
-            />
-          </div>
-        )}
-
-        {/* Pending (request mode) — show waiting message */}
-        {bookingId && bookingStatus === 'PENDING' && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
-            <span className="text-2xl mb-2 block">⏳</span>
-            <p className="text-sm font-semibold text-amber-800 mb-1">Request sent!</p>
-            <p className="text-xs text-amber-700">The host will confirm within 1 hour. We&apos;ll send you a payment link once confirmed.</p>
-          </div>
-        )}
-
         {/* Error */}
-        {error && !bookingId && (
+        {error && (
           <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        {/* Action buttons — only show before booking is created */}
-        {!bookingId && authChoice !== 'none' && (
-          <div className="space-y-3">
-            {isInstantBook ? (
-              <>
-                {/* Pay now — creates booking + shows payment inline */}
-                <button
-                  onClick={handleBookAndPay}
-                  disabled={isProcessing || !isFormValid}
-                  className="btn-primary w-full text-base py-4"
-                >
-                  {isProcessing ? 'Creating booking...' : `Pay ${formatPrice(total, property.currency)}`}
-                </button>
-
-                {/* Pay later — creates booking + sends link */}
-                <button
-                  onClick={handleSendPaymentLink}
-                  disabled={isProcessing || !isFormValid}
-                  className="w-full text-sm py-3 rounded-xl border border-ink-200 text-ink-700 font-medium hover:bg-ink-50 transition-colors"
-                >
-                  Send me a payment link instead
-                </button>
-              </>
-            ) : (
-              // Request mode — single button
-              <button
-                onClick={handleSendPaymentLink}
-                disabled={isProcessing || !isFormValid}
-                className="btn-primary w-full text-base py-4"
-              >
-                {isProcessing ? 'Sending request...' : 'Send Booking Request'}
-              </button>
-            )}
-          </div>
+        {/* Book button — only show after auth choice */}
+        {authChoice !== 'none' && (
+          <button
+            onClick={handleCreateBooking}
+            disabled={isProcessing || !guestName.trim() || !guestEmail.includes('@')}
+            className="btn-primary w-full text-base py-4"
+          >
+            {isProcessing ? 'Processing...' : property.instantBookEnabled ? 'Proceed to Pay' : 'Send Booking Request'}
+          </button>
         )}
 
-        {/* Fine print */}
         <p className="text-center text-xs text-ink-400">
-          {isInstantBook
-            ? 'Your dates are held for 15 minutes. Pay to confirm.'
-            : `By requesting, you agree to the host's ${property.cancellationPolicy?.toLowerCase() || 'flexible'} cancellation policy.`}
+          By booking, you agree to the host&apos;s cancellation policy ({property.cancellationPolicy?.toLowerCase() || 'flexible'}).
         </p>
       </div>
 
       {/* Auth Modal */}
-      <AuthModal isOpen={showAuthModal} onClose={() => { setShowAuthModal(false); setAuthChoice('signin'); }} />
+      <AuthModal isOpen={showAuthModal} onClose={() => { setShowAuthModal(false); handleAuthSuccess(); }} />
     </div>
   );
 }

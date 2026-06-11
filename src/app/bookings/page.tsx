@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyBookings } from '@/graphql/queries';
 import { createReview } from '@/graphql/mutations';
+import { getCdnUrl } from '@/lib/utils';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { StarIcon as StarOutline, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { StarIcon as StarOutline, CalendarDaysIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -16,14 +18,17 @@ interface BookingProperty {
   propertyId: string;
   title: string;
   thumbnail: string;
+  images: string[];
   district: string;
   region: string;
+  propertyType: string;
 }
 
 interface BookingPricing {
   total: number;
   currency: string;
   numberOfNights: number;
+  nightlyRate: number;
 }
 
 interface Booking {
@@ -43,9 +48,9 @@ interface Booking {
 type Tab = 'upcoming' | 'past' | 'cancelled';
 
 const STATUS_BADGE: Record<string, { label: string; classes: string }> = {
-  PENDING: { label: 'Pending', classes: 'bg-amber-100 text-amber-800' },
-  CONFIRMED: { label: 'Confirmed', classes: 'bg-blue-100 text-blue-800' },
-  COMPLETED: { label: 'Completed', classes: 'bg-green-100 text-green-700' },
+  PENDING: { label: 'Awaiting confirmation', classes: 'bg-amber-100 text-amber-800' },
+  CONFIRMED: { label: 'Confirmed', classes: 'bg-green-100 text-green-700' },
+  COMPLETED: { label: 'Completed', classes: 'bg-ink-100 text-ink-600' },
   CANCELLED: { label: 'Cancelled', classes: 'bg-red-100 text-red-700' },
   DECLINED: { label: 'Declined', classes: 'bg-red-100 text-red-700' },
 };
@@ -131,12 +136,24 @@ export default function MyBookingsPage() {
 
   function formatDate(dateStr: string) {
     const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function formatDateShort(dateStr: string) {
+    const [y, m, d] = dateStr.split('-').map(Number);
     return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   function formatPrice(amount: number, currency: string) {
     if (currency === 'USD') return `$${amount.toLocaleString()}`;
     return `TZS ${amount.toLocaleString()}`;
+  }
+
+  function daysUntil(dateStr: string): number {
+    const target = new Date(dateStr + 'T00:00:00');
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   }
 
   const today = new Date().toISOString().split('T')[0];
@@ -160,20 +177,21 @@ export default function MyBookingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-10">
-      <h1 className="text-xl sm:text-2xl font-bold text-ink-900 mb-6">My Bookings</h1>
+    <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-10">
+      <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-2">Trips</h1>
+      <p className="text-ink-500 text-sm mb-6">Your upcoming and past reservations</p>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 mb-8 border-b border-ink-100 pb-0">
         {(['upcoming', 'past', 'cancelled'] as Tab[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              'px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap touch-manipulation',
+              'px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap touch-manipulation',
               activeTab === tab
-                ? 'bg-brand-600 text-white'
-                : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+                ? 'border-ink-900 text-ink-900'
+                : 'border-transparent text-ink-500 hover:text-ink-700'
             )}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -183,93 +201,137 @@ export default function MyBookingsPage() {
 
       {/* Bookings */}
       {loading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse border border-ink-100 rounded-xl p-4 h-32" />
+        <div className="space-y-6">
+          {[1, 2].map((i) => (
+            <div key={i} className="animate-pulse rounded-2xl overflow-hidden border border-ink-100">
+              <div className="h-48 sm:h-56 bg-ink-100" />
+              <div className="p-5 space-y-3">
+                <div className="h-5 bg-ink-100 rounded w-2/3" />
+                <div className="h-4 bg-ink-100 rounded w-1/3" />
+              </div>
+            </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <CalendarDaysIcon className="h-12 w-12 text-ink-200 mx-auto mb-3" />
-          <p className="text-ink-500 text-sm">
-            {activeTab === 'upcoming' ? 'No upcoming bookings' : activeTab === 'past' ? 'No past stays yet' : 'No cancelled bookings'}
+        <div className="text-center py-20">
+          <CalendarDaysIcon className="h-16 w-16 text-ink-200 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-ink-700 mb-2">
+            {activeTab === 'upcoming' ? 'No trips planned' : activeTab === 'past' ? 'No past trips' : 'No cancellations'}
+          </h2>
+          <p className="text-ink-400 text-sm mb-6">
+            {activeTab === 'upcoming' && 'Time to explore! Find a place to stay.'}
           </p>
+          {activeTab === 'upcoming' && (
+            <Link href="/search" className="btn-primary inline-flex items-center gap-2">
+              Start exploring
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {filtered.map((booking) => {
             const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
             const canReview = activeTab === 'past' && booking.status === 'COMPLETED';
             const isReviewing = reviewingBooking === booking.bookingId;
+            const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';
+            const days = daysUntil(booking.checkInDate);
 
             return (
-              <div key={booking.bookingId} className="border border-ink-100 rounded-xl overflow-hidden">
-                {/* Booking card */}
-                <div className="flex gap-3 p-4">
-                  {/* Property thumbnail */}
-                  {booking.property?.thumbnail && (
-                    <Link href={`/property/${booking.propertyId}`} className="shrink-0">
-                      <img
-                        src={booking.property.thumbnail}
-                        alt={booking.property.title || ''}
-                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
+              <div key={booking.bookingId} className="rounded-2xl border border-ink-100 overflow-hidden hover:shadow-md transition-shadow">
+                {/* Property image — large, clickable */}
+                <Link href={`/property/${booking.propertyId}`} className="block relative">
+                  <div className="relative h-48 sm:h-56 bg-ink-100">
+                    {propertyImage ? (
+                      <Image
+                        src={getCdnUrl(propertyImage)}
+                        alt={booking.property?.title || 'Property'}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 800px"
                       />
-                    </Link>
-                  )}
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <Link href={`/property/${booking.propertyId}`}>
-                          <h3 className="text-sm font-semibold text-ink-900 truncate hover:text-brand-600 transition-colors">
-                            {booking.property?.title || 'Property'}
-                          </h3>
-                        </Link>
-                        {booking.property && (
-                          <p className="text-xs text-ink-400 mt-0.5">
-                            {booking.property.district}, {booking.property.region}
-                          </p>
-                        )}
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <CalendarDaysIcon className="h-12 w-12 text-ink-300" />
                       </div>
-                      <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full shrink-0', badge.classes)}>
+                    )}
+
+                    {/* Status overlay */}
+                    <div className="absolute top-4 left-4">
+                      <span className={cn('text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm', badge.classes)}>
                         {badge.label}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs text-ink-500">
-                      <span>{formatDate(booking.checkInDate)} → {formatDate(booking.checkOutDate)}</span>
+                    {/* Countdown for upcoming */}
+                    {activeTab === 'upcoming' && days >= 0 && days <= 30 && (
+                      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-ink-800 text-xs font-semibold px-3 py-1.5 rounded-full">
+                        {days === 0 ? 'Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`}
+                      </div>
+                    )}
+
+                    {/* Date bar at bottom of image */}
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent pt-10 pb-4 px-5">
+                      <p className="text-white font-semibold text-sm">
+                        {formatDateShort(booking.checkInDate)} – {formatDateShort(booking.checkOutDate)}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Booking details */}
+                <div className="p-4 sm:p-5">
+                  <Link href={`/property/${booking.propertyId}`}>
+                    <h3 className="text-base sm:text-lg font-semibold text-ink-900 hover:text-brand-600 transition-colors">
+                      {booking.property?.title || 'Property'}
+                    </h3>
+                  </Link>
+
+                  <div className="flex items-center gap-3 mt-1.5 text-sm text-ink-500">
+                    {booking.property && (
+                      <span className="flex items-center gap-1">
+                        <MapPinIcon className="h-3.5 w-3.5" />
+                        {booking.property.district}, {booking.property.region}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Stats row */}
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-ink-100">
+                    <div className="flex items-center gap-1.5 text-sm text-ink-600">
+                      <CalendarDaysIcon className="h-4 w-4 text-ink-400" />
                       <span>{booking.numberOfNights} night{booking.numberOfNights > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-sm text-ink-600">
+                      <UserGroupIcon className="h-4 w-4 text-ink-400" />
                       <span>{booking.numberOfGuests} guest{booking.numberOfGuests > 1 ? 's' : ''}</span>
                     </div>
-
-                    <p className="text-sm font-semibold text-ink-800 mt-2">
+                    <div className="ml-auto text-base font-bold text-ink-900">
                       {formatPrice(booking.pricing.total, booking.pricing.currency)}
-                    </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Review section for completed bookings */}
+                {/* Review CTA for completed bookings */}
                 {canReview && !isReviewing && (
-                  <div className="px-4 pb-4 pt-0">
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5">
                     <button
                       onClick={() => setReviewingBooking(booking.bookingId)}
-                      className="w-full btn-secondary text-sm py-2 touch-manipulation"
+                      className="w-full py-3 rounded-xl border-2 border-ink-900 text-sm font-semibold text-ink-900 hover:bg-ink-900 hover:text-white transition-colors touch-manipulation"
                     >
-                      Leave a Review
+                      Write a review
                     </button>
                   </div>
                 )}
 
                 {/* Review form */}
                 {isReviewing && (
-                  <div className="border-t border-ink-100 p-4 space-y-4 bg-ink-50/50">
-                    <p className="text-sm font-medium text-ink-800">How was your stay?</p>
+                  <div className="border-t border-ink-100 p-4 sm:p-5 space-y-4 bg-ink-50/50">
+                    <p className="text-base font-semibold text-ink-900">How was your stay?</p>
 
-                    {/* Overall rating - stars */}
+                    {/* Overall rating */}
                     <div>
-                      <label className="block text-xs font-medium text-ink-600 mb-1.5">Overall rating</label>
-                      <div className="flex gap-1">
+                      <label className="block text-sm font-medium text-ink-600 mb-2">Overall rating</label>
+                      <div className="flex gap-1.5">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             key={star}
@@ -278,9 +340,9 @@ export default function MyBookingsPage() {
                             className="touch-manipulation"
                           >
                             {star <= reviewForm.overallRating ? (
-                              <StarSolid className="h-7 w-7 text-amber-400" />
+                              <StarSolid className="h-8 w-8 text-amber-400" />
                             ) : (
-                              <StarOutline className="h-7 w-7 text-ink-300" />
+                              <StarOutline className="h-8 w-8 text-ink-300 hover:text-amber-300 transition-colors" />
                             )}
                           </button>
                         ))}
@@ -288,10 +350,10 @@ export default function MyBookingsPage() {
                     </div>
 
                     {/* Category ratings */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {(['cleanliness', 'accuracy', 'communication', 'location', 'value'] as const).map((cat) => (
                         <div key={cat}>
-                          <label className="block text-xs font-medium text-ink-600 mb-1 capitalize">{cat}</label>
+                          <label className="block text-xs font-medium text-ink-600 mb-1.5 capitalize">{cat}</label>
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <button
@@ -301,9 +363,9 @@ export default function MyBookingsPage() {
                                 className="touch-manipulation"
                               >
                                 {star <= reviewForm[cat] ? (
-                                  <StarSolid className="h-4 w-4 text-amber-400" />
+                                  <StarSolid className="h-5 w-5 text-amber-400" />
                                 ) : (
-                                  <StarOutline className="h-4 w-4 text-ink-300" />
+                                  <StarOutline className="h-5 w-5 text-ink-200" />
                                 )}
                               </button>
                             ))}
@@ -314,31 +376,31 @@ export default function MyBookingsPage() {
 
                     {/* Comment */}
                     <div>
-                      <label className="block text-xs font-medium text-ink-600 mb-1">Your review</label>
+                      <label className="block text-sm font-medium text-ink-600 mb-1.5">Your review</label>
                       <textarea
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
                         placeholder="What did you love? What could be improved?"
-                        className="input text-sm min-h-[80px]"
-                        rows={3}
+                        className="input text-sm min-h-[100px]"
+                        rows={4}
                       />
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <button
                         onClick={() => {
                           setReviewingBooking(null);
                           setReviewForm({ overallRating: 0, cleanliness: 5, accuracy: 5, communication: 5, location: 5, value: 5, comment: '' });
                         }}
-                        className="btn-secondary text-sm py-2 px-4"
+                        className="btn-secondary text-sm py-2.5 px-5"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => handleSubmitReview(booking.bookingId, booking.propertyId)}
                         disabled={submittingReview || reviewForm.overallRating === 0}
-                        className="btn-primary text-sm py-2 px-4 flex-1"
+                        className="btn-primary text-sm py-2.5 px-5 flex-1"
                       >
                         {submittingReview ? 'Submitting...' : 'Submit Review'}
                       </button>

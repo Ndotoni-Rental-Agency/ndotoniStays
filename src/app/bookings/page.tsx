@@ -207,7 +207,8 @@ export default function MyBookingsPage() {
       return (b.status === 'CONFIRMED' || b.status === 'PENDING') && b.checkInDate >= today;
     }
     if (activeTab === 'past') {
-      return b.status === 'COMPLETED' || (b.status === 'CONFIRMED' && b.checkOutDate < today);
+      return b.status === 'COMPLETED'
+        || (b.status === 'CONFIRMED' && b.checkOutDate < today);
     }
     return b.status === 'CANCELLED' || b.status === 'DECLINED';
   });
@@ -275,7 +276,10 @@ export default function MyBookingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {filtered.map((booking) => {
             const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
-            const canReview = activeTab === 'past' && booking.status === 'COMPLETED';
+            const canReview = activeTab === 'past' && (
+              booking.status === 'COMPLETED' ||
+              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkOutDate < today)
+            );
             const isReviewing = reviewingBooking === booking.bookingId;
             const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';
             const days = daysUntil(booking.checkInDate);

@@ -84,13 +84,13 @@ export function calculateEarnings(
   let totalPaid = 0;
   let totalPotential = 0;
 
-  for (const entry of dateMap.values()) {
+  dateMap.forEach((entry) => {
     if (entry.paid) {
       totalPaid += entry.perNight;
     } else {
       totalPotential += entry.perNight;
     }
-  }
+  });
 
   // Detect currency from first paid booking, or first booking, or fallback
   const paidBooking = activeBookings.find((b) => b.paymentStatus === 'CAPTURED');

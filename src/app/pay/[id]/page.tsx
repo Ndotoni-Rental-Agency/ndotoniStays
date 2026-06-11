@@ -8,7 +8,9 @@ import { initiatePayment } from '@/graphql/mutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
+import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 
+type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
 type PageState = 'loading' | 'ready' | 'processing' | 'confirmed' | 'failed' | 'already_paid' | 'error';
 
@@ -27,6 +29,7 @@ export default function PayBookingPage() {
   const [booking, setBooking] = useState<any>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [paymentOption, setPaymentOption] = useState<PaymentOption>('full');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
   const [error, setError] = useState('');
   const [paymentMessage, setPaymentMessage] = useState('');
 
@@ -323,24 +326,77 @@ export default function PayBookingPage() {
           </div>
         </div>
 
-        {/* M-Pesa number */}
+        {/* Payment method selector */}
         <div className="rounded-2xl border border-ink-100 p-5">
-          <h3 className="font-semibold text-ink-900 mb-1">Mobile Money</h3>
-          <p className="text-xs text-ink-500 mb-3">M-Pesa, Airtel Money, Tigo Pesa, or Halotel</p>
-          <input
-            type="tel"
-            value={phoneNumber}
-            onChange={handlePhoneChange}
-            placeholder="0712 345 678"
-            className="input"
-          />
-          {phoneNumber && !isValidPhone && (
-            <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
-          )}
-          <p className="text-xs text-ink-400 mt-2">
-            You can pay from any number — it doesn&apos;t have to be the guest&apos;s phone.
-          </p>
+          <h3 className="font-semibold text-ink-900 mb-3">Payment method</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setPaymentMethod('mobile_money')}
+              className={`p-3 rounded-xl border-2 text-center text-sm font-medium transition-all ${
+                paymentMethod === 'mobile_money' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-ink-100 text-ink-600 hover:border-ink-200'
+              }`}
+            >
+              📱 Mobile Money
+            </button>
+            <button
+              onClick={() => setPaymentMethod('card')}
+              className={`p-3 rounded-xl border-2 text-center text-sm font-medium transition-all ${
+                paymentMethod === 'card' ? 'border-brand-500 bg-brand-50 text-brand-700' : 'border-ink-100 text-ink-600 hover:border-ink-200'
+              }`}
+            >
+              💳 Card / Apple Pay
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Money */}
+        {paymentMethod === 'mobile_money' && (
+          <>
+            <div className="rounded-2xl border border-ink-100 p-5">
+              <h3 className="font-semibold text-ink-900 mb-1">Mobile Money</h3>
+              <p className="text-xs text-ink-500 mb-3">M-Pesa, Airtel Money, Tigo Pesa, or Halotel</p>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                placeholder="0712 345 678"
+                className="input"
+              />
+              {phoneNumber && !isValidPhone && (
+                <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
+              )}
+              <p className="text-xs text-ink-400 mt-2">
+                You can pay from any number — it doesn&apos;t have to be the guest&apos;s phone.
+              </p>
+            </div>
+
+            <button
+              onClick={handlePay}
+              disabled={!isValidPhone}
+              className="btn-primary w-full text-base py-4"
+            >
+              Send {formatPrice(payNowAmount, currency)} payment request
+            </button>
+
+            <p className="text-center text-xs text-ink-400">
+              You&apos;ll receive a payment prompt on your phone. Confirm on your phone to complete.
+            </p>
+          </>
+        )}
+
+        {/* Card / Apple Pay / Google Pay */}
+        {paymentMethod === 'card' && (
+          <div className="rounded-2xl border border-ink-100 p-5">
+            <h3 className="font-semibold text-ink-900 mb-3">Card Payment</h3>
+            <StripePaymentForm
+              bookingId={bookingId}
+              amount={payNowAmount}
+              currency={currency}
+              onSuccess={() => setState('confirmed')}
+              onError={(msg) => setError(msg)}
+            />
+          </div>
+        )}
 
         {/* Error */}
         {error && (
@@ -348,19 +404,6 @@ export default function PayBookingPage() {
             {error}
           </div>
         )}
-
-        {/* Pay button */}
-        <button
-          onClick={handlePay}
-          disabled={!isValidPhone}
-          className="btn-primary w-full text-base py-4"
-        >
-          Send {formatPrice(payNowAmount, currency)} payment request
-        </button>
-
-        <p className="text-center text-xs text-ink-400">
-          You&apos;ll receive a payment prompt on your phone. Confirm on your phone to complete.
-        </p>
       </div>
     </div>
   );

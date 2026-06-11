@@ -2747,3 +2747,14 @@ export const verifyEmail = /* GraphQL */ `mutation VerifyEmail($code: String!, $
   APITypes.VerifyEmailMutationVariables,
   APITypes.VerifyEmailMutation
 >;
+
+export const createStripePaymentIntent = /* GraphQL */ `mutation CreateStripePaymentIntent($bookingId: ID!) {
+  createStripePaymentIntent(bookingId: $bookingId) {
+    clientSecret
+    paymentIntentId
+    amount
+    currency
+    __typename
+  }
+}
+`;

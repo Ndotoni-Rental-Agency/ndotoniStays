@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { BoltIcon } from '@heroicons/react/24/solid';
-import { formatPrice, calculateNights } from '@/lib/utils';
-import { GraphQLClient } from '@/lib/graphql-client';
-import { calculateBookingPrice, getBlockedDates } from '@/graphql/queries';
-import { useAuth } from '@/contexts/AuthContext';
-import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { BoltIcon } from "@heroicons/react/24/solid";
+import { formatPrice, calculateNights, findAvailableRanges } from "@/lib/utils";
+import { GraphQLClient } from "@/lib/graphql-client";
+import { calculateBookingPrice, getBlockedDates } from "@/graphql/queries";
+import { useAuth } from "@/contexts/AuthContext";
+import CalendarDatePicker from "@/components/ui/CalendarDatePicker";
 
 interface Props {
   property: {
@@ -36,7 +36,11 @@ interface PriceBreakdown {
   currency: string;
 }
 
-export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
+export function BookingSidebar({
+  property,
+  initialCheckIn,
+  initialCheckOut,
+}: Props) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const executeGql = isAuthenticated
@@ -49,6 +53,15 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   const [loadingPrice, setLoadingPrice] = useState(false);
   const [bookingInProgress, setBookingInProgress] = useState(false);
   const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
+  const [unavailableMessage, setUnavailableMessage] = useState<string | null>(
+    null
+  );
+  const [alternativeDates, setAlternativeDates] = useState<
+    Array<{
+      checkIn: string;
+      checkOut: string;
+    }>
+  >([]);
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const minStay = property.minimumStay || 1;
@@ -57,19 +70,26 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDate = tomorrow.toISOString().split("T")[0];
 
   // Fetch blocked dates on mount
   useEffect(() => {
     async function fetchBlockedDates() {
       try {
         const now = new Date();
-        const startDate = now.toISOString().split('T')[0];
-        const endDate = new Date(now.setMonth(now.getMonth() + 6)).toISOString().split('T')[0];
-        const data = await executeGql<{ getBlockedDates: { blockedRanges: Array<{ startDate: string; endDate: string }> } }>(
-          getBlockedDates,
-          { propertyId: property.propertyId, startDate, endDate }
-        );
+        const startDate = now.toISOString().split("T")[0];
+        const endDate = new Date(now.setMonth(now.getMonth() + 6))
+          .toISOString()
+          .split("T")[0];
+        const data = await executeGql<{
+          getBlockedDates: {
+            blockedRanges: Array<{ startDate: string; endDate: string }>;
+          };
+        }>(getBlockedDates, {
+          propertyId: property.propertyId,
+          startDate,
+          endDate,
+        });
         console.log("data returned", data);
         const blocked = new Set<string>();
         for (const range of data.getBlockedDates?.blockedRanges || []) {
@@ -78,14 +98,64 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
           const end = new Date(range.endDate);
           const current = new Date(start);
           while (current <= end) {
-            blocked.add(current.toISOString().split('T')[0]);
+            blocked.add(current.toISOString().split("T")[0]);
             current.setDate(current.getDate() + 1);
           }
         }
-        console.log("blocked ", blocked);
         setBlockedDates(blocked);
-      } catch(e) {
-        console.log('error when getting blocked dates', e)
+
+        // Check if the initial dates from search params overlap with blocked dates
+        if (initialCheckIn && initialCheckOut) {
+          const [sy, sm, sd] = initialCheckIn.split("-").map(Number);
+          const [ey, em, ed] = initialCheckOut.split("-").map(Number);
+          const start = new Date(sy, sm - 1, sd);
+          const end = new Date(ey, em - 1, ed);
+          const cursor = new Date(start);
+          let hasConflict = false;
+          while (cursor <= end && !hasConflict) {
+            const y = cursor.getFullYear();
+            const m = String(cursor.getMonth() + 1).padStart(2, "0");
+            const d = String(cursor.getDate()).padStart(2, "0");
+            if (blocked.has(`${y}-${m}-${d}`)) hasConflict = true;
+            cursor.setDate(cursor.getDate() + 1);
+          }
+          if (hasConflict) {
+            const requestedNights = calculateNights(
+              initialCheckIn,
+              initialCheckOut
+            );
+
+            // Respect property minimum stay
+            const nightsToFind = Math.max(
+              requestedNights,
+              property.minimumStay || 1
+            );
+
+            const alternatives = findAvailableRanges(
+              blocked,
+              nightsToFind,
+              initialCheckIn,
+              3
+            );
+
+            if (alternatives.length > 0) {
+              setCheckIn(alternatives[0].checkIn);
+              setCheckOut(alternatives[0].checkOut);
+
+              setAlternativeDates(alternatives);
+
+              setUnavailableMessage(
+                `Your selected dates aren't available. We've automatically selected the next available stay.`
+              );
+            } else {
+              setUnavailableMessage(
+                `Your selected dates are unavailable. We've automatically selected the closest available ${nightsToFind}-night stay.`
+              );
+            }
+          }
+        }
+      } catch (e) {
+        console.log("error when getting blocked dates", e);
         // Non-critical — don't block the UI
       }
     }
@@ -115,7 +185,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
       );
       setPricing(data.calculateBookingPrice);
     } catch (err) {
-      console.error('Price calculation error:', err);
+      console.error("Price calculation error:", err);
       // Fallback to simple calculation
       const fallback: PriceBreakdown = {
         nightlyRate: property.nightlyRate,
@@ -124,7 +194,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         cleaningFee: property.cleaningFee || 0,
         serviceFee: 0,
         taxes: 0,
-        total: (property.nightlyRate * nights) + (property.cleaningFee || 0),
+        total: property.nightlyRate * nights + (property.cleaningFee || 0),
         currency: property.currency,
       };
       setPricing(fallback);
@@ -179,18 +249,50 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
               rangeStart={checkIn}
               rangeEnd={checkOut}
             />
+            {unavailableMessage && (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm text-amber-800">{unavailableMessage}</p>
+
+                {alternativeDates.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-xs font-medium text-amber-700">
+                      Other available options:
+                    </p>
+
+                    {alternativeDates.map((alt) => (
+                      <button
+                        key={`${alt.checkIn}-${alt.checkOut}`}
+                        type="button"
+                        onClick={() => {
+                          setCheckIn(alt.checkIn);
+                          setCheckOut(alt.checkOut);
+                        }}
+                        className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-left text-sm hover:bg-amber-100"
+                      >
+                        {alt.checkIn} → {alt.checkOut}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="text-xs font-medium text-ink-500 block mb-1">Guests</label>
+            <label className="text-xs font-medium text-ink-500 block mb-1">
+              Guests
+            </label>
             <select
               value={guests}
               onChange={(e) => setGuests(Number(e.target.value))}
               className="input text-sm py-2.5"
             >
-              {Array.from({ length: property.maxGuests || 10 }, (_, i) => i + 1).map((n) => (
+              {Array.from(
+                { length: property.maxGuests || 10 },
+                (_, i) => i + 1
+              ).map((n) => (
                 <option key={n} value={n}>
-                  {n} {n === 1 ? 'guest' : 'guests'}
+                  {n} {n === 1 ? "guest" : "guests"}
                 </option>
               ))}
             </select>
@@ -200,7 +302,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         {/* Minimum stay warning */}
         {nights > 0 && nights < minStay && (
           <p className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
-            Minimum stay: {minStay} {minStay === 1 ? 'night' : 'nights'}
+            Minimum stay: {minStay} {minStay === 1 ? "night" : "nights"}
           </p>
         )}
 
@@ -208,13 +310,18 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         {pricing && (
           <div className="mt-5 space-y-2 text-sm">
             <div className="flex justify-between text-ink-600">
-              <span>{formatPrice(pricing.nightlyRate, pricing.currency)} × {pricing.numberOfNights} nights</span>
+              <span>
+                {formatPrice(pricing.nightlyRate, pricing.currency)} ×{" "}
+                {pricing.numberOfNights} nights
+              </span>
               <span>{formatPrice(pricing.subtotal, pricing.currency)}</span>
             </div>
             {pricing.cleaningFee > 0 && (
               <div className="flex justify-between text-ink-600">
                 <span>Cleaning fee</span>
-                <span>{formatPrice(pricing.cleaningFee, pricing.currency)}</span>
+                <span>
+                  {formatPrice(pricing.cleaningFee, pricing.currency)}
+                </span>
               </div>
             )}
             {pricing.serviceFee > 0 && (
@@ -233,11 +340,13 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         {/* Book button */}
         <button
           onClick={handleBook}
-          disabled={!checkIn || !checkOut || nights < minStay || bookingInProgress}
+          disabled={
+            !checkIn || !checkOut || nights < minStay || bookingInProgress
+          }
           className="btn-primary w-full mt-6 gap-2"
         >
           {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
-          {property.instantBookEnabled ? 'Book Instantly' : 'Request to Book'}
+          {property.instantBookEnabled ? "Book Instantly" : "Request to Book"}
         </button>
 
         {/* Reassurance */}

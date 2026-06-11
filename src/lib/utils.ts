@@ -62,3 +62,60 @@ export function getWhatsAppUrl(message: string): string {
 export function toTitleCase(str: string): string {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
 }
+
+export function findAvailableRanges(
+  blockedDates: Set<string>,
+  requiredNights: number,
+  startSearchFrom: string,
+  count = 3
+) {
+  const results: Array<{
+    checkIn: string;
+    checkOut: string;
+  }> = [];
+
+  const cursor = new Date(startSearchFrom);
+
+  while (results.length < count) {
+    let valid = true;
+
+    // Entire stay must be available
+    for (let n = 0; n < requiredNights; n++) {
+      const day = new Date(cursor);
+      day.setDate(day.getDate() + n);
+
+      const key = day.toISOString().split('T')[0];
+
+      if (blockedDates.has(key)) {
+        valid = false;
+        break;
+      }
+    }
+
+    if (valid) {
+      const checkIn = new Date(cursor);
+
+      const checkOut = new Date(cursor);
+      checkOut.setDate(checkOut.getDate() + requiredNights);
+
+      results.push({
+        checkIn: checkIn.toISOString().split('T')[0],
+        checkOut: checkOut.toISOString().split('T')[0],
+      });
+
+      cursor.setDate(cursor.getDate() + requiredNights + 1);
+    } else {
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Stop searching after 1 year
+    const oneYearLater = new Date(startSearchFrom);
+    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+
+    if (cursor > oneYearLater) {
+      break;
+    }
+  }
+
+  return results;
+}

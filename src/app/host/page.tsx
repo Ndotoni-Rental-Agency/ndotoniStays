@@ -12,8 +12,11 @@ import {
   HomeModernIcon,
   CalendarDaysIcon,
   ClipboardDocumentListIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline';
 import { HostBookings } from '@/components/host/HostBookings';
+import { HostEarnings } from '@/components/host/HostEarnings';
+import { HostReviews } from '@/components/host/HostReviews';
 
 interface Property {
   propertyId: string;
@@ -37,7 +40,7 @@ const STATUS_BADGES: Record<string, { label: string; classes: string }> = {
   INACTIVE: { label: 'Inactive', classes: 'bg-gray-100 text-gray-600' },
 };
 
-type Tab = 'properties' | 'bookings';
+type Tab = 'properties' | 'bookings' | 'reviews';
 
 export default function HostDashboardPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -131,6 +134,17 @@ export default function HostDashboardPage() {
             <ClipboardDocumentListIcon className="h-4 w-4" />
             Bookings
           </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === 'reviews'
+                ? 'border-brand-600 text-brand-700'
+                : 'border-transparent text-ink-500 hover:text-ink-700 hover:border-ink-200'
+            }`}
+          >
+            <StarIcon className="h-4 w-4" />
+            Reviews
+          </button>
         </nav>
       </div>
 
@@ -139,6 +153,11 @@ export default function HostDashboardPage() {
         <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 mb-5">
           {error}
         </div>
+      )}
+
+      {/* Earnings summary — visible on all tabs */}
+      {!loading && properties.length > 0 && (
+        <HostEarnings propertyIds={livePropertyIds} />
       )}
 
       {/* Properties Tab */}
@@ -240,6 +259,11 @@ export default function HostDashboardPage() {
       {/* Bookings Tab */}
       {activeTab === 'bookings' && (
         <HostBookings propertyIds={livePropertyIds} />
+      )}
+
+      {/* Reviews Tab */}
+      {activeTab === 'reviews' && (
+        <HostReviews propertyIds={livePropertyIds} />
       )}
     </div>
   );

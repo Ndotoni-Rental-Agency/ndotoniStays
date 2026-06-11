@@ -9,6 +9,21 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyBookings } from '@/graphql/queries';
 import { createReview } from '@/graphql/mutations';
 import { getCdnUrl } from '@/lib/utils';
+
+// Lightweight query just for property images
+const getPropertyImages = /* GraphQL */ `
+  query GetPropertyImages($propertyId: ID!) {
+    getShortTermProperty(propertyId: $propertyId) {
+      propertyId
+      title
+      thumbnail
+      images
+      district
+      region
+      propertyType
+    }
+  }
+`;
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutline, CalendarDaysIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
@@ -91,7 +106,36 @@ export default function MyBookingsPage() {
       const data = await GraphQLClient.executeAuthenticated<{
         listMyBookings: { bookings: Booking[]; count: number };
       }>(listMyBookings, { limit: 50 });
-      setBookings(data.listMyBookings?.bookings || []);
+
+      const rawBookings = data.listMyBookings?.bookings || [];
+
+      // Enrich bookings with property details (images may not come from the booking query)
+      const uniquePropertyIds = [...new Set(rawBookings.map((b) => b.propertyId))];
+      const propertyMap = new Map<string, BookingProperty>();
+
+      // Fetch property details in parallel
+      const propertyResults = await Promise.allSettled(
+        uniquePropertyIds.map((propertyId) =>
+          GraphQLClient.executePublic<{
+            getShortTermProperty: BookingProperty;
+          }>(getPropertyImages, { propertyId })
+        )
+      );
+
+      for (const result of propertyResults) {
+        if (result.status === 'fulfilled' && result.value.getShortTermProperty) {
+          const p = result.value.getShortTermProperty;
+          propertyMap.set(p.propertyId, p);
+        }
+      }
+
+      // Merge property data into bookings
+      const enriched = rawBookings.map((b) => ({
+        ...b,
+        property: propertyMap.get(b.propertyId) || b.property,
+      }));
+
+      setBookings(enriched);
     } catch (err) {
       console.error('Failed to load bookings:', err);
     } finally {

@@ -82,6 +82,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
             current.setDate(current.getDate() + 1);
           }
         }
+        console.log("blocked ", blocked);
         setBlockedDates(blocked);
       } catch(e) {
         console.log('error when getting blocked dates', e)

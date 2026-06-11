@@ -595,7 +595,7 @@ export default function BookingPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink-500 mb-1">Phone number (WhatsApp)</label>
+                <label className="block text-xs font-medium text-ink-500 mb-1">Phone number / WhatsApp <span className="text-ink-400 font-normal">(optional)</span></label>
                 <div className="flex gap-2">
                   <select
                     value={countryCode}
@@ -623,12 +623,12 @@ export default function BookingPage() {
                     onChange={(e) => handleGuestPhoneInput(e.target.value)}
                     placeholder="712 345 678"
                     className="input flex-1"
-                    required
                   />
                 </div>
                 {guestPhone && !isValidGuestPhone && (
                   <p className="text-xs text-red-500 mt-1">Enter a valid phone number</p>
                 )}
+                <p className="text-xs text-ink-400 mt-1">Helps us send booking updates via WhatsApp in addition to email.</p>
               </div>
             </div>
             {authChoice === 'guest' && (

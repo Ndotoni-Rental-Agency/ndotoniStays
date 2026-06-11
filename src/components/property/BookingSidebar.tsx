@@ -6,6 +6,7 @@ import { BoltIcon } from '@heroicons/react/24/solid';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { calculateBookingPrice, getBlockedDates } from '@/graphql/queries';
+import { useAuth } from '@/contexts/AuthContext';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 interface Props {
@@ -37,6 +38,10 @@ interface PriceBreakdown {
 
 export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Props) {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const executeGql = isAuthenticated
+    ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
+    : GraphQLClient.executePublic.bind(GraphQLClient);
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(initialCheckOut);
   const [guests, setGuests] = useState(1);
@@ -61,7 +66,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
         const now = new Date();
         const startDate = now.toISOString().split('T')[0];
         const endDate = new Date(now.setMonth(now.getMonth() + 6)).toISOString().split('T')[0];
-        const data = await GraphQLClient.executePublic<{ getBlockedDates: { blockedRanges: Array<{ startDate: string; endDate: string }> } }>(
+        const data = await executeGql<{ getBlockedDates: { blockedRanges: Array<{ startDate: string; endDate: string }> } }>(
           getBlockedDates,
           { propertyId: property.propertyId, startDate, endDate }
         );
@@ -97,7 +102,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   async function fetchPrice() {
     setLoadingPrice(true);
     try {
-      const data = await GraphQLClient.executePublic<{ calculateBookingPrice: PriceBreakdown }>(
+      const data = await executeGql<{ calculateBookingPrice: PriceBreakdown }>(
         calculateBookingPrice,
         {
           propertyId: property.propertyId,

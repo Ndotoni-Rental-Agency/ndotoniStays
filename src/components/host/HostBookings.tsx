@@ -31,6 +31,9 @@ interface Booking {
   bookingType: string;
   paymentStatus: string;
   guest: BookingGuest | null;
+  guestName: string | null;
+  guestEmail: string | null;
+  guestPhone: string | null;
   pricing: BookingPricing;
   specialRequests: string | null;
   createdAt: string;
@@ -240,9 +243,10 @@ export function HostBookings({ propertyIds }: Props) {
         <div className="space-y-3">
           {bookings.map((booking) => {
             const statusCfg = STATUS_CONFIG[booking.status] || STATUS_CONFIG.PENDING;
-            const guestName = booking.guest
-              ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim()
-              : 'Guest';
+            const guestName = booking.guestName
+              || (booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim() : null)
+              || 'Guest';
+            const guestContact = booking.guestPhone || booking.guest?.whatsappNumber || null;
             const isProcessing = actionLoading === booking.bookingId;
 
             return (
@@ -343,10 +347,10 @@ export function HostBookings({ propertyIds }: Props) {
                 )}
 
                 {/* WhatsApp contact for confirmed */}
-                {booking.status === 'CONFIRMED' && booking.guest?.whatsappNumber && (
+                {booking.status === 'CONFIRMED' && guestContact && (
                   <div className="pt-2 border-t border-ink-100">
                     <a
-                      href={`https://wa.me/${booking.guest.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                      href={`https://wa.me/${guestContact.replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs text-green-700 font-medium hover:underline"

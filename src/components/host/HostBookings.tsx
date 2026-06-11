@@ -55,7 +55,7 @@ const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
 export function HostBookings({ propertyIds }: Props) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<StatusFilter>('PENDING');
+  const [filter, setFilter] = useState<StatusFilter>('ALL');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');

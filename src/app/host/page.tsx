@@ -89,6 +89,9 @@ export default function HostDashboardPage() {
     .filter((p) => p.status === 'AVAILABLE')
     .map((p) => p.propertyId);
 
+  // All property IDs — bookings can exist for any property regardless of current status
+  const allPropertyIds = properties.map((p) => p.propertyId);
+
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-12">
       {/* Header */}
@@ -157,7 +160,7 @@ export default function HostDashboardPage() {
 
       {/* Earnings summary — visible on all tabs */}
       {!loading && properties.length > 0 && (
-        <HostEarnings propertyIds={livePropertyIds} />
+        <HostEarnings propertyIds={allPropertyIds} />
       )}
 
       {/* Properties Tab */}
@@ -258,12 +261,12 @@ export default function HostDashboardPage() {
 
       {/* Bookings Tab */}
       {activeTab === 'bookings' && (
-        <HostBookings propertyIds={livePropertyIds} />
+        <HostBookings propertyIds={allPropertyIds} />
       )}
 
       {/* Reviews Tab */}
       {activeTab === 'reviews' && (
-        <HostReviews propertyIds={livePropertyIds} />
+        <HostReviews propertyIds={allPropertyIds} />
       )}
     </div>
   );

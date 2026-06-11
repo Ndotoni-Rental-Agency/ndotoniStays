@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listPropertyBookings } from '@/graphql/queries';
 import { BanknotesIcon, CalendarIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts';
 
 interface BookingPricing {
   total: number;
@@ -155,7 +164,6 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
     );
   }
 
-  const maxEarnings = Math.max(...monthlyData.map((m) => m.earnings), 1);
   const hasData = monthlyData.some((m) => m.earnings > 0);
 
   return (
@@ -198,36 +206,46 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
         </div>
       </div>
 
-      {/* Bar chart */}
+      {/* Bar chart — recharts */}
       {hasData && (
         <div className="rounded-xl border border-ink-100 p-4">
           <p className="text-xs font-medium text-ink-500 mb-3">Monthly earnings (last 6 months)</p>
-          <div className="flex items-end gap-1.5 sm:gap-3 h-28 sm:h-36">
-            {monthlyData.map((month, i) => {
-              const heightPercent = maxEarnings > 0 ? (month.earnings / maxEarnings) * 100 : 0;
-              const isCurrentMonth = i === monthlyData.length - 1;
-
-              return (
-                <div key={month.month} className="flex-1 flex flex-col items-center gap-1">
-                  {/* Bar */}
-                  <div className="w-full flex items-end justify-center h-full">
-                    <div
-                      className={`w-full max-w-[40px] rounded-t-md transition-all ${
-                        isCurrentMonth ? 'bg-brand-500' : 'bg-brand-200'
-                      }`}
-                      style={{
-                        height: `${Math.max(heightPercent, month.earnings > 0 ? 8 : 2)}%`,
-                      }}
-                      title={`${month.month}: ${formatPriceFull(month.earnings)} (${month.bookings} booking${month.bookings !== 1 ? 's' : ''})`}
-                    />
-                  </div>
-                  {/* Label */}
-                  <span className={`text-[10px] sm:text-xs font-medium ${isCurrentMonth ? 'text-brand-600' : 'text-ink-400'}`}>
-                    {month.month}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="h-44 sm:h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#888' }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: '#aaa' }}
+                  tickFormatter={(v) => {
+                    if (detectedCurrency === 'USD') return `$${v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v}`;
+                    if (v >= 1000000) return `${(v / 1000000).toFixed(1)}M`;
+                    if (v >= 1000) return `${(v / 1000).toFixed(0)}K`;
+                    return String(v);
+                  }}
+                  width={45}
+                />
+                <Tooltip
+                  formatter={(value: number) => [formatPriceFull(value), 'Earned']}
+                  labelStyle={{ fontSize: 12, color: '#666' }}
+                  contentStyle={{ borderRadius: 12, border: '1px solid #eee', fontSize: 13 }}
+                  cursor={{ fill: 'rgba(0,0,0,0.03)' }}
+                />
+                <Bar
+                  dataKey="earnings"
+                  fill="#6366f1"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={40}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

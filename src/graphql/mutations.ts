@@ -2748,8 +2748,8 @@ export const verifyEmail = /* GraphQL */ `mutation VerifyEmail($code: String!, $
   APITypes.VerifyEmailMutation
 >;
 
-export const createStripePaymentIntent = /* GraphQL */ `mutation CreateStripePaymentIntent($bookingId: ID!) {
-  createStripePaymentIntent(bookingId: $bookingId) {
+export const createStripePaymentIntent = /* GraphQL */ `mutation CreateStripePaymentIntent($bookingId: ID!, $currency: String) {
+  createStripePaymentIntent(bookingId: $bookingId, currency: $currency) {
     clientSecret
     paymentIntentId
     amount

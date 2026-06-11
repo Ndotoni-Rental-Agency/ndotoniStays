@@ -31,7 +31,7 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
 
         const data = await executeGql<{ createStripePaymentIntent: any }>(
           createStripePaymentIntent,
-          { bookingId }
+          { bookingId, currency: 'usd' }
         );
 
         setClientSecret(data.createStripePaymentIntent.clientSecret);

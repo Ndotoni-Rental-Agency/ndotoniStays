@@ -84,7 +84,7 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
       const { totalPaid, totalPotential, currency: detCurrency } = calculateEarnings(allBookings, currency);
 
       const upcoming = allBookings.filter(
-        (b) => b.status === 'CONFIRMED' && b.checkInDate >= today
+        (b) => b.status === 'CONFIRMED' && b.checkInDate >= today && b.paymentStatus !== 'REFUNDED'
       ).length;
 
       const paidBookings = allBookings.filter((b) => b.paymentStatus === 'CAPTURED');
@@ -182,7 +182,7 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
         <div className="rounded-xl p-3 border border-ink-100">
           <div className="flex items-center gap-1.5 mb-0.5">
             <CalendarIcon className="h-3.5 w-3.5 text-ink-400" />
-            <span className="text-[10px] sm:text-xs text-ink-500 font-medium">Upcoming</span>
+            <span className="text-[10px] sm:text-xs text-ink-500 font-medium">Upcoming Check-ins</span>
           </div>
           <p className="text-sm sm:text-lg font-bold text-ink-900">{upcomingBookings}</p>
         </div>

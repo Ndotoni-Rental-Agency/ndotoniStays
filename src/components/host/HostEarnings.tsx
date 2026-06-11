@@ -13,6 +13,7 @@ interface BookingPricing {
 interface Booking {
   bookingId: string;
   status: string;
+  paymentStatus: string;
   checkInDate: string;
   checkOutDate: string;
   createdAt: string;
@@ -33,6 +34,7 @@ interface MonthlyData {
 
 export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
   const [totalEarnings, setTotalEarnings] = useState(0);
+  const [potentialEarnings, setPotentialEarnings] = useState(0);
   const [upcomingBookings, setUpcomingBookings] = useState(0);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [detectedCurrency, setDetectedCurrency] = useState(currency);
@@ -67,20 +69,31 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
       }
 
       const today = new Date().toISOString().split('T')[0];
-      const confirmed = allBookings.filter(
-        (b) => b.status === 'CONFIRMED' || b.status === 'COMPLETED'
+
+      // Paid = payment captured (money received)
+      const paid = allBookings.filter(
+        (b) => b.paymentStatus === 'CAPTURED'
       );
 
-      const total = confirmed.reduce((sum, b) => sum + (b.pricing?.total || 0), 0);
+      // Potential = confirmed but not yet paid (authorized or pending payment)
+      const potential = allBookings.filter(
+        (b) => (b.status === 'CONFIRMED' || b.status === 'COMPLETED') && b.paymentStatus !== 'CAPTURED'
+      );
+
+      const totalPaid = paid.reduce((sum, b) => sum + (b.pricing?.total || 0), 0);
+      const totalPotential = potential.reduce((sum, b) => sum + (b.pricing?.total || 0), 0);
       const upcoming = allBookings.filter(
         (b) => b.status === 'CONFIRMED' && b.checkInDate >= today
       ).length;
-      const cur = confirmed[0]?.pricing?.currency || currency;
 
-      // Build last 6 months of data
-      const months = buildMonthlyData(confirmed);
+      const allConfirmed = [...paid, ...potential];
+      const cur = allConfirmed[0]?.pricing?.currency || currency;
 
-      setTotalEarnings(total);
+      // Build last 6 months of data (only paid bookings for the chart)
+      const months = buildMonthlyData(paid);
+
+      setTotalEarnings(totalPaid);
+      setPotentialEarnings(totalPotential);
       setUpcomingBookings(upcoming);
       setDetectedCurrency(cur);
       setMonthlyData(months);
@@ -148,14 +161,23 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
   return (
     <div className="mb-6 space-y-4">
       {/* Stat cards — compact row */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl p-3 border border-brand-200 bg-brand-50">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl p-3 border border-green-200 bg-green-50">
           <div className="flex items-center gap-1.5 mb-0.5">
-            <BanknotesIcon className="h-3.5 w-3.5 text-brand-600" />
-            <span className="text-[10px] sm:text-xs text-brand-600 font-medium">Earnings</span>
+            <BanknotesIcon className="h-3.5 w-3.5 text-green-600" />
+            <span className="text-[10px] sm:text-xs text-green-700 font-medium">Earned</span>
           </div>
-          <p className="text-sm sm:text-lg font-bold text-brand-700 truncate">
+          <p className="text-sm sm:text-lg font-bold text-green-800 truncate">
             {formatPriceFull(totalEarnings)}
+          </p>
+        </div>
+        <div className="rounded-xl p-3 border border-amber-200 bg-amber-50">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <ArrowTrendingUpIcon className="h-3.5 w-3.5 text-amber-600" />
+            <span className="text-[10px] sm:text-xs text-amber-700 font-medium">Potential</span>
+          </div>
+          <p className="text-sm sm:text-lg font-bold text-amber-800 truncate">
+            {formatPriceFull(potentialEarnings)}
           </p>
         </div>
         <div className="rounded-xl p-3 border border-ink-100">
@@ -167,7 +189,7 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
         </div>
         <div className="rounded-xl p-3 border border-ink-100">
           <div className="flex items-center gap-1.5 mb-0.5">
-            <ArrowTrendingUpIcon className="h-3.5 w-3.5 text-ink-400" />
+            <BanknotesIcon className="h-3.5 w-3.5 text-ink-400" />
             <span className="text-[10px] sm:text-xs text-ink-500 font-medium">This Month</span>
           </div>
           <p className="text-sm sm:text-lg font-bold text-ink-900">

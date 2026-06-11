@@ -45,11 +45,19 @@ type StatusFilter = 'PENDING' | 'CONFIRMED' | 'ALL';
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string }> = {
   PENDING: { label: 'Pending', classes: 'bg-amber-100 text-amber-800' },
-  CONFIRMED: { label: 'Confirmed', classes: 'bg-green-100 text-green-800' },
+  CONFIRMED: { label: 'Confirmed', classes: 'bg-blue-100 text-blue-800' },
   CANCELLED: { label: 'Cancelled', classes: 'bg-red-100 text-red-700' },
   DECLINED: { label: 'Declined', classes: 'bg-red-100 text-red-700' },
   COMPLETED: { label: 'Completed', classes: 'bg-ink-100 text-ink-600' },
   NO_SHOW: { label: 'No Show', classes: 'bg-ink-100 text-ink-600' },
+};
+
+const PAYMENT_CONFIG: Record<string, { label: string; classes: string }> = {
+  PENDING: { label: 'Unpaid', classes: 'bg-gray-100 text-gray-600' },
+  AUTHORIZED: { label: 'Authorized', classes: 'bg-blue-50 text-blue-600' },
+  CAPTURED: { label: 'Paid', classes: 'bg-green-100 text-green-700' },
+  REFUNDED: { label: 'Refunded', classes: 'bg-purple-100 text-purple-700' },
+  FAILED: { label: 'Failed', classes: 'bg-red-100 text-red-700' },
 };
 
 export function HostBookings({ propertyIds }: Props) {
@@ -246,6 +254,11 @@ export function HostBookings({ propertyIds }: Props) {
                       <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', statusCfg.classes)}>
                         {statusCfg.label}
                       </span>
+                      {booking.paymentStatus && (
+                        <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', (PAYMENT_CONFIG[booking.paymentStatus] || PAYMENT_CONFIG.PENDING).classes)}>
+                          {(PAYMENT_CONFIG[booking.paymentStatus] || PAYMENT_CONFIG.PENDING).label}
+                        </span>
+                      )}
                     </div>
                     {booking.property?.title && (
                       <p className="text-xs text-ink-400 mt-0.5 truncate">{booking.property.title}</p>

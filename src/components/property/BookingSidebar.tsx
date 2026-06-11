@@ -248,12 +248,20 @@ export function BookingSidebar({
               rangeStart={checkIn}
               rangeEnd={checkOut}
             />
-            {unavailableMessage && (
-              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                <p className="text-sm text-amber-800">{unavailableMessage}</p>
-              </div>
-            )}
           </div>
+
+          {unavailableMessage && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+              <p className="text-xs text-amber-700 flex-1">{unavailableMessage}</p>
+              <button
+                onClick={() => setUnavailableMessage(null)}
+                className="text-amber-400 hover:text-amber-600 text-sm leading-none"
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            </div>
+          )}
 
           <div>
             <label className="text-xs font-medium text-ink-500 block mb-1">

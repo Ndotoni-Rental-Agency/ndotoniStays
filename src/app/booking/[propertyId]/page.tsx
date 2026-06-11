@@ -9,9 +9,11 @@ import { createBooking, initiatePayment } from '@/graphql/mutations';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights, getCdnUrl } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
-import { BoltIcon } from '@heroicons/react/24/solid';
+import { BoltIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 
+type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
 type BookingStep = 'details' | 'confirmation' | 'processing' | 'confirmed' | 'failed';
 
@@ -33,6 +35,7 @@ export default function BookingPage() {
   const [step, setStep] = useState<BookingStep>('details');
   const [paymentOption, setPaymentOption] = useState<PaymentOption>('full');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mobile_money');
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
@@ -418,9 +421,9 @@ export default function BookingPage() {
           {/* Payment section — only for confirmed/instant bookings */}
           {bookingData?.status === 'CONFIRMED' && (
             <>
-              {/* Payment option */}
+              {/* Payment option (full vs deposit) */}
               <div className="rounded-2xl border border-ink-100 p-5">
-                <h3 className="font-semibold text-ink-900 mb-3">How would you like to pay?</h3>
+                <h3 className="font-semibold text-ink-900 mb-3">How much would you like to pay?</h3>
                 <div className="space-y-2">
                   <label
                     className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -456,61 +459,123 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* M-Pesa number */}
+              {/* Payment method selector */}
               <div className="rounded-2xl border border-ink-100 p-5">
-                <h3 className="font-semibold text-ink-900 mb-1">Pay with Mobile Money</h3>
-                <p className="text-xs text-ink-500 mb-3">M-Pesa, Airtel Money, Tigo Pesa, or Halotel</p>
-                <input
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => {
-                    let v = e.target.value.replace(/\D/g, '');
-                    if (v.startsWith('0')) v = '255' + v.substring(1);
-                    else if (v.startsWith('7') || v.startsWith('6')) v = '255' + v;
-                    setPhoneNumber(v.slice(0, 12));
-                  }}
-                  placeholder="0712 345 678"
-                  className="input"
-                />
-                {phoneNumber && !/^255[67]\d{8}$/.test(phoneNumber) && (
-                  <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
-                )}
+                <h3 className="font-semibold text-ink-900 mb-3">Choose payment method</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setPaymentMethod('mobile_money')}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${
+                      paymentMethod === 'mobile_money'
+                        ? 'border-brand-500 bg-brand-50 shadow-sm'
+                        : 'border-ink-100 hover:border-ink-200'
+                    }`}
+                  >
+                    <span className="text-2xl block mb-1">📱</span>
+                    <span className="text-sm font-medium text-ink-900">Mobile Money</span>
+                    <span className="text-xs text-ink-500 block">M-Pesa, Airtel, Tigo</span>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod('card')}
+                    className={`p-4 rounded-xl border-2 text-center transition-all ${
+                      paymentMethod === 'card'
+                        ? 'border-brand-500 bg-brand-50 shadow-sm'
+                        : 'border-ink-100 hover:border-ink-200'
+                    }`}
+                  >
+                    <span className="text-2xl block mb-1">💳</span>
+                    <span className="text-sm font-medium text-ink-900">Card</span>
+                    <span className="text-xs text-ink-500 block">Visa, Apple Pay</span>
+                  </button>
+                </div>
               </div>
+
+              {/* Mobile Money input */}
+              {paymentMethod === 'mobile_money' && (
+                <>
+                  <div className="rounded-2xl border border-ink-100 p-5">
+                    <h3 className="font-semibold text-ink-900 mb-1">Mobile Money Number</h3>
+                    <p className="text-xs text-ink-500 mb-3">We&apos;ll send a payment prompt to this number</p>
+                    <input
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        let v = e.target.value.replace(/\D/g, '');
+                        if (v.startsWith('0')) v = '255' + v.substring(1);
+                        else if (v.startsWith('7') || v.startsWith('6')) v = '255' + v;
+                        setPhoneNumber(v.slice(0, 12));
+                      }}
+                      placeholder="0712 345 678"
+                      className="input"
+                    />
+                    {phoneNumber && !/^255[67]\d{8}$/.test(phoneNumber) && (
+                      <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={handlePay}
+                    disabled={(!phoneNumber || !/^255[67]\d{8}$/.test(phoneNumber)) || isProcessing}
+                    className="btn-primary w-full text-base py-4 flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? (
+                      <><span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Sending...</>
+                    ) : (
+                      <>📱 Send {formatPrice(payNowAmount, property.currency)} payment request</>
+                    )}
+                  </button>
+                </>
+              )}
+
+              {/* Card / Apple Pay / Google Pay */}
+              {paymentMethod === 'card' && bookingId && (
+                <div className="rounded-2xl border border-ink-100 p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <SparklesIcon className="h-4 w-4 text-brand-500" />
+                    <h3 className="font-semibold text-ink-900">Secure Card Payment</h3>
+                  </div>
+                  <StripePaymentForm
+                    bookingId={bookingId}
+                    amount={payNowAmount}
+                    currency={property.currency}
+                    onSuccess={() => setStep('confirmed')}
+                    onError={(msg) => setError(msg)}
+                  />
+                </div>
+              )}
 
               {/* Error */}
               {error && (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+                <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 animate-shake">
                   {error}
                 </div>
               )}
 
-              {/* Pay button */}
-              <button
-                onClick={handlePay}
-                disabled={(!phoneNumber || !/^255[67]\d{8}$/.test(phoneNumber)) || isProcessing}
-                className="btn-primary w-full text-base py-4"
-              >
-                {isProcessing ? 'Sending...' : `Send ${formatPrice(payNowAmount, property.currency)} payment request`}
-              </button>
-
               <p className="text-center text-xs text-ink-400">
-                You&apos;ll receive a payment prompt on your phone. Confirm to complete.
+                🔒 Payments are secure and encrypted. Your dates are locked once payment completes.
               </p>
             </>
           )}
 
           {/* For pending bookings — inform guest to wait */}
           {bookingData?.status === 'PENDING' && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
-              <p className="text-sm text-amber-800 font-medium mb-1">Awaiting host confirmation</p>
-              <p className="text-xs text-amber-600">
-                The host has 1 hour to confirm. Once confirmed, you&apos;ll receive a notification to complete payment via WhatsApp and email.
+            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 text-center">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-3">
+                <span className="text-xl">⏳</span>
+              </div>
+              <p className="text-sm text-amber-800 font-semibold mb-2">Almost there! Awaiting host</p>
+              <p className="text-xs text-amber-700 leading-relaxed">
+                The host will confirm availability within 1 hour. We&apos;ll notify you via WhatsApp and email when it&apos;s time to pay.
               </p>
+              <div className="mt-4 flex items-center justify-center gap-1 text-xs text-amber-600">
+                <span className="inline-block h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Waiting for response...</span>
+              </div>
             </div>
           )}
 
-          <button onClick={() => router.push('/')} className="text-sm text-ink-500 hover:text-ink-700 text-center">
-            ← Back to browsing
+          <button onClick={() => router.push('/')} className="text-sm text-ink-500 hover:text-ink-700 text-center transition-colors">
+            ← Continue browsing
           </button>
         </div>
       </div>

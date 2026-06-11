@@ -420,82 +420,46 @@ export default function BookingPage() {
 
           {/* Payment section — only for confirmed/instant bookings */}
           {bookingData?.status === 'CONFIRMED' && (
-            <>
-              {/* Payment option (full vs deposit) */}
-              <div className="rounded-2xl border border-ink-100 p-5">
-                <h3 className="font-semibold text-ink-900 mb-3">How much would you like to pay?</h3>
-                <div className="space-y-2">
-                  <label
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentOption === 'full' ? 'border-brand-500 bg-brand-50' : 'border-ink-100 hover:border-ink-200'
-                    }`}
-                  >
-                    <input type="radio" name="payment" checked={paymentOption === 'full'} onChange={() => setPaymentOption('full')} className="sr-only" />
-                    <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentOption === 'full' ? 'border-brand-600' : 'border-ink-300'}`}>
-                      {paymentOption === 'full' && <div className="h-2.5 w-2.5 rounded-full bg-brand-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-ink-900">Pay in full</p>
-                      <p className="text-xs text-ink-500">Pay {formatPrice(total, property.currency)} now</p>
-                    </div>
-                  </label>
-
-                  <label
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentOption === 'deposit' ? 'border-brand-500 bg-brand-50' : 'border-ink-100 hover:border-ink-200'
-                    }`}
-                  >
-                    <input type="radio" name="payment" checked={paymentOption === 'deposit'} onChange={() => setPaymentOption('deposit')} className="sr-only" />
-                    <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentOption === 'deposit' ? 'border-brand-600' : 'border-ink-300'}`}>
-                      {paymentOption === 'deposit' && <div className="h-2.5 w-2.5 rounded-full bg-brand-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-ink-900">Pay deposit ({DEPOSIT_PERCENTAGE}%)</p>
-                      <p className="text-xs text-ink-500">
-                        Pay {formatPrice(depositAmount, property.currency)} now, {formatPrice(balanceDue, property.currency)} at check-in
-                      </p>
-                    </div>
-                  </label>
-                </div>
+            <div className="mt-2">
+              {/* Amount badge */}
+              <div className="text-center mb-6">
+                <p className="text-2xl font-bold text-ink-900">{formatPrice(total, property.currency)}</p>
+                <p className="text-xs text-ink-500 mt-1">Pay now to secure your dates</p>
               </div>
 
-              {/* Payment method selector */}
-              <div className="rounded-2xl border border-ink-100 p-5">
-                <h3 className="font-semibold text-ink-900 mb-3">Choose payment method</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setPaymentMethod('mobile_money')}
-                    className={`p-4 rounded-xl border-2 text-center transition-all ${
-                      paymentMethod === 'mobile_money'
-                        ? 'border-brand-500 bg-brand-50 shadow-sm'
-                        : 'border-ink-100 hover:border-ink-200'
-                    }`}
-                  >
-                    <span className="text-2xl block mb-1">📱</span>
-                    <span className="text-sm font-medium text-ink-900">Mobile Money</span>
-                    <span className="text-xs text-ink-500 block">M-Pesa, Airtel, Tigo</span>
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-4 rounded-xl border-2 text-center transition-all ${
-                      paymentMethod === 'card'
-                        ? 'border-brand-500 bg-brand-50 shadow-sm'
-                        : 'border-ink-100 hover:border-ink-200'
-                    }`}
-                  >
-                    <span className="text-2xl block mb-1">💳</span>
-                    <span className="text-sm font-medium text-ink-900">Card</span>
-                    <span className="text-xs text-ink-500 block">Visa, Apple Pay</span>
-                  </button>
-                </div>
+              {/* Payment method — big clear choice */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button
+                  onClick={() => setPaymentMethod('mobile_money')}
+                  className={`p-5 rounded-2xl border-2 text-center transition-all ${
+                    paymentMethod === 'mobile_money'
+                      ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
+                      : 'border-ink-100 hover:border-ink-200'
+                  }`}
+                >
+                  <span className="text-3xl block mb-2">📱</span>
+                  <span className="text-sm font-semibold text-ink-900 block">M-Pesa</span>
+                  <span className="text-xs text-ink-500">Airtel · Tigo</span>
+                </button>
+                <button
+                  onClick={() => setPaymentMethod('card')}
+                  className={`p-5 rounded-2xl border-2 text-center transition-all ${
+                    paymentMethod === 'card'
+                      ? 'border-brand-500 bg-brand-50 shadow-md shadow-brand-500/10'
+                      : 'border-ink-100 hover:border-ink-200'
+                  }`}
+                >
+                  <span className="text-3xl block mb-2">💳</span>
+                  <span className="text-sm font-semibold text-ink-900 block">Card</span>
+                  <span className="text-xs text-ink-500">Visa · Apple Pay</span>
+                </button>
               </div>
 
-              {/* Mobile Money input */}
+              {/* Mobile Money */}
               {paymentMethod === 'mobile_money' && (
-                <>
-                  <div className="rounded-2xl border border-ink-100 p-5">
-                    <h3 className="font-semibold text-ink-900 mb-1">Mobile Money Number</h3>
-                    <p className="text-xs text-ink-500 mb-3">We&apos;ll send a payment prompt to this number</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-ink-500 mb-1.5">Phone number</label>
                     <input
                       type="tel"
                       value={phoneNumber}
@@ -506,7 +470,8 @@ export default function BookingPage() {
                         setPhoneNumber(v.slice(0, 12));
                       }}
                       placeholder="0712 345 678"
-                      className="input"
+                      className="input text-lg tracking-wide"
+                      autoFocus
                     />
                     {phoneNumber && !/^255[67]\d{8}$/.test(phoneNumber) && (
                       <p className="text-xs text-red-500 mt-1">Enter a valid Tanzanian number</p>
@@ -516,45 +481,38 @@ export default function BookingPage() {
                   <button
                     onClick={handlePay}
                     disabled={(!phoneNumber || !/^255[67]\d{8}$/.test(phoneNumber)) || isProcessing}
-                    className="btn-primary w-full text-base py-4 flex items-center justify-center gap-2"
+                    className="btn-primary w-full text-base py-4"
                   >
-                    {isProcessing ? (
-                      <><span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" /> Sending...</>
-                    ) : (
-                      <>📱 Send {formatPrice(payNowAmount, property.currency)} payment request</>
-                    )}
+                    {isProcessing ? 'Sending...' : /^255[67]\d{8}$/.test(phoneNumber)
+                      ? `Send ${formatPrice(total, property.currency)} request`
+                      : 'Enter number to continue'
+                    }
                   </button>
-                </>
+                </div>
               )}
 
-              {/* Card / Apple Pay / Google Pay */}
+              {/* Card / Apple Pay */}
               {paymentMethod === 'card' && bookingId && (
-                <div className="rounded-2xl border border-ink-100 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <SparklesIcon className="h-4 w-4 text-brand-500" />
-                    <h3 className="font-semibold text-ink-900">Secure Card Payment</h3>
-                  </div>
-                  <StripePaymentForm
-                    bookingId={bookingId}
-                    amount={payNowAmount}
-                    currency={property.currency}
-                    onSuccess={() => setStep('confirmed')}
-                    onError={(msg) => setError(msg)}
-                  />
-                </div>
+                <StripePaymentForm
+                  bookingId={bookingId}
+                  amount={total}
+                  currency={property.currency}
+                  onSuccess={() => setStep('confirmed')}
+                  onError={(msg) => setError(msg)}
+                />
               )}
 
               {/* Error */}
               {error && (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 animate-shake">
+                <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
 
-              <p className="text-center text-xs text-ink-400">
-                🔒 Payments are secure and encrypted. Your dates are locked once payment completes.
+              <p className="text-center text-xs text-ink-300 mt-6">
+                🔒 Secure · Encrypted · ndotoni
               </p>
-            </>
+            </div>
           )}
 
           {/* For pending bookings — inform guest to wait */}

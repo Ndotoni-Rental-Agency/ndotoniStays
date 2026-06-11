@@ -272,7 +272,7 @@ export default function MyBookingsPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {filtered.map((booking) => {
             const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
             const canReview = activeTab === 'past' && booking.status === 'COMPLETED';
@@ -281,10 +281,10 @@ export default function MyBookingsPage() {
             const days = daysUntil(booking.checkInDate);
 
             return (
-              <div key={booking.bookingId} className="rounded-2xl border border-ink-100 overflow-hidden hover:shadow-md transition-shadow">
+              <div key={booking.bookingId} className="rounded-2xl border border-ink-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                 {/* Property image — large, clickable */}
                 <Link href={`/property/${booking.propertyId}`} className="block relative">
-                  <div className="relative h-48 sm:h-56 bg-ink-100">
+                  <div className="relative aspect-[16/10] bg-ink-100">
                     {propertyImage ? (
                       <Image
                         src={getCdnUrl(propertyImage)}
@@ -323,44 +323,42 @@ export default function MyBookingsPage() {
                 </Link>
 
                 {/* Booking details */}
-                <div className="p-4 sm:p-5">
+                <div className="p-4 sm:p-5 flex-1 flex flex-col">
                   <Link href={`/property/${booking.propertyId}`}>
-                    <h3 className="text-base sm:text-lg font-semibold text-ink-900 hover:text-brand-600 transition-colors">
+                    <h3 className="text-sm sm:text-base font-semibold text-ink-900 hover:text-brand-600 transition-colors line-clamp-1">
                       {booking.property?.title || 'Property'}
                     </h3>
                   </Link>
 
-                  <div className="flex items-center gap-3 mt-1.5 text-sm text-ink-500">
-                    {booking.property && (
-                      <span className="flex items-center gap-1">
-                        <MapPinIcon className="h-3.5 w-3.5" />
-                        {booking.property.district}, {booking.property.region}
-                      </span>
-                    )}
-                  </div>
+                  {booking.property && (
+                    <p className="flex items-center gap-1 mt-1 text-xs text-ink-500">
+                      <MapPinIcon className="h-3 w-3" />
+                      {booking.property.district}, {booking.property.region}
+                    </p>
+                  )}
 
                   {/* Stats row */}
-                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-ink-100">
-                    <div className="flex items-center gap-1.5 text-sm text-ink-600">
-                      <CalendarDaysIcon className="h-4 w-4 text-ink-400" />
-                      <span>{booking.numberOfNights} night{booking.numberOfNights > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-sm text-ink-600">
-                      <UserGroupIcon className="h-4 w-4 text-ink-400" />
-                      <span>{booking.numberOfGuests} guest{booking.numberOfGuests > 1 ? 's' : ''}</span>
-                    </div>
-                    <div className="ml-auto text-base font-bold text-ink-900">
+                  <div className="flex items-center gap-3 mt-auto pt-3 text-xs text-ink-500">
+                    <span className="flex items-center gap-1">
+                      <CalendarDaysIcon className="h-3.5 w-3.5" />
+                      {booking.numberOfNights} night{booking.numberOfNights > 1 ? 's' : ''}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <UserGroupIcon className="h-3.5 w-3.5" />
+                      {booking.numberOfGuests} guest{booking.numberOfGuests > 1 ? 's' : ''}
+                    </span>
+                    <span className="ml-auto text-sm font-bold text-ink-900">
                       {formatPrice(booking.pricing.total, booking.pricing.currency)}
-                    </div>
+                    </span>
                   </div>
                 </div>
 
                 {/* Review CTA for completed bookings */}
                 {canReview && !isReviewing && (
-                  <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
                     <button
                       onClick={() => setReviewingBooking(booking.bookingId)}
-                      className="w-full py-3 rounded-xl border-2 border-ink-900 text-sm font-semibold text-ink-900 hover:bg-ink-900 hover:text-white transition-colors touch-manipulation"
+                      className="w-full py-2.5 rounded-xl border-2 border-ink-800 text-xs font-semibold text-ink-800 hover:bg-ink-800 hover:text-white transition-colors touch-manipulation"
                     >
                       Write a review
                     </button>

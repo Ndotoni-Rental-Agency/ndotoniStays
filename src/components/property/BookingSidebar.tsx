@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
 import { formatPrice, calculateNights, findAvailableRanges } from "@/lib/utils";
 import { GraphQLClient } from "@/lib/graphql-client";
-import { calculateBookingPrice, getBlockedDates } from "@/graphql/queries";
+import { calculateBookingPrice, getBlockedDates, checkAvailability } from "@/graphql/queries";
 import { useAuth } from "@/contexts/AuthContext";
 import CalendarDatePicker from "@/components/ui/CalendarDatePicker";
 
@@ -202,10 +202,37 @@ export function BookingSidebar({
     }
   }
 
-  function handleBook() {
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+
+  async function handleBook() {
     if (!checkIn || !checkOut) return;
 
-    // Navigate to booking page with dates and guests (auth handled there)
+    setBookingInProgress(true);
+    setAvailabilityError(null);
+
+    try {
+      // Check real availability (including booked dates) before navigating
+      const data = await executeGql<{
+        checkAvailability: { available: boolean; unavailableDates: string[] };
+      }>(checkAvailability, {
+        propertyId: property.propertyId,
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+      });
+
+      if (!data.checkAvailability?.available) {
+        const dates = data.checkAvailability?.unavailableDates || [];
+        setAvailabilityError(
+          `Some dates are no longer available${dates.length > 0 ? ` (${dates.slice(0, 3).join(', ')}${dates.length > 3 ? '...' : ''})` : ''}. Please pick different dates.`
+        );
+        setBookingInProgress(false);
+        return;
+      }
+    } catch {
+      // If check fails, let them proceed — backend will catch it
+    }
+
+    // Navigate to booking page
     const params = new URLSearchParams({
       checkIn,
       checkOut,
@@ -319,6 +346,13 @@ export function BookingSidebar({
               <span>Total</span>
               <span>{formatPrice(pricing.total, pricing.currency)}</span>
             </div>
+          </div>
+        )}
+
+        {/* Availability error */}
+        {availabilityError && (
+          <div className="mt-3 rounded-xl bg-red-50 border border-red-200 p-3">
+            <p className="text-sm text-red-700">{availabilityError}</p>
           </div>
         )}
 

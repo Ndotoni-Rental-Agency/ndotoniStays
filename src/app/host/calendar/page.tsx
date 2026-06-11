@@ -9,6 +9,9 @@ interface Property {
   propertyId: string;
   title: string;
   status: string;
+  district: string;
+  nightlyRate: number;
+  currency: string;
 }
 
 export default function HostCalendarPage() {
@@ -67,13 +70,16 @@ export default function HostCalendarPage() {
           <select
             value={selectedProperty}
             onChange={(e) => setSelectedProperty(e.target.value)}
-            className="input text-sm py-2 w-auto max-w-[200px] sm:max-w-xs"
+            className="input text-sm py-2 w-auto max-w-[240px] sm:max-w-xs"
           >
-            {properties.map((p) => (
-              <option key={p.propertyId} value={p.propertyId}>
-                {p.title}
-              </option>
-            ))}
+            {properties.map((p) => {
+              const price = p.currency === 'USD' ? `$${p.nightlyRate?.toLocaleString()}` : `TZS ${p.nightlyRate?.toLocaleString()}`;
+              return (
+                <option key={p.propertyId} value={p.propertyId}>
+                  {p.title} · {p.district} · {price}/n
+                </option>
+              );
+            })}
           </select>
         )}
       </div>

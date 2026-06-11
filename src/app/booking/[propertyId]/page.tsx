@@ -485,7 +485,7 @@ export default function BookingPage() {
                 disabled={(!phoneNumber || !/^255[67]\d{8}$/.test(phoneNumber)) || isProcessing}
                 className="btn-primary w-full text-base py-4"
               >
-                {isProcessing ? 'Processing...' : `Pay ${formatPrice(payNowAmount, property.currency)}`}
+                {isProcessing ? 'Sending...' : `Send ${formatPrice(payNowAmount, property.currency)} payment request`}
               </button>
 
               <p className="text-center text-xs text-ink-400">

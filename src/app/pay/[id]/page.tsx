@@ -349,11 +349,11 @@ export default function PayBookingPage() {
           disabled={!isValidPhone}
           className="btn-primary w-full text-base py-4"
         >
-          Pay {formatPrice(payNowAmount, currency)}
+          Send {formatPrice(payNowAmount, currency)} payment request
         </button>
 
         <p className="text-center text-xs text-ink-400">
-          A payment prompt will be sent to the phone above. Share this link with anyone paying on your behalf.
+          You&apos;ll receive a payment prompt on your phone. Confirm on your phone to complete.
         </p>
       </div>
     </div>

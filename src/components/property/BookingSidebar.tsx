@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { BoltIcon } from '@heroicons/react/24/solid';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
-import { calculateBookingPrice } from '@/graphql/queries';
+import { calculateBookingPrice, getBlockedDates } from '@/graphql/queries';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 interface Props {
@@ -43,6 +43,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   const [pricing, setPricing] = useState<PriceBreakdown | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(false);
   const [bookingInProgress, setBookingInProgress] = useState(false);
+  const [blockedDates, setBlockedDates] = useState<Set<string>>(new Set());
 
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const minStay = property.minimumStay || 1;
@@ -52,6 +53,36 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
+
+  // Fetch blocked dates on mount
+  useEffect(() => {
+    async function fetchBlockedDates() {
+      try {
+        const now = new Date();
+        const startDate = now.toISOString().split('T')[0];
+        const endDate = new Date(now.setMonth(now.getMonth() + 6)).toISOString().split('T')[0];
+        const data = await GraphQLClient.executePublic<{ getBlockedDates: { blockedRanges: Array<{ startDate: string; endDate: string }> } }>(
+          getBlockedDates,
+          { propertyId: property.propertyId, startDate, endDate }
+        );
+        const blocked = new Set<string>();
+        for (const range of data.getBlockedDates?.blockedRanges || []) {
+          // Expand each range into individual dates
+          const start = new Date(range.startDate);
+          const end = new Date(range.endDate);
+          const current = new Date(start);
+          while (current <= end) {
+            blocked.add(current.toISOString().split('T')[0]);
+            current.setDate(current.getDate() + 1);
+          }
+        }
+        setBlockedDates(blocked);
+      } catch {
+        // Non-critical — don't block the UI
+      }
+    }
+    fetchBlockedDates();
+  }, [property.propertyId]);
 
   // Fetch price when dates/guests change
   useEffect(() => {

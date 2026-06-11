@@ -70,6 +70,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
           getBlockedDates,
           { propertyId: property.propertyId, startDate, endDate }
         );
+        console.log("data returned", data);
         const blocked = new Set<string>();
         for (const range of data.getBlockedDates?.blockedRanges || []) {
           // Expand each range into individual dates

@@ -165,6 +165,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
               min={minDate}
               label="Check-in"
               placeholder="Add date"
+              blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
             />
@@ -174,6 +175,7 @@ export function BookingSidebar({ property, initialCheckIn, initialCheckOut }: Pr
               min={checkIn || minDate}
               label="Check-out"
               placeholder="Add date"
+              blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
             />

@@ -203,14 +203,18 @@ export default function MyBookingsPage() {
   const today = new Date().toISOString().split('T')[0];
 
   const filtered = bookings.filter((b) => {
-    if (activeTab === 'upcoming') {
-      return (b.status === 'CONFIRMED' || b.status === 'PENDING') && b.checkInDate >= today;
+    const isPast = b.checkOutDate < today;
+    const isCancelled = b.status === 'CANCELLED' || b.status === 'DECLINED';
+
+    if (activeTab === 'cancelled') {
+      return isCancelled;
     }
     if (activeTab === 'past') {
-      return b.status === 'COMPLETED'
-        || (b.status === 'CONFIRMED' && b.checkOutDate < today);
+      // Past = checkout has passed AND not cancelled
+      return !isCancelled && isPast;
     }
-    return b.status === 'CANCELLED' || b.status === 'DECLINED';
+    // Upcoming = checkout hasn't passed yet AND not cancelled
+    return !isCancelled && !isPast;
   });
 
   if (authLoading) {

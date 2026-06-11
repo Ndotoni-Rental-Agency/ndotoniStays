@@ -15,9 +15,7 @@ export function PropertyGallery({ images, title }: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [touchDelta, setTouchDelta] = useState(0);
-  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -45,50 +43,77 @@ export function PropertyGallery({ images, title }: Props) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxOpen, goNext, goPrev]);
 
-  // Touch swipe handling
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.touches[0].clientX);
-    setTouchStartY(e.touches[0].clientY);
-    setTouchDelta(0);
-    setIsHorizontalSwipe(false);
-  };
+  // Touch swipe handling — use refs for imperative event listeners (passive: false needed for preventDefault)
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchDeltaRef = useRef(0);
+  const isHorizontalRef = useRef(false);
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
-    const deltaX = e.touches[0].clientX - touchStart;
-    const deltaY = e.touches[0].clientY - (touchStartY ?? 0);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-    // Determine swipe direction on first significant movement
-    if (!isHorizontalSwipe && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
-
-    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY)) {
-      setIsHorizontalSwipe(true);
+    function onTouchStart(e: TouchEvent) {
+      touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      touchDeltaRef.current = 0;
+      isHorizontalRef.current = false;
+      setTouchDelta(0);
+      setTouchStart(e.touches[0].clientX);
     }
 
-    // Only handle horizontal swipes — let vertical ones scroll the page
-    if (!isHorizontalSwipe && Math.abs(deltaY) > Math.abs(deltaX)) return;
+    function onTouchMove(e: TouchEvent) {
+      if (!touchStartRef.current) return;
+      const deltaX = e.touches[0].clientX - touchStartRef.current.x;
+      const deltaY = e.touches[0].clientY - touchStartRef.current.y;
 
-    // Prevent page scroll during horizontal swipe
-    e.preventDefault();
+      // Wait for a clear direction before committing
+      if (!isHorizontalRef.current && Math.abs(deltaX) < 8 && Math.abs(deltaY) < 8) return;
 
-    // Rubber-band effect at edges
-    const clamped =
-      (currentIndex === 0 && deltaX > 0) ? deltaX * 0.3 :
-      (currentIndex === imageCount - 1 && deltaX < 0) ? deltaX * 0.3 :
-      deltaX;
-    setTouchDelta(clamped);
-  };
+      // Lock direction on first meaningful move
+      if (!isHorizontalRef.current) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          isHorizontalRef.current = true;
+        } else {
+          // Vertical swipe — bail out, let page scroll
+          touchStartRef.current = null;
+          return;
+        }
+      }
 
-  const handleTouchEnd = () => {
-    if (Math.abs(touchDelta) > 50) {
-      if (touchDelta > 0 && currentIndex > 0) goPrev();
-      else if (touchDelta < 0 && currentIndex < imageCount - 1) goNext();
+      // Prevent vertical scroll during horizontal swipe
+      e.preventDefault();
+
+      // Rubber-band at edges
+      const clamped =
+        (currentIndex === 0 && deltaX > 0) ? deltaX * 0.3 :
+        (currentIndex === imageCount - 1 && deltaX < 0) ? deltaX * 0.3 :
+        deltaX;
+      touchDeltaRef.current = clamped;
+      setTouchDelta(clamped);
     }
-    setTouchStart(null);
-    setTouchStartY(null);
-    setTouchDelta(0);
-    setIsHorizontalSwipe(false);
-  };
+
+    function onTouchEnd() {
+      const delta = touchDeltaRef.current;
+      if (Math.abs(delta) > 50) {
+        if (delta > 0 && currentIndex > 0) goPrev();
+        else if (delta < 0 && currentIndex < imageCount - 1) goNext();
+      }
+      touchStartRef.current = null;
+      touchDeltaRef.current = 0;
+      isHorizontalRef.current = false;
+      setTouchStart(null);
+      setTouchDelta(0);
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [currentIndex, imageCount, goPrev, goNext]);
 
   return (
     <>
@@ -213,10 +238,7 @@ export function PropertyGallery({ images, title }: Props) {
       <div
         ref={containerRef}
         className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
-        style={{ touchAction: 'pan-y pinch-zoom', overscrollBehavior: 'none' }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        style={{ overscrollBehavior: 'none' }}
       >
         <div className="absolute inset-0 overflow-hidden">
           <div

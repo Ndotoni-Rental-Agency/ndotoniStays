@@ -211,19 +211,19 @@ export default function EditPropertyPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-12 pb-24 sm:pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link
             href="/host"
-            className="p-2 hover:bg-ink-50 rounded-lg transition"
+            className="p-2 -ml-2 hover:bg-ink-50 rounded-lg transition shrink-0"
             aria-label="Back to properties"
           >
             <ArrowLeftIcon className="h-5 w-5 text-ink-500" />
           </Link>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-ink-900 truncate max-w-[300px] sm:max-w-none">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-ink-900 truncate">
               {form.title || 'Untitled Property'}
             </h1>
             <div className="flex items-center gap-2 mt-0.5">
@@ -237,7 +237,7 @@ export default function EditPropertyPage() {
                   Draft
                 </span>
               )}
-              <span className="text-xs text-ink-400">ID: {propertyId.slice(0, 8)}</span>
+              <span className="text-xs text-ink-400 hidden sm:inline">ID: {propertyId.slice(0, 8)}</span>
             </div>
           </div>
         </div>
@@ -245,16 +245,19 @@ export default function EditPropertyPage() {
           <button
             onClick={handlePublish}
             disabled={publishing}
-            className="btn-primary text-sm"
+            className="btn-primary text-sm shrink-0"
           >
             {publishing ? 'Publishing...' : 'Publish'}
           </button>
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-ink-100 mb-8">
-        <nav className="flex gap-1 -mb-px overflow-x-auto" aria-label="Property sections">
+      {/* Tabs — scrollable on mobile, no visible scrollbar */}
+      <div className="border-b border-ink-100 mb-6 sm:mb-8">
+        <nav
+          className="flex -mb-px overflow-x-auto no-scrollbar"
+          aria-label="Property sections"
+        >
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -262,14 +265,14 @@ export default function EditPropertyPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap min-w-0 ${
                   isActive
                     ? 'border-brand-600 text-brand-700'
                     : 'border-transparent text-ink-500 hover:text-ink-700 hover:border-ink-200'
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                {tab.label}
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{tab.label}</span>
               </button>
             );
           })}

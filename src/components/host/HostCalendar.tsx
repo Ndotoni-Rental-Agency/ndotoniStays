@@ -95,7 +95,6 @@ export function HostCalendar({ propertyId }: Props) {
         await GraphQLClient.executeAuthenticated(blockDates, {
           input: { propertyId, startDate, endDate, reason: reason || undefined },
         });
-        // Update local state
         setBlockedDates((prev) => {
           const next = new Set(prev);
           for (const d of sortedDates) next.add(d);
@@ -133,7 +132,7 @@ export function HostCalendar({ propertyId }: Props) {
 
     const days = [];
     for (let i = 0; i < startingDay; i++) {
-      days.push(<div key={`e-${monthOffset}-${i}`} className="h-10" />);
+      days.push(<div key={`e-${monthOffset}-${i}`} className="aspect-square" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -152,7 +151,8 @@ export function HostCalendar({ propertyId }: Props) {
           disabled={isPast}
           onClick={() => handleDateClick(dateStr)}
           className={cn(
-            'h-10 w-full flex items-center justify-center text-sm rounded-lg transition-all relative',
+            // Min 44px touch target via aspect-square + proper sizing
+            'aspect-square w-full flex items-center justify-center text-sm rounded-lg transition-all touch-manipulation active:scale-95',
             isPast && 'text-ink-200 cursor-not-allowed',
             !isPast && !isBlocked && !isSelected && 'hover:bg-ink-50 text-ink-800',
             isBlocked && !isSelected && 'bg-red-100 text-red-700 font-medium',
@@ -171,25 +171,25 @@ export function HostCalendar({ propertyId }: Props) {
         <h3 className="text-sm font-semibold text-ink-800 mb-3 text-center">
           {display.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </h3>
-        <div className="grid grid-cols-7 gap-1 mb-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) => (
-            <div key={d} className="text-xs font-medium text-ink-400 text-center py-1">
+            <div key={d} className="text-[11px] sm:text-xs font-medium text-ink-400 text-center py-1">
               {d}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">{days}</div>
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">{days}</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6 pb-24 sm:pb-0">
       {/* Instructions */}
-      <div className="bg-ink-50 rounded-xl p-4">
+      <div className="bg-ink-50 rounded-xl p-3 sm:p-4">
         <h3 className="text-sm font-semibold text-ink-800 mb-1">Manage your availability</h3>
-        <p className="text-xs text-ink-500">
-          Click dates to block or unblock them. Blocked dates won't accept bookings.
+        <p className="text-xs text-ink-500 leading-relaxed">
+          Tap dates to block or unblock them. Blocked dates won&apos;t accept bookings.
           Select multiple dates, then save.
         </p>
       </div>
@@ -199,7 +199,8 @@ export function HostCalendar({ propertyId }: Props) {
         <button
           type="button"
           onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-          className="p-2 hover:bg-ink-50 rounded-lg transition"
+          className="p-3 -ml-2 hover:bg-ink-50 rounded-lg transition touch-manipulation"
+          aria-label="Previous month"
         >
           <svg className="w-5 h-5 text-ink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -208,14 +209,15 @@ export function HostCalendar({ propertyId }: Props) {
         <button
           type="button"
           onClick={() => setCurrentMonth(new Date())}
-          className="text-sm text-brand-600 font-medium hover:underline"
+          className="text-sm text-brand-600 font-medium hover:underline px-3 py-2 touch-manipulation"
         >
           Today
         </button>
         <button
           type="button"
           onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-          className="p-2 hover:bg-ink-50 rounded-lg transition"
+          className="p-3 -mr-2 hover:bg-ink-50 rounded-lg transition touch-manipulation"
+          aria-label="Next month"
         >
           <svg className="w-5 h-5 text-ink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -223,27 +225,27 @@ export function HostCalendar({ propertyId }: Props) {
         </button>
       </div>
 
-      {/* Two-month view */}
+      {/* Calendar months — single column on mobile, two on desktop */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-8 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
           <div className="animate-pulse space-y-3">
             <div className="h-4 bg-ink-100 rounded w-1/3 mx-auto" />
             <div className="h-64 bg-ink-50 rounded-xl" />
           </div>
-          <div className="animate-pulse space-y-3">
+          <div className="animate-pulse space-y-3 hidden md:block">
             <div className="h-4 bg-ink-100 rounded w-1/3 mx-auto" />
             <div className="h-64 bg-ink-50 rounded-xl" />
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-8 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
           {renderMonth(0)}
           {renderMonth(1)}
         </div>
       )}
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-ink-500">
+      <div className="flex flex-wrap gap-3 sm:gap-4 text-xs text-ink-500">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-red-100 border border-red-200" />
           <span>Blocked</span>
@@ -262,55 +264,59 @@ export function HostCalendar({ propertyId }: Props) {
         </div>
       </div>
 
-      {/* Selection action bar */}
+      {/* Selection action bar — stacks vertically on mobile */}
       {isSelecting && selectedDates.size > 0 && (
-        <div className="sticky bottom-4 bg-white border border-ink-200 shadow-xl rounded-2xl p-4 flex items-center gap-4 flex-wrap">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-ink-800">
-              {selectedDates.size} date{selectedDates.size > 1 ? 's' : ''} selected
-              <span className={cn(
-                'ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
-                selectionMode === 'block' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-              )}>
-                {selectionMode === 'block' ? 'Blocking' : 'Unblocking'}
-              </span>
-            </p>
-            {selectionMode === 'block' && (
-              <input
-                type="text"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Reason (optional) — e.g. Personal use, Maintenance"
-                className="mt-2 input text-sm py-2 w-full max-w-sm"
-              />
-            )}
-          </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={clearSelection}
-              className="btn-secondary text-sm py-2 px-4"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className={cn(
-                'text-sm py-2 px-5 rounded-xl font-medium text-white transition-colors',
-                selectionMode === 'block'
-                  ? 'bg-red-600 hover:bg-red-700'
-                  : 'bg-green-600 hover:bg-green-700',
-                saving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {saving
-                ? 'Saving...'
-                : selectionMode === 'block'
-                  ? 'Block Dates'
-                  : 'Unblock Dates'}
-            </button>
+        <div className="fixed bottom-0 left-0 right-0 sm:sticky sm:bottom-4 bg-white border-t sm:border border-ink-200 shadow-xl sm:rounded-2xl p-4 z-50">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-ink-800">
+                  {selectedDates.size} date{selectedDates.size > 1 ? 's' : ''} selected
+                  <span className={cn(
+                    'ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
+                    selectionMode === 'block' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                  )}>
+                    {selectionMode === 'block' ? 'Blocking' : 'Unblocking'}
+                  </span>
+                </p>
+                {selectionMode === 'block' && (
+                  <input
+                    type="text"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Reason (optional)"
+                    className="mt-2 input text-sm py-2.5 w-full"
+                  />
+                )}
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="btn-secondary text-sm py-2.5 px-4 flex-1 sm:flex-none"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving}
+                  className={cn(
+                    'text-sm py-2.5 px-5 rounded-xl font-medium text-white transition-colors flex-1 sm:flex-none',
+                    selectionMode === 'block'
+                      ? 'bg-red-600 hover:bg-red-700 active:bg-red-800'
+                      : 'bg-green-600 hover:bg-green-700 active:bg-green-800',
+                    saving && 'opacity-50 cursor-not-allowed'
+                  )}
+                >
+                  {saving
+                    ? 'Saving...'
+                    : selectionMode === 'block'
+                      ? 'Block Dates'
+                      : 'Unblock Dates'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

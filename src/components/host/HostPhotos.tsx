@@ -42,13 +42,13 @@ export function HostPhotos({ propertyId, initialImages }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6 pb-24 sm:pb-0">
       {/* Instructions */}
-      <div className="bg-ink-50 rounded-xl p-4">
+      <div className="bg-ink-50 rounded-xl p-3 sm:p-4">
         <h3 className="text-sm font-semibold text-ink-800 mb-1">Property photos</h3>
-        <p className="text-xs text-ink-500">
+        <p className="text-xs text-ink-500 leading-relaxed">
           Upload high-quality photos. The first image becomes your listing cover.
-          Drag to reorder (first = cover). Guests trust listings with 5+ clear photos.
+          Guests trust listings with 5+ clear photos.
         </p>
       </div>
 
@@ -60,27 +60,29 @@ export function HostPhotos({ propertyId, initialImages }: Props) {
       />
 
       {/* Stats */}
-      <div className="flex items-center justify-between text-sm text-ink-500">
-        <span>{images.length} photo{images.length !== 1 ? 's' : ''} uploaded</span>
+      <div className="flex items-center justify-between text-sm text-ink-500 px-1">
+        <span>{images.length} photo{images.length !== 1 ? 's' : ''}</span>
         {images.length < 5 && (
-          <span className="text-amber-600 font-medium">
-            Add {5 - images.length} more for better visibility
+          <span className="text-amber-600 font-medium text-xs sm:text-sm">
+            +{5 - images.length} more recommended
           </span>
         )}
       </div>
 
-      {/* Save button */}
+      {/* Save button — fixed bottom bar on mobile */}
       {hasChanges && (
-        <div className="sticky bottom-4 bg-white border border-ink-200 shadow-xl rounded-2xl p-4 flex items-center justify-between">
-          <p className="text-sm text-ink-600">You have unsaved photo changes</p>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="btn-primary text-sm py-2 px-6"
-          >
-            {saving ? 'Saving...' : 'Save Photos'}
-          </button>
+        <div className="fixed bottom-0 left-0 right-0 sm:sticky sm:bottom-4 bg-white border-t sm:border border-ink-200 shadow-xl sm:rounded-2xl p-4 z-50">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+            <p className="text-sm text-ink-600 text-center sm:text-left">Unsaved photo changes</p>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="btn-primary text-base sm:text-sm py-3 sm:py-2 px-6 w-full sm:w-auto"
+            >
+              {saving ? 'Saving...' : 'Save Photos'}
+            </button>
+          </div>
         </div>
       )}
     </div>

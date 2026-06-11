@@ -1,8 +1,11 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { listMyShortTermProperties, listPropertyBookings } from '@/graphql/queries';
 import {
   HomeModernIcon,
   ClipboardDocumentListIcon,
@@ -11,20 +14,57 @@ import {
   PlusIcon,
 } from '@heroicons/react/24/outline';
 
-const NAV_ITEMS = [
-  { name: 'Properties', href: '/host', icon: HomeModernIcon, exact: true },
-  { name: 'Bookings', href: '/host/bookings', icon: ClipboardDocumentListIcon },
-  { name: 'Calendar', href: '/host/calendar', icon: CalendarDaysIcon },
-  { name: 'Reviews', href: '/host/reviews', icon: StarIcon },
-];
-
 export function HostSidebar() {
   const pathname = usePathname();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  const fetchPendingCount = useCallback(async () => {
+    try {
+      const data = await GraphQLClient.executeAuthenticated<{
+        listMyShortTermProperties: { properties: Array<{ propertyId: string }> };
+      }>(listMyShortTermProperties, { limit: 50 });
+
+      const propertyIds = (data.listMyShortTermProperties?.properties || []).map((p) => p.propertyId);
+      if (propertyIds.length === 0) return;
+
+      let count = 0;
+      const results = await Promise.allSettled(
+        propertyIds.map((propertyId) =>
+          GraphQLClient.executeAuthenticated<{
+            listPropertyBookings: { bookings: Array<{ status: string }>; count: number };
+          }>(listPropertyBookings, { propertyId, limit: 20, status: 'PENDING' })
+        )
+      );
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          count += result.value.listPropertyBookings?.bookings?.length || 0;
+        }
+      }
+
+      setPendingCount(count);
+    } catch {
+      // Silent — non-critical
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 15000);
+    return () => clearInterval(interval);
+  }, [fetchPendingCount]);
 
   function isActive(href: string, exact = false) {
     if (exact) return pathname === href;
     return pathname.startsWith(href);
   }
+
+  const NAV_ITEMS = [
+    { name: 'Properties', href: '/host', icon: HomeModernIcon, exact: true, badge: 0 },
+    { name: 'Bookings', href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
+    { name: 'Calendar', href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },
+    { name: 'Reviews', href: '/host/reviews', icon: StarIcon, badge: 0 },
+  ];
 
   return (
     <>
@@ -46,7 +86,12 @@ export function HostSidebar() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
-                <span>{item.name}</span>
+                <span className="flex-1">{item.name}</span>
+                {item.badge > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -75,11 +120,18 @@ export function HostSidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex-1 flex flex-col items-center gap-0.5 py-2 pt-2.5 text-[10px] font-medium transition-colors touch-manipulation',
+                  'flex-1 flex flex-col items-center gap-0.5 py-2 pt-2.5 text-[10px] font-medium transition-colors touch-manipulation relative',
                   active ? 'text-brand-600' : 'text-ink-400'
                 )}
               >
-                <Icon className={cn('h-5 w-5', active && 'text-brand-600')} />
+                <div className="relative">
+                  <Icon className={cn('h-5 w-5', active && 'text-brand-600')} />
+                  {item.badge > 0 && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
                 <span>{item.name}</span>
               </Link>
             );

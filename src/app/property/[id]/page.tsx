@@ -102,12 +102,14 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      {/* Gallery */}
-      <PropertyGallery images={property.images} title={property.title} />
+    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
+      {/* Gallery — full-bleed on mobile, padded on desktop */}
+      <div className="sm:px-0">
+        <PropertyGallery images={property.images} title={property.title} />
+      </div>
 
       {/* Mobile booking card - shown above property details on small screens */}
-      <div className="mt-6 lg:hidden">
+      <div className="mt-6 px-4 sm:px-0 lg:hidden">
         <BookingSidebar
           property={property}
           initialCheckIn={checkIn}
@@ -116,7 +118,7 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Content grid */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="mt-8 px-4 sm:px-0 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Property info */}
         <div className="lg:col-span-2">
           <PropertyInfo property={property} />

@@ -15,7 +15,9 @@ export function PropertyGallery({ images, title }: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
   const [touchDelta, setTouchDelta] = useState(0);
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,17 +48,34 @@ export function PropertyGallery({ images, title }: Props) {
   // Touch swipe handling
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.touches[0].clientX);
+    setTouchStartY(e.touches[0].clientY);
     setTouchDelta(0);
+    setIsHorizontalSwipe(false);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStart === null) return;
-    const delta = e.touches[0].clientX - touchStart;
-    // Clamp delta to prevent over-scrolling past first/last image
+    const deltaX = e.touches[0].clientX - touchStart;
+    const deltaY = e.touches[0].clientY - (touchStartY ?? 0);
+
+    // Determine swipe direction on first significant movement
+    if (!isHorizontalSwipe && Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
+
+    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY)) {
+      setIsHorizontalSwipe(true);
+    }
+
+    // Only handle horizontal swipes — let vertical ones scroll the page
+    if (!isHorizontalSwipe && Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    // Prevent page scroll during horizontal swipe
+    e.preventDefault();
+
+    // Rubber-band effect at edges
     const clamped =
-      (currentIndex === 0 && delta > 0) ? delta * 0.3 :
-      (currentIndex === imageCount - 1 && delta < 0) ? delta * 0.3 :
-      delta;
+      (currentIndex === 0 && deltaX > 0) ? deltaX * 0.3 :
+      (currentIndex === imageCount - 1 && deltaX < 0) ? deltaX * 0.3 :
+      deltaX;
     setTouchDelta(clamped);
   };
 
@@ -66,7 +85,9 @@ export function PropertyGallery({ images, title }: Props) {
       else if (touchDelta < 0 && currentIndex < imageCount - 1) goNext();
     }
     setTouchStart(null);
+    setTouchStartY(null);
     setTouchDelta(0);
+    setIsHorizontalSwipe(false);
   };
 
   return (
@@ -188,10 +209,11 @@ export function PropertyGallery({ images, title }: Props) {
         </div>
       )}
 
-      {/* Mobile: Swipeable full-bleed carousel */}
+      {/* Mobile: Full-bleed swipeable carousel — Airbnb-style */}
       <div
         ref={containerRef}
-        className="sm:hidden relative rounded-2xl overflow-hidden aspect-[4/3] touch-pan-y"
+        className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
+        style={{ touchAction: 'pan-y pinch-zoom', overscrollBehavior: 'none' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -205,7 +227,11 @@ export function PropertyGallery({ images, title }: Props) {
             }}
           >
             {displayImages.map((img, i) => (
-              <div key={i} className="relative min-w-full h-full flex-shrink-0">
+              <div
+                key={i}
+                className="relative min-w-full h-full flex-shrink-0"
+                onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
+              >
                 <Image
                   src={getCdnUrl(img)}
                   alt={`${title} photo ${i + 1}`}
@@ -220,26 +246,28 @@ export function PropertyGallery({ images, title }: Props) {
           </div>
         </div>
 
-        {/* Mobile dot indicators */}
+        {/* Gradient bottom */}
         {imageCount > 1 && (
-          <>
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
-            <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1">
-              {displayImages.slice(0, 7).map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === currentIndex
-                      ? 'w-5 bg-white'
-                      : 'w-1.5 bg-white/50'
-                  }`}
-                />
-              ))}
-              {imageCount > 7 && (
-                <span className="text-[10px] text-white/70 ml-1">+{imageCount - 7}</span>
-              )}
-            </div>
-          </>
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+        )}
+
+        {/* Dot indicators */}
+        {imageCount > 1 && (
+          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1">
+            {displayImages.slice(0, Math.min(imageCount, 7)).map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex
+                    ? 'w-5 bg-white'
+                    : 'w-1.5 bg-white/50'
+                }`}
+              />
+            ))}
+            {imageCount > 7 && (
+              <span className="text-[10px] text-white/70 ml-1 self-center">+{imageCount - 7}</span>
+            )}
+          </div>
         )}
 
         {/* Photo count badge */}

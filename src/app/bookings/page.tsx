@@ -110,7 +110,7 @@ export default function MyBookingsPage() {
       const rawBookings = data.listMyBookings?.bookings || [];
 
       // Enrich bookings with property details (images may not come from the booking query)
-      const uniquePropertyIds = [...new Set(rawBookings.map((b) => b.propertyId))];
+      const uniquePropertyIds = Array.from(new Set(rawBookings.map((b) => b.propertyId)));
       const propertyMap = new Map<string, BookingProperty>();
 
       // Fetch property details in parallel

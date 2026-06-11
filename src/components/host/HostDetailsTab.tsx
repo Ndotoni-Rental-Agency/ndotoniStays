@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PROPERTY_TYPES, REGIONS, AMENITIES } from './constants';
 import { PropertyFormData } from './types';
 
@@ -12,6 +14,25 @@ interface Props {
 }
 
 export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving }: Props) {
+  const [customAmenity, setCustomAmenity] = useState('');
+
+  // Custom amenities are any in form.amenities that aren't in the preset list
+  const customAmenities = form.amenities.filter((a) => !AMENITIES.includes(a));
+
+  function addCustomAmenity() {
+    const trimmed = customAmenity.trim();
+    if (!trimmed) return;
+    if (form.amenities.includes(trimmed)) {
+      setCustomAmenity('');
+      return;
+    }
+    onUpdate('amenities', [...form.amenities, trimmed]);
+    setCustomAmenity('');
+  }
+
+  function removeCustomAmenity(amenity: string) {
+    onUpdate('amenities', form.amenities.filter((a) => a !== amenity));
+  }
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Basic Info */}
@@ -200,6 +221,54 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
               <span className="text-xs sm:text-sm font-medium text-ink-700">{amenity}</span>
             </label>
           ))}
+        </div>
+
+        {/* Custom amenities */}
+        {customAmenities.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {customAmenities.map((amenity) => (
+              <span
+                key={amenity}
+                className="inline-flex items-center gap-1 bg-brand-50 border border-brand-200 text-brand-700 text-xs sm:text-sm font-medium px-2.5 py-1.5 rounded-lg"
+              >
+                {amenity}
+                <button
+                  type="button"
+                  onClick={() => removeCustomAmenity(amenity)}
+                  className="text-brand-400 hover:text-brand-700 touch-manipulation"
+                  aria-label={`Remove ${amenity}`}
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Add custom amenity */}
+        <div className="mt-3 flex gap-2">
+          <input
+            type="text"
+            value={customAmenity}
+            onChange={(e) => setCustomAmenity(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustomAmenity();
+              }
+            }}
+            placeholder="Add custom amenity..."
+            className="input text-sm py-2 flex-1"
+          />
+          <button
+            type="button"
+            onClick={addCustomAmenity}
+            disabled={!customAmenity.trim()}
+            className="btn-secondary text-sm py-2 px-3 shrink-0 disabled:opacity-40"
+            aria-label="Add amenity"
+          >
+            <PlusIcon className="h-4 w-4" />
+          </button>
         </div>
       </section>
 

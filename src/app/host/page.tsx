@@ -104,30 +104,34 @@ export default function HostPropertiesPage() {
                 key={property.propertyId}
                 className="rounded-2xl border border-ink-100 overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* Thumbnail */}
-                <div className="relative h-36 bg-ink-100">
-                  {property.thumbnail ? (
-                    <img
-                      src={property.thumbnail}
-                      alt={property.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <HomeModernIcon className="h-12 w-12 text-ink-300" />
-                    </div>
-                  )}
-                  <span className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full ${badge.classes}`}>
-                    {badge.label}
-                  </span>
-                </div>
+                {/* Thumbnail — clickable to view as guest */}
+                <Link href={`/property/${property.propertyId}`}>
+                  <div className="relative h-36 bg-ink-100">
+                    {property.thumbnail ? (
+                      <img
+                        src={property.thumbnail}
+                        alt={property.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <HomeModernIcon className="h-12 w-12 text-ink-300" />
+                      </div>
+                    )}
+                    <span className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full ${badge.classes}`}>
+                      {badge.label}
+                    </span>
+                  </div>
+                </Link>
 
                 {/* Info */}
                 <div className="p-3.5">
-                  <h3 className="font-semibold text-ink-900 truncate text-sm">{property.title}</h3>
-                  <p className="text-xs text-ink-500 mt-0.5">
-                    {property.district}, {property.region}
-                  </p>
+                  <Link href={`/property/${property.propertyId}`} className="block">
+                    <h3 className="font-semibold text-ink-900 truncate text-sm hover:text-brand-600 transition-colors">{property.title}</h3>
+                    <p className="text-xs text-ink-500 mt-0.5">
+                      {property.district}, {property.region}
+                    </p>
+                  </Link>
                   <div className="flex items-center justify-between mt-2.5">
                     <p className="text-sm font-medium text-ink-700">
                       {property.currency} {property.nightlyRate?.toLocaleString()}

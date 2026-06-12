@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty } from '@/graphql/queries';
-import { updateShortTermProperty, publishShortTermProperty } from '@/graphql/mutations';
+import { updateShortTermProperty, publishShortTermProperty, deactivateShortTermProperty } from '@/graphql/mutations';
 import {
   ArrowLeftIcon,
   CheckCircleIcon,
@@ -213,6 +213,17 @@ export default function EditPropertyPage() {
     }
   }
 
+  async function handleDelete() {
+    try {
+      await GraphQLClient.executeAuthenticated(deactivateShortTermProperty, { propertyId });
+      toast.success('Property deleted');
+      router.replace('/host');
+    } catch (err: any) {
+      console.error('Error deleting property:', err);
+      toast.error(err?.message || 'Failed to delete property');
+    }
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -319,6 +330,8 @@ export default function EditPropertyPage() {
           onUpdate={updateField}
           onSave={handleSave}
           saving={saving}
+          propertyId={propertyId}
+          onDelete={handleDelete}
         />
       )}
     </div>

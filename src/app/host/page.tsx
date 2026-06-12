@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyShortTermProperties } from '@/graphql/queries';
+import { deactivateShortTermProperty } from '@/graphql/mutations';
 import {
   PlusIcon,
   PencilSquareIcon,
   HomeModernIcon,
   CalendarDaysIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { HostEarnings } from '@/components/host/HostEarnings';
+import toast from 'react-hot-toast';
 
 interface Property {
   propertyId: string;
@@ -35,6 +38,7 @@ const STATUS_BADGES: Record<string, { label: string; classes: string }> = {
 export default function HostPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProperties();
@@ -50,6 +54,23 @@ export default function HostPropertiesPage() {
       console.error('Failed to load properties:', err);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(propertyId: string, title: string) {
+    const confirmed = window.confirm(`Delete "${title}"? This cannot be undone.`);
+    if (!confirmed) return;
+
+    setDeletingId(propertyId);
+    try {
+      await GraphQLClient.executeAuthenticated(deactivateShortTermProperty, { propertyId });
+      setProperties(prev => prev.filter(p => p.propertyId !== propertyId));
+      toast.success('Property deleted');
+    } catch (err: any) {
+      console.error('Failed to delete property:', err);
+      toast.error(err?.message || 'Failed to delete');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -157,6 +178,19 @@ export default function HostPropertiesPage() {
                     >
                       <CalendarDaysIcon className="h-3.5 w-3.5" />
                     </Link>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(property.propertyId, property.title)}
+                      disabled={deletingId === property.propertyId}
+                      className="flex items-center justify-center text-xs py-2 px-3 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors touch-manipulation disabled:opacity-50"
+                      aria-label="Delete"
+                    >
+                      {deletingId === property.propertyId ? (
+                        <span className="h-3.5 w-3.5 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                      ) : (
+                        <TrashIcon className="h-3.5 w-3.5" />
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>

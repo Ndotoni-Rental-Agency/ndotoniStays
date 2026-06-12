@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { createShortTermPropertyDraft } from '@/graphql/mutations';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { ImageUpload } from '@/components/media/ImageUpload';
 import { PhoneInput } from '@/components/ui/PhoneInput';
@@ -26,12 +26,20 @@ const PROPERTY_TYPES = [
   { value: 'BUNGALOW', label: 'Bungalow', icon: '🌴' },
 ];
 
+const STEPS = [
+  { id: 1, label: 'Type & Category' },
+  { id: 2, label: 'Location' },
+  { id: 3, label: 'Pricing & Details' },
+  { id: 4, label: 'Photos & Contact' },
+];
+
 export default function CreatePropertyPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [step, setStep] = useState(1);
 
   const [form, setForm] = useState({
     title: '',
@@ -50,7 +58,6 @@ export default function CreatePropertyPage() {
     lng: 0,
   });
 
-  // Pre-fill phone from user profile
   useEffect(() => {
     if (user?.phoneNumber && !form.phoneNumber) {
       setForm(prev => ({ ...prev, phoneNumber: user.phoneNumber || '' }));
@@ -65,6 +72,21 @@ export default function CreatePropertyPage() {
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function canAdvance(): boolean {
+    if (step === 1) return !!form.propertyType && form.stayCategories.length > 0;
+    if (step === 2) return !!form.region && !!form.district;
+    if (step === 3) return !!form.title && !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
+    return true;
+  }
+
+  function nextStep() {
+    if (canAdvance() && step < 4) setStep(step + 1);
+  }
+
+  function prevStep() {
+    if (step > 1) setStep(step - 1);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -113,9 +135,7 @@ export default function CreatePropertyPage() {
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => {
-            if (!isAuthenticated) {
-              router.replace('/');
-            }
+            if (!isAuthenticated) router.replace('/');
             setShowAuthModal(false);
           }}
         />
@@ -124,213 +144,319 @@ export default function CreatePropertyPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-8 sm:py-12">
+    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8 sm:py-12">
       {/* Back link */}
       <Link href="/host" className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 mb-6">
         <ArrowLeftIcon className="h-4 w-4" />
         Back to My Properties
       </Link>
 
-      <div className="bg-white rounded-2xl border border-ink-100 shadow-sm p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-ink-900 mb-1">Add a new property</h1>
-        <p className="text-ink-500 mb-6">Start with the basics. You can add more details after.</p>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">List your space</h1>
+        <p className="text-ink-500 mt-1">Takes about 2 minutes. You can always edit later.</p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">Property name</label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={(e) => updateField('title', e.target.value)}
-              placeholder="e.g. Cozy Beach Apartment in Msasani"
-              className="input"
-              required
-            />
-          </div>
-
-          {/* Property type — visual grid */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Property type</label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              {PROPERTY_TYPES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => updateField('propertyType', t.value)}
-                  className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition-all ${
-                    form.propertyType === t.value
-                      ? 'border-brand-500 bg-brand-50 shadow-sm'
-                      : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50'
+      {/* Progress Steps */}
+      <div className="mb-8">
+        <div className="flex items-center gap-1">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className="flex items-center flex-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (s.id < step || canAdvance()) setStep(s.id);
+                }}
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  s.id === step
+                    ? 'text-brand-700'
+                    : s.id < step
+                    ? 'text-green-600'
+                    : 'text-ink-400'
+                }`}
+              >
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
+                    s.id === step
+                      ? 'bg-brand-600 text-white'
+                      : s.id < step
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-ink-100 text-ink-400'
                   }`}
                 >
-                  <span className="text-xl">{t.icon}</span>
-                  <span className="text-[11px] font-medium text-ink-700">{t.label}</span>
-                </button>
-              ))}
+                  {s.id < step ? <CheckIcon className="h-3.5 w-3.5" /> : s.id}
+                </span>
+                <span className="hidden sm:inline">{s.label}</span>
+              </button>
+              {i < STEPS.length - 1 && (
+                <div className={`flex-1 h-0.5 mx-2 rounded ${s.id < step ? 'bg-green-200' : 'bg-ink-100'}`} />
+              )}
             </div>
-            {!form.propertyType && (
-              <input type="text" required value={form.propertyType} className="sr-only" onChange={() => {}} tabIndex={-1} />
-            )}
-          </div>
+          ))}
+        </div>
+      </div>
 
-          {/* Stay Categories */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1">What's this space great for?</label>
-            <p className="text-xs text-ink-400 mb-2">Select all that apply</p>
-            <div className="flex flex-wrap gap-2">
-              {STAY_CATEGORIES.map((cat) => {
-                const isSelected = form.stayCategories.includes(cat.value);
-                return (
-                  <button
-                    key={cat.value}
-                    type="button"
-                    onClick={() => {
-                      setForm(prev => ({
-                        ...prev,
-                        stayCategories: isSelected
-                          ? prev.stayCategories.filter(c => c !== cat.value)
-                          : [...prev.stayCategories, cat.value],
-                      }));
-                    }}
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all ${
-                      isSelected
-                        ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
-                        : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:bg-ink-50'
-                    }`}
-                  >
-                    <span className="text-base">{cat.icon}</span>
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+      <form onSubmit={handleSubmit}>
+        <div className="bg-white rounded-2xl border border-ink-100 shadow-sm p-6 sm:p-8">
 
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Location</label>
-            <LocationSelector
-              value={{
-                region: form.region,
-                district: form.district,
-                ward: form.ward,
-                street: form.street,
-              }}
-              onChange={(loc) =>
-                setForm((prev) => ({
-                  ...prev,
-                  region: loc.region,
-                  district: loc.district,
-                  ward: loc.ward || '',
-                  street: loc.street || '',
-                }))
-              }
-              required
-            />
-          </div>
-
-          {/* Map */}
-          {form.region && form.district && (
-            <div>
-              <label className="block text-sm font-medium text-ink-700 mb-2">Pin location on map</label>
-              <LocationMapPicker
-                location={{
-                  region: form.region,
-                  district: form.district,
-                  ward: form.ward,
-                  street: form.street,
-                }}
-                onChange={(coords) =>
-                  setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }))
-                }
-              />
-            </div>
-          )}
-
-          {/* Price + Guests */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">Price per night</label>
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm">
-                    {form.currency === 'TZS' ? 'TZS' : '$'}
-                  </span>
-                  <input
-                    type="number"
-                    value={form.nightlyRate}
-                    onChange={(e) => updateField('nightlyRate', e.target.value)}
-                    placeholder={form.currency === 'TZS' ? '50000' : '25'}
-                    className="input pl-12"
-                    required
-                    min="1"
-                  />
+          {/* Step 1: Property Type & Categories */}
+          {step === 1 && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-lg font-semibold text-ink-900 mb-1">What type of space is this?</h2>
+                <p className="text-sm text-ink-500 mb-4">Choose the option that best describes your property</p>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
+                  {PROPERTY_TYPES.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => updateField('propertyType', t.value)}
+                      className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-3.5 transition-all ${
+                        form.propertyType === t.value
+                          ? 'border-brand-500 bg-brand-50 shadow-sm scale-[1.02]'
+                          : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50'
+                      }`}
+                    >
+                      <span className="text-2xl">{t.icon}</span>
+                      <span className="text-xs font-medium text-ink-700">{t.label}</span>
+                    </button>
+                  ))}
                 </div>
-                <select
-                  value={form.currency}
-                  onChange={(e) => updateField('currency', e.target.value)}
-                  className="input w-24"
-                >
-                  <option value="TZS">TZS</option>
-                  <option value="USD">USD</option>
-                </select>
+              </div>
+
+              <div className="border-t border-ink-100 pt-6">
+                <h2 className="text-lg font-semibold text-ink-900 mb-1">What's this space great for?</h2>
+                <p className="text-sm text-ink-500 mb-4">Select all that apply — helps guests find your listing</p>
+                <div className="flex flex-wrap gap-2.5">
+                  {STAY_CATEGORIES.map((cat) => {
+                    const isSelected = form.stayCategories.includes(cat.value);
+                    return (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => {
+                          setForm(prev => ({
+                            ...prev,
+                            stayCategories: isSelected
+                              ? prev.stayCategories.filter(c => c !== cat.value)
+                              : [...prev.stayCategories, cat.value],
+                          }));
+                        }}
+                        className={`inline-flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm transition-all ${
+                          isSelected
+                            ? 'border-brand-500 bg-brand-50 text-brand-700 font-semibold shadow-sm'
+                            : 'border-ink-150 text-ink-600 hover:border-ink-300 hover:bg-ink-50'
+                        }`}
+                      >
+                        <span className="text-lg">{cat.icon}</span>
+                        <span>{cat.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {form.stayCategories.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-2">Select at least one category</p>
+                )}
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">Max guests</label>
-              <select
-                value={form.maxGuests}
-                onChange={(e) => updateField('maxGuests', e.target.value)}
-                className="input"
-              >
-                {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          )}
 
-          {/* Photos */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Photos</label>
-            <ImageUpload
-              images={form.images}
-              onChange={(imgs) => setForm(prev => ({ ...prev, images: imgs }))}
-              maxImages={10}
-            />
-            <p className="text-xs text-ink-400 mt-1.5">Add at least 1 photo. First photo becomes the cover.</p>
-          </div>
+          {/* Step 2: Location */}
+          {step === 2 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold text-ink-900 mb-1">Where is your property?</h2>
+                <p className="text-sm text-ink-500 mb-4">Help guests find you by adding your location</p>
+                <LocationSelector
+                  value={{
+                    region: form.region,
+                    district: form.district,
+                    ward: form.ward,
+                    street: form.street,
+                  }}
+                  onChange={(loc) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      region: loc.region,
+                      district: loc.district,
+                      ward: loc.ward || '',
+                      street: loc.street || '',
+                    }))
+                  }
+                  required
+                />
+              </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">Your WhatsApp / phone number</label>
-            <PhoneInput
-              value={form.phoneNumber}
-              onChange={(val) => setForm(prev => ({ ...prev, phoneNumber: val }))}
-              placeholder="Phone number"
-              required
-            />
-            <p className="text-xs text-ink-400 mt-1">So we can reach you about your listing.</p>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
-              {error}
+              {form.region && form.district && (
+                <div className="border-t border-ink-100 pt-6">
+                  <h3 className="text-sm font-medium text-ink-700 mb-2">Pin exact location on map</h3>
+                  <p className="text-xs text-ink-400 mb-3">Optional — makes your listing more discoverable</p>
+                  <LocationMapPicker
+                    location={{
+                      region: form.region,
+                      district: form.district,
+                      ward: form.ward,
+                      street: form.street,
+                    }}
+                    onChange={(coords) =>
+                      setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }))
+                    }
+                  />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading || !form.propertyType}
-            className="btn-primary w-full text-base py-3"
-          >
-            {loading ? 'Creating...' : 'Create Property'}
-          </button>
-        </form>
-      </div>
+          {/* Step 3: Title, Pricing & Capacity */}
+          {step === 3 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold text-ink-900 mb-1">Name and price your space</h2>
+                <p className="text-sm text-ink-500 mb-4">A good title and fair price attract more bookings</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-1.5">Property name</label>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => updateField('title', e.target.value)}
+                  placeholder="e.g. Cozy Beach Apartment in Msasani"
+                  className="input text-base"
+                  required
+                />
+                <p className="text-xs text-ink-400 mt-1">Tip: mention the area and what makes it special</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-ink-700 mb-1.5">Price per night</label>
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm font-medium">
+                        {form.currency === 'TZS' ? 'TZS' : '$'}
+                      </span>
+                      <input
+                        type="number"
+                        value={form.nightlyRate}
+                        onChange={(e) => updateField('nightlyRate', e.target.value)}
+                        placeholder={form.currency === 'TZS' ? '50,000' : '25'}
+                        className="input pl-12 text-base font-medium"
+                        required
+                        min="1"
+                      />
+                    </div>
+                    <select
+                      value={form.currency}
+                      onChange={(e) => updateField('currency', e.target.value)}
+                      className="input w-24"
+                    >
+                      <option value="TZS">TZS</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-ink-700 mb-1.5">Max guests</label>
+                  <select
+                    value={form.maxGuests}
+                    onChange={(e) => updateField('maxGuests', e.target.value)}
+                    className="input text-base"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
+                      <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Photos & Contact */}
+          {step === 4 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold text-ink-900 mb-1">Add photos and your contact</h2>
+                <p className="text-sm text-ink-500 mb-4">Listings with photos get 5x more bookings</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-2">Photos</label>
+                <ImageUpload
+                  images={form.images}
+                  onChange={(imgs) => setForm(prev => ({ ...prev, images: imgs }))}
+                  maxImages={10}
+                />
+                <p className="text-xs text-ink-400 mt-2">Add at least 1 photo. First photo becomes the cover. You can add more later.</p>
+              </div>
+
+              <div className="border-t border-ink-100 pt-6">
+                <label className="block text-sm font-medium text-ink-700 mb-1.5">Your WhatsApp / phone number</label>
+                <PhoneInput
+                  value={form.phoneNumber}
+                  onChange={(val) => setForm(prev => ({ ...prev, phoneNumber: val }))}
+                  placeholder="Phone number"
+                  required
+                />
+                <p className="text-xs text-ink-400 mt-1.5">So guests and our team can reach you about bookings</p>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between mt-6">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Back
+            </button>
+          ) : (
+            <div />
+          )}
+
+          {step < 4 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              disabled={!canAdvance()}
+              className="btn-primary inline-flex items-center gap-2 px-6 py-2.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Continue
+              <ArrowRightIcon className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={loading || !form.propertyType || !form.title || !form.nightlyRate}
+              className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-base disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <CheckIcon className="h-5 w-5" />
+                  Create Property
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </form>
     </div>
   );
 }

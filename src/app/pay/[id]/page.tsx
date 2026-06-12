@@ -35,6 +35,7 @@ export default function PayBookingPage() {
     async function fetchBooking() {
       try {
         const data = await executeGql<{ getBooking: any }>(getBooking, { bookingId });
+        console.log('booking data', data);
         const b = data.getBooking;
 
         if (!b) {

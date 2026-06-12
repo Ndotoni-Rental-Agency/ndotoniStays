@@ -17,6 +17,7 @@ import {
 } from '@/components/host/create';
 
 const STORAGE_KEY = 'ndotoni_create_property_draft';
+const PENDING_SUBMIT_KEY = 'ndotoni_create_pending_submit';
 
 const STEPS = [
   { id: 1, label: 'Type & Category' },
@@ -61,6 +62,12 @@ export default function ListYourPlacePage() {
         const parsed = JSON.parse(saved);
         setForm(parsed);
         setStep(4);
+
+        // If returning from OAuth redirect with pending submit, mark for auto-submit
+        const pending = localStorage.getItem(PENDING_SUBMIT_KEY);
+        if (pending) {
+          pendingSubmitRef.current = true;
+        }
       }
     } catch {
       // ignore parse errors
@@ -80,6 +87,7 @@ export default function ListYourPlacePage() {
       pendingSubmitRef.current = false;
       setShowAuthModal(false);
       localStorage.removeItem('ndotoni_booking_redirect');
+      localStorage.removeItem(PENDING_SUBMIT_KEY);
       submitProperty();
     }
   }, [isAuthenticated]);
@@ -155,6 +163,7 @@ export default function ListYourPlacePage() {
     if (!isAuthenticated) {
       // Save form to localStorage and prompt sign-in
       localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      localStorage.setItem(PENDING_SUBMIT_KEY, 'true');
       // Save current URL for OAuth redirect
       localStorage.setItem('ndotoni_booking_redirect', window.location.href);
       pendingSubmitRef.current = true;

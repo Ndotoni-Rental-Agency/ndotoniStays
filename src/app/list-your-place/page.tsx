@@ -96,11 +96,17 @@ export default function ListYourPlacePage() {
   }
 
   function nextStep() {
-    if (canAdvance() && step < 4) setStep(step + 1);
+    if (canAdvance() && step < 4) {
+      setStep(step + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   function prevStep() {
-    if (step > 1) setStep(step - 1);
+    if (step > 1) {
+      setStep(step - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   async function submitProperty() {

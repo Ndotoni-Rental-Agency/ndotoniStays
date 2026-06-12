@@ -17,13 +17,22 @@ export function StepPhotosContact({ form, setForm, error }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-ink-700 mb-3">Photos</label>
+        <label className="block text-sm font-medium text-ink-700 mb-3">
+          Photos <span className="text-red-500">*</span>
+        </label>
         <ImageUpload
           images={form.images}
           onChange={(imgs) => setForm(prev => ({ ...prev, images: imgs }))}
           maxImages={10}
         />
-        <p className="text-sm text-ink-400 mt-3">Add at least 1 photo. First photo becomes the cover. You can add more later.</p>
+        <p className="text-sm text-ink-400 mt-3">
+          {form.images.length === 0
+            ? 'Add at least 1 photo to publish your listing.'
+            : 'First photo becomes the cover. You can add more later.'}
+        </p>
+        {form.images.length === 0 && (
+          <p className="text-sm text-amber-600 mt-1">At least 1 photo is required</p>
+        )}
       </div>
 
       <div className="border-t border-ink-100 pt-8 max-w-md">

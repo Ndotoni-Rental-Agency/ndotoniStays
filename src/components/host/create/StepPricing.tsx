@@ -2,7 +2,24 @@
 
 import { StepProps } from './types';
 
+function formatWithCommas(value: string): string {
+  const num = value.replace(/[^0-9]/g, '');
+  if (!num) return '';
+  return Number(num).toLocaleString('en-US');
+}
+
+function stripCommas(value: string): string {
+  return value.replace(/,/g, '');
+}
+
 export function StepPricing({ form, updateField }: StepProps) {
+  const displayPrice = form.nightlyRate ? formatWithCommas(form.nightlyRate) : '';
+
+  function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = stripCommas(e.target.value);
+    updateField('nightlyRate', raw);
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -33,13 +50,13 @@ export function StepPricing({ form, updateField }: StepProps) {
                   {form.currency === 'TZS' ? 'TZS' : '$'}
                 </span>
                 <input
-                  type="number"
-                  value={form.nightlyRate}
-                  onChange={(e) => updateField('nightlyRate', e.target.value)}
-                  placeholder={form.currency === 'TZS' ? '50000' : '25'}
+                  type="text"
+                  inputMode="numeric"
+                  value={displayPrice}
+                  onChange={handlePriceChange}
+                  placeholder={form.currency === 'TZS' ? '50,000' : '25'}
                   className="input pl-12 text-lg font-semibold py-3.5"
                   required
-                  min="1"
                 />
               </div>
               <select

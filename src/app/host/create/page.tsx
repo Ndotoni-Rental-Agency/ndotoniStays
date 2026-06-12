@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
@@ -16,6 +16,8 @@ import {
   CreatePropertyFormData,
 } from '@/components/host/create';
 
+const STORAGE_KEY = 'ndotoni_create_property_draft';
+
 const STEPS = [
   { id: 1, label: 'Type & Category' },
   { id: 2, label: 'Location' },
@@ -30,10 +32,13 @@ export default function CreatePropertyPage() {
   const [error, setError] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [step, setStep] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
+  const pendingSubmitRef = useRef(false);
 
   const [form, setForm] = useState<CreatePropertyFormData>({
     title: '',
-    propertyType: '',
+    propertyType: 'HOTEL',
     stayCategories: ['NIGHTLY_STAY'],
     region: 'Dar es Salaam',
     district: '',
@@ -48,17 +53,36 @@ export default function CreatePropertyPage() {
     lng: 0,
   });
 
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setForm(parsed);
+        // If we saved because auth was needed, go to the last step
+        setStep(4);
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
+
+  // Pre-fill phone from user profile
   useEffect(() => {
     if (user?.phoneNumber && !form.phoneNumber) {
       setForm(prev => ({ ...prev, phoneNumber: user.phoneNumber || '' }));
     }
   }, [user]);
 
+  // After sign-in, auto-submit if we have a pending draft
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setShowAuthModal(true);
+    if (isAuthenticated && pendingSubmitRef.current) {
+      pendingSubmitRef.current = false;
+      setShowAuthModal(false);
+      submitProperty();
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isAuthenticated]);
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -79,8 +103,7 @@ export default function CreatePropertyPage() {
     if (step > 1) setStep(step - 1);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submitProperty() {
     setLoading(true);
     setError(null);
 
@@ -103,12 +126,15 @@ export default function CreatePropertyPage() {
         },
       });
 
+      // Clear saved draft
+      localStorage.removeItem(STORAGE_KEY);
+
       const propertyId = data.createShortTermPropertyDraft?.propertyId;
       if (propertyId) {
-        router.push(`/host/property/${propertyId}/edit`);
+        setCreatedPropertyId(propertyId);
+        setShowSuccess(true);
       } else {
-        setError('Property created but no ID returned. Check your properties list.');
-        router.push('/host');
+        setError('Property created but no ID returned.');
       }
     } catch (err: any) {
       console.error('Error creating property:', err);
@@ -118,17 +144,64 @@ export default function CreatePropertyPage() {
     }
   }
 
-  if (isLoading || (!isAuthenticated && !isLoading)) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      // Save form to localStorage and prompt sign-in
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      pendingSubmitRef.current = true;
+      setShowAuthModal(true);
+      return;
+    }
+
+    await submitProperty();
+  }
+
+  // Success screen with confetti
+  if (showSuccess) {
+    return (
+      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-ink-50/50 px-4">
+        <div className="text-center max-w-md">
+          {/* Confetti burst */}
+          <div className="relative mb-6">
+            <div className="text-7xl animate-bounce">🎉</div>
+            <div className="absolute -top-2 -left-4 text-3xl animate-ping opacity-50">✨</div>
+            <div className="absolute -top-1 -right-3 text-2xl animate-ping opacity-50 delay-100">🎊</div>
+            <div className="absolute top-8 -right-6 text-xl animate-ping opacity-40 delay-200">⭐</div>
+            <div className="absolute top-10 -left-5 text-xl animate-ping opacity-40 delay-300">🌟</div>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-3">
+            Your property is listed!
+          </h1>
+          <p className="text-ink-500 text-base mb-8">
+            Congratulations! Guests can now find and book your space. Add more details to attract even more bookings.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => router.push(`/host/property/${createdPropertyId}/edit`)}
+              className="btn-primary px-6 py-3 text-base"
+            >
+              Add More Details
+            </button>
+            <button
+              onClick={() => router.push('/host')}
+              className="btn-secondary px-6 py-3 text-base"
+            >
+              Go to My Properties
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-pulse text-ink-400">Loading...</div>
-        <AuthModal
-          isOpen={showAuthModal}
-          onClose={() => {
-            if (!isAuthenticated) router.replace('/');
-            setShowAuthModal(false);
-          }}
-        />
       </div>
     );
   }
@@ -140,9 +213,9 @@ export default function CreatePropertyPage() {
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-ink-100 px-4 sm:px-6 py-3">
         <div className="mx-auto max-w-5xl flex items-center justify-between">
-          <Link href="/host" className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
             <ArrowLeftIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">My Properties</span>
+            <span className="hidden sm:inline">Back</span>
           </Link>
 
           {/* Step indicator */}
@@ -186,6 +259,15 @@ export default function CreatePropertyPage() {
 
       {/* Main content */}
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* Reassurance banner */}
+        <div className="flex items-center gap-3 bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 mb-6">
+          <span className="text-2xl">⚡</span>
+          <div>
+            <p className="text-sm font-medium text-brand-800">This takes less than 2 minutes</p>
+            <p className="text-xs text-brand-600">Just the basics — you can add more details anytime after.</p>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl sm:rounded-3xl border border-ink-100 shadow-sm overflow-hidden">
             <div className="p-5 sm:p-8 lg:p-10">
@@ -245,6 +327,15 @@ export default function CreatePropertyPage() {
           </div>
         </form>
       </div>
+
+      {/* Auth Modal — shown only when submitting without auth */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          pendingSubmitRef.current = false;
+        }}
+      />
     </div>
   );
 }

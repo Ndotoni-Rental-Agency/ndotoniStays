@@ -13,6 +13,10 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      // Save current URL so OAuth redirect returns here
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('ndotoni_booking_redirect', window.location.href);
+      }
       setShowAuthModal(true);
     }
   }, [isLoading, isAuthenticated]);

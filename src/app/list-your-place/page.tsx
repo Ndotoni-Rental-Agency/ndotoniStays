@@ -79,6 +79,7 @@ export default function ListYourPlacePage() {
     if (isAuthenticated && pendingSubmitRef.current) {
       pendingSubmitRef.current = false;
       setShowAuthModal(false);
+      localStorage.removeItem('ndotoni_booking_redirect');
       submitProperty();
     }
   }, [isAuthenticated]);
@@ -146,7 +147,10 @@ export default function ListYourPlacePage() {
     e.preventDefault();
 
     if (!isAuthenticated) {
+      // Save form to localStorage and prompt sign-in
       localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+      // Save current URL for OAuth redirect
+      localStorage.setItem('ndotoni_booking_redirect', window.location.href);
       pendingSubmitRef.current = true;
       setShowAuthModal(true);
       return;

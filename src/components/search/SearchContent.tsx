@@ -13,6 +13,7 @@ interface ShortTermProperty {
   nightlyRate: number;
   currency: string;
   propertyType: string;
+  stayCategories: string[] | null;
   region: string;
   district: string;
   thumbnail: string;
@@ -34,10 +35,11 @@ export function SearchContent() {
   const checkOut = searchParams.get('checkOut') || getDefaultCheckOut();
   const guests = parseInt(searchParams.get('guests') || '1');
   const propertyType = searchParams.get('propertyType') || undefined;
+  const stayCategory = searchParams.get('category') || undefined;
 
   useEffect(() => {
     fetchProperties();
-  }, [region, checkIn, checkOut, guests, propertyType]);
+  }, [region, checkIn, checkOut, guests, propertyType, stayCategory]);
 
   async function fetchProperties() {
     setLoading(true);
@@ -52,6 +54,7 @@ export function SearchContent() {
           checkOutDate: checkOut,
           numberOfGuests: guests,
           ...(propertyType && { propertyType }),
+          ...(stayCategory && { stayCategory }),
           limit: 20,
         },
       });

@@ -10,7 +10,26 @@ const CATEGORIES = [
     description: 'Apartments & rooms for a comfortable night',
     icon: '🏠',
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=APARTMENT',
+    searchParams: 'category=NIGHTLY_STAY&region=DAR ES SALAAM',
+    regionLabel: 'Dar es Salaam',
+  },
+  {
+    id: 'beach',
+    title: 'Beach Getaways',
+    description: 'Sun, sand, and ocean views',
+    icon: '🏖️',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop',
+    searchParams: 'category=BEACH&region=ZANZIBAR',
+    regionLabel: 'Zanzibar',
+  },
+  {
+    id: 'safari',
+    title: 'Safari Stays',
+    description: 'Wildlife lodges and bush camps',
+    icon: '🦁',
+    image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=600&auto=format&fit=crop',
+    searchParams: 'category=SAFARI&region=ARUSHA',
+    regionLabel: 'Arusha',
   },
   {
     id: 'parties',
@@ -18,7 +37,8 @@ const CATEGORIES = [
     description: 'Birthday venues & celebration spaces',
     icon: '🎉',
     image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=VILLA',
+    searchParams: 'category=PARTY&region=DAR ES SALAAM',
+    regionLabel: 'Dar es Salaam',
   },
   {
     id: 'photoshoot',
@@ -26,23 +46,8 @@ const CATEGORIES = [
     description: 'Beautiful backdrops for your shots',
     icon: '📸',
     image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=STUDIO',
-  },
-  {
-    id: 'getaways',
-    title: 'Beach & Nature',
-    description: 'Coastal escapes and serene retreats',
-    icon: '🌊',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=COTTAGE',
-  },
-  {
-    id: 'groups',
-    title: 'Group Getaways',
-    description: 'Villas & guesthouses for the crew',
-    icon: '👥',
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=GUESTHOUSE',
+    searchParams: 'category=PHOTOSHOOT&region=DAR ES SALAAM',
+    regionLabel: 'Dar es Salaam',
   },
   {
     id: 'business',
@@ -50,7 +55,8 @@ const CATEGORIES = [
     description: 'Quiet spaces for focused work',
     icon: '💼',
     image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'propertyType=HOTEL',
+    searchParams: 'category=MEETING&region=DAR ES SALAAM',
+    regionLabel: 'Dar es Salaam',
   },
 ];
 
@@ -93,7 +99,7 @@ export function CategoryGrid() {
                   {cat.title}
                 </h3>
                 <p className="text-sm text-white/75 mt-0.5">
-                  {cat.description}
+                  {cat.description} · <span className="text-white/90 font-medium">{cat.regionLabel}</span>
                 </p>
               </div>
 

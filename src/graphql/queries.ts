@@ -1677,6 +1677,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     nightlyRate
     propertyId
     propertyType
+    stayCategories
     publishedAt
     ratingSummary {
       accuracy
@@ -3710,6 +3711,7 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       nightlyRate
       propertyId
       propertyType
+      stayCategories
       publishedAt
       ratingSummary {
         accuracy

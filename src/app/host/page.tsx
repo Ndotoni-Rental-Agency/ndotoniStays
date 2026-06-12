@@ -13,6 +13,7 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { HostEarnings } from '@/components/host/HostEarnings';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import toast from 'react-hot-toast';
 
 interface Property {
@@ -39,6 +40,7 @@ export default function HostPropertiesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     fetchProperties();
@@ -58,19 +60,24 @@ export default function HostPropertiesPage() {
   }
 
   async function handleDelete(propertyId: string, title: string) {
-    const confirmed = window.confirm(`Delete "${title}"? This cannot be undone.`);
-    if (!confirmed) return;
+    setDeleteTarget({ id: propertyId, title });
+  }
 
-    setDeletingId(propertyId);
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const { id } = deleteTarget;
+
+    setDeletingId(id);
     try {
-      await GraphQLClient.executeAuthenticated(deactivateShortTermProperty, { propertyId });
-      setProperties(prev => prev.filter(p => p.propertyId !== propertyId));
+      await GraphQLClient.executeAuthenticated(deactivateShortTermProperty, { propertyId: id });
+      setProperties(prev => prev.filter(p => p.propertyId !== id));
       toast.success('Property deleted');
     } catch (err: any) {
       console.error('Failed to delete property:', err);
       toast.error(err?.message || 'Failed to delete');
     } finally {
       setDeletingId(null);
+      setDeleteTarget(null);
     }
   }
 
@@ -198,6 +205,19 @@ export default function HostPropertiesPage() {
           })}
         </div>
       )}
+
+      {/* Delete confirmation modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete property?"
+        message={`"${deleteTarget?.title}" will be permanently removed. This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        variant="danger"
+        loading={!!deletingId}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </>
   );
 }

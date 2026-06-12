@@ -47,22 +47,31 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
         : GraphQLClient.executePublic.bind(GraphQLClient);
 
+      console.log('[PaymentFlow] Initiating payment:', { bookingId, phoneNumber, amount, currency });
+
       const response = await executeGql<{ initiatePayment: any }>(initiatePayment, {
         input: { bookingId, phoneNumber },
       });
 
+      console.log('[PaymentFlow] initiatePayment response:', JSON.stringify(response, null, 2));
+
       const result = response.initiatePayment;
 
       if (result.status === 'PENDING') {
+        console.log('[PaymentFlow] Payment pending, polling reference:', result.reference);
         pollPaymentStatus(result.reference);
       } else if (result.status === 'COMPLETED' || result.status === 'CAPTURED') {
+        console.log('[PaymentFlow] Payment completed immediately');
         onSuccess();
       } else {
+        console.error('[PaymentFlow] Payment failed with status:', result.status, result.message);
         onError(result.message || 'Payment failed');
         setIsProcessing(false);
       }
     } catch (err: any) {
-      onError(err?.errors?.[0]?.message || err?.message || 'Payment failed');
+      console.error('[PaymentFlow] initiatePayment error:', err);
+      console.error('[PaymentFlow] Error details:', JSON.stringify(err?.errors || err?.message || err, null, 2));
+      onError(err?.errors?.[0]?.message || err?.message || 'Payment initiation failed');
       setIsProcessing(false);
     }
   }

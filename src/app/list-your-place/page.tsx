@@ -63,10 +63,14 @@ export default function ListYourPlacePage() {
         setForm(parsed);
         setStep(4);
 
-        // If returning from OAuth redirect with pending submit, mark for auto-submit
+        // Only auto-submit if returning from OAuth redirect AND not already authenticated.
+        // If user is already authenticated, they're just revisiting — show the form normally.
         const pending = localStorage.getItem(PENDING_SUBMIT_KEY);
-        if (pending) {
+        if (pending && !isAuthenticated) {
           pendingSubmitRef.current = true;
+        } else {
+          // Clean up stale pending flag
+          localStorage.removeItem(PENDING_SUBMIT_KEY);
         }
       }
     } catch {
@@ -81,14 +85,16 @@ export default function ListYourPlacePage() {
     }
   }, [user]);
 
-  // After sign-in, auto-submit if we have a pending draft
+  // After sign-in, auto-submit if we have a pending draft.
+  // This fires when isAuthenticated changes from false → true (user just signed in).
   useEffect(() => {
     if (isAuthenticated && pendingSubmitRef.current) {
       pendingSubmitRef.current = false;
       setShowAuthModal(false);
       localStorage.removeItem('ndotoni_booking_redirect');
       localStorage.removeItem(PENDING_SUBMIT_KEY);
-      submitProperty();
+      // Small delay to let auth state fully settle
+      setTimeout(() => submitProperty(), 300);
     }
   }, [isAuthenticated]);
 

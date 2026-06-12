@@ -116,7 +116,8 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
       <div className="text-center py-8">
         <div className="animate-spin h-10 w-10 border-3 border-brand-600 border-t-transparent rounded-full mx-auto mb-4" />
         <p className="text-sm font-medium text-ink-900">Waiting for payment...</p>
-        <p className="text-xs text-ink-500 mt-1">Check your phone and confirm the M-Pesa prompt</p>
+        <p className="text-xs text-ink-500 mt-1">Check your phone and confirm the payment prompt</p>
+        <p className="text-xs text-ink-400 mt-1">Works with all Tanzanian networks: Vodacom (M-Pesa), Airtel, Tigo, Halotel & more</p>
       </div>
     );
   }
@@ -132,7 +133,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           <span className="text-3xl">📱</span>
           <div className="flex-1">
             <p className="font-semibold text-ink-900 group-hover:text-brand-700">Mobile Money</p>
-            <p className="text-xs text-ink-500">M-Pesa, Airtel Money, Tigo Pesa</p>
+            <p className="text-xs text-ink-500">All networks: Vodacom, Airtel, Tigo, Halotel & more</p>
           </div>
           <svg className="h-5 w-5 text-ink-300 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </button>
@@ -207,7 +208,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         onClick={() => setMethod(null)}
         className="w-full text-center text-sm text-ink-500 hover:text-brand-600 transition-colors py-1"
       >
-        ← Pay with M-Pesa instead
+        ← Pay with mobile money instead
       </button>
     </div>
   );

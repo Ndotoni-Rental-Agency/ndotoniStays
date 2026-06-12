@@ -58,6 +58,7 @@ export default function EditPropertyPage() {
     title: '',
     description: '',
     propertyType: '',
+    stayCategories: ['NIGHTLY_STAY'],
     region: '',
     district: '',
     street: '',
@@ -109,6 +110,7 @@ export default function EditPropertyPage() {
         title: p.title || '',
         description: p.description || '',
         propertyType: p.propertyType || '',
+        stayCategories: p.stayCategories || ['NIGHTLY_STAY'],
         region: p.region || p.address?.region || '',
         district: p.district || p.address?.district || '',
         street: p.address?.street || '',
@@ -155,6 +157,7 @@ export default function EditPropertyPage() {
         title: form.title,
         description: form.description,
         propertyType: form.propertyType,
+        stayCategories: form.stayCategories,
         region: form.region,
         district: form.district,
         address: {

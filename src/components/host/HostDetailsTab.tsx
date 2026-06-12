@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { PROPERTY_TYPES, REGIONS, AMENITIES } from './constants';
+import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
 import { PropertyFormData } from './types';
 
 interface Props {
@@ -77,6 +77,37 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                   <span className="text-[10px] sm:text-[11px] font-medium text-ink-700 leading-tight text-center">{t.label}</span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Stay Categories */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1">What's this space great for?</label>
+            <p className="text-xs text-ink-400 mb-2">Select all that apply — helps guests find you</p>
+            <div className="flex flex-wrap gap-2">
+              {STAY_CATEGORIES.map((cat) => {
+                const isSelected = form.stayCategories.includes(cat.value);
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => {
+                      const updated = isSelected
+                        ? form.stayCategories.filter((c) => c !== cat.value)
+                        : [...form.stayCategories, cat.value];
+                      onUpdate('stayCategories', updated);
+                    }}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all touch-manipulation ${
+                      isSelected
+                        ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
+                        : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:bg-ink-50'
+                    }`}
+                  >
+                    <span className="text-base">{cat.icon}</span>
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

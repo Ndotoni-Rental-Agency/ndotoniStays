@@ -2669,6 +2669,7 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     nightlyRate
     propertyId
     propertyType
+    stayCategories
     publishedAt
     ratingSummary {
       accuracy

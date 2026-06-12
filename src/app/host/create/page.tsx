@@ -11,6 +11,7 @@ import { ImageUpload } from '@/components/media/ImageUpload';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import LocationSelector from '@/components/location/LocationSelector';
 import LocationMapPicker from '@/components/location/LocationMapPicker';
+import { STAY_CATEGORIES } from '@/components/host/constants';
 
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
@@ -33,6 +34,7 @@ export default function CreatePropertyPage() {
   const [form, setForm] = useState({
     title: '',
     propertyType: '',
+    stayCategories: ['NIGHTLY_STAY'] as string[],
     region: 'Dar es Salaam',
     district: '',
     ward: '',
@@ -75,6 +77,7 @@ export default function CreatePropertyPage() {
         input: {
           title: form.title,
           propertyType: form.propertyType,
+          stayCategories: form.stayCategories,
           region: form.region,
           district: form.district || form.region,
           nightlyRate: parseFloat(form.nightlyRate),
@@ -158,6 +161,39 @@ export default function CreatePropertyPage() {
             {!form.propertyType && (
               <input type="text" required value={form.propertyType} className="sr-only" onChange={() => {}} tabIndex={-1} />
             )}
+          </div>
+
+          {/* Stay Categories */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1">What's this space great for?</label>
+            <p className="text-xs text-ink-400 mb-2">Select all that apply</p>
+            <div className="flex flex-wrap gap-2">
+              {STAY_CATEGORIES.map((cat) => {
+                const isSelected = form.stayCategories.includes(cat.value);
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => {
+                      setForm(prev => ({
+                        ...prev,
+                        stayCategories: isSelected
+                          ? prev.stayCategories.filter(c => c !== cat.value)
+                          : [...prev.stayCategories, cat.value],
+                      }));
+                    }}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all ${
+                      isSelected
+                        ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
+                        : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:bg-ink-50'
+                    }`}
+                  >
+                    <span className="text-base">{cat.icon}</span>
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Location */}

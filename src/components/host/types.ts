@@ -2,6 +2,7 @@ export interface PropertyFormData {
   title: string;
   description: string;
   propertyType: string;
+  stayCategories: string[];
   region: string;
   district: string;
   street: string;
@@ -26,6 +27,7 @@ export interface PropertyData {
   title: string;
   description: string;
   propertyType: string;
+  stayCategories: string[] | null;
   address: {
     street: string;
     city: string;

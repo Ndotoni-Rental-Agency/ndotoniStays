@@ -147,16 +147,37 @@ export default function PayBookingPage() {
   // Ready — show payment form
   return (
     <div className="mx-auto max-w-sm px-4 py-10 sm:py-16">
+      {/* Property card */}
+      {booking?.property && (
+        <div className="flex items-center gap-3 bg-ink-50 rounded-xl p-3 mb-6">
+          {(booking.property.thumbnail || booking.property.images?.[0]) && (
+            <img
+              src={booking.property.thumbnail || booking.property.images[0]}
+              alt={booking.property.title}
+              className="h-14 w-14 rounded-lg object-cover shrink-0"
+            />
+          )}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-ink-900 truncate">
+              {booking.property.title}
+            </p>
+            <p className="text-xs text-ink-500">
+              {booking.property.district}, {booking.property.region}
+            </p>
+            <p className="text-xs text-ink-400 mt-0.5">
+              {booking.checkInDate} → {booking.checkOutDate} · {nights} night{nights > 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Amount header */}
       <div className="text-center mb-8">
         <p className="text-3xl font-bold text-ink-900 tracking-tight">
           {formatPrice(total, currency)}
         </p>
-        <p className="text-sm text-ink-500 mt-2">
-          {booking?.property?.title || booking?.propertyTitle}
-        </p>
-        <p className="text-xs text-ink-400 mt-0.5">
-          {guestName} · {nights} night{nights > 1 ? 's' : ''}
+        <p className="text-xs text-ink-400 mt-1">
+          {guestName} · Total due
         </p>
       </div>
 

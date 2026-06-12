@@ -1,19 +1,21 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { HostSidebar } from '@/components/host/HostSidebar';
 
 export default function HostLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/');
+      setShowAuthModal(true);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -23,7 +25,25 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-ink-500 mb-4">Sign in to access your host dashboard</p>
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="btn-primary"
+          >
+            Sign In
+          </button>
+        </div>
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

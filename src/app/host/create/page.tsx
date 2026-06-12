@@ -12,6 +12,7 @@ import { PhoneInput } from '@/components/ui/PhoneInput';
 import LocationSelector from '@/components/location/LocationSelector';
 import LocationMapPicker from '@/components/location/LocationMapPicker';
 import { STAY_CATEGORIES } from '@/components/host/constants';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 const PROPERTY_TYPES = [
   { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
@@ -30,6 +31,7 @@ export default function CreatePropertyPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -57,9 +59,9 @@ export default function CreatePropertyPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace('/');
+      setShowAuthModal(true);
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated]);
 
   function updateField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -108,6 +110,15 @@ export default function CreatePropertyPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="animate-pulse text-ink-400">Loading...</div>
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => {
+            if (!isAuthenticated) {
+              router.replace('/');
+            }
+            setShowAuthModal(false);
+          }}
+        />
       </div>
     );
   }

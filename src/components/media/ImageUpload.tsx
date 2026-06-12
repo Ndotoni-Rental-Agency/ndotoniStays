@@ -26,10 +26,11 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: Props) {
 
   const uploadFile = async (file: File): Promise<string | null> => {
     try {
-      // Get presigned upload URL
+      // Get presigned upload URL (public — no auth required)
       const data = await GraphQLClient.execute<{ getMediaUploadUrl: { uploadUrl: string; fileUrl: string } }>(
         getMediaUploadUrl,
-        { fileName: file.name, contentType: file.type }
+        { fileName: file.name, contentType: file.type },
+        true // forceApiKey — allow unauthenticated uploads
       );
 
       const { uploadUrl, fileUrl } = data.getMediaUploadUrl;

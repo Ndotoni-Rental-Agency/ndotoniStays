@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -9,17 +9,25 @@ import { HostSidebar } from '@/components/host/HostSidebar';
 export default function HostLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // /host/create is allowed without auth — it just redirects to /list-your-place
+  const isCreatePage = pathname === '/host/create';
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Save current URL so OAuth redirect returns here
+    if (!isLoading && !isAuthenticated && !isCreatePage) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('ndotoni_booking_redirect', window.location.href);
       }
       setShowAuthModal(true);
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading, isAuthenticated, isCreatePage]);
+
+  // Let the create page pass through without auth — it redirects itself
+  if (isCreatePage) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (

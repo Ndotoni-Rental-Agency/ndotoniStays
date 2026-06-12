@@ -315,6 +315,11 @@ export default function ListYourPlacePage() {
                       <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Creating...
                     </>
+                  ) : !isAuthenticated ? (
+                    <>
+                      <CheckIcon className="h-5 w-5" />
+                      Sign in to Create Property
+                    </>
                   ) : (
                     <>
                       <CheckIcon className="h-5 w-5" />

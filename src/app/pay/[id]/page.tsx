@@ -149,22 +149,24 @@ export default function PayBookingPage() {
   return (
     <div className="mx-auto max-w-sm px-4 py-10 sm:py-16">
       {/* Property card */}
-      {booking?.property && (
+      {(booking?.property || booking?.propertyTitle) && (
         <div className="flex items-center gap-3 bg-ink-50 rounded-xl p-3 mb-6">
-          {(booking.property.thumbnail || booking.property.images?.[0]) && (
+          {(booking.property?.thumbnail || booking.property?.images?.[0] || booking.propertyThumbnail) && (
             <img
-              src={booking.property.thumbnail || booking.property.images[0]}
-              alt={booking.property.title}
+              src={booking.property?.thumbnail || booking.property?.images?.[0] || booking.propertyThumbnail}
+              alt={booking.property?.title || booking.propertyTitle}
               className="h-14 w-14 rounded-lg object-cover shrink-0"
             />
           )}
           <div className="min-w-0">
             <p className="text-sm font-semibold text-ink-900 truncate">
-              {booking.property.title}
+              {booking.property?.title || booking.propertyTitle}
             </p>
-            <p className="text-xs text-ink-500">
-              {booking.property.district}, {booking.property.region}
-            </p>
+            {booking.property?.district && (
+              <p className="text-xs text-ink-500">
+                {booking.property.district}, {booking.property.region}
+              </p>
+            )}
             <p className="text-xs text-ink-400 mt-0.5">
               {booking.checkInDate} → {booking.checkOutDate} · {nights} night{nights > 1 ? 's' : ''}
             </p>

@@ -131,7 +131,6 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: Props) {
             type="file"
             accept="image/*"
             multiple
-            capture="environment"
             onChange={(e) => e.target.files && handleFiles(e.target.files)}
             className="sr-only"
             disabled={uploading}

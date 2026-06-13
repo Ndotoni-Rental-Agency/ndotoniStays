@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { StepProps } from './types';
 
 function formatWithCommas(value: string): string {
@@ -13,11 +14,34 @@ function stripCommas(value: string): string {
 }
 
 export function StepPricing({ form, updateField, setForm }: StepProps) {
+  const [generatingTitle, setGeneratingTitle] = useState(false);
   const displayPrice = form.nightlyRate ? formatWithCommas(form.nightlyRate) : '';
 
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = stripCommas(e.target.value);
     updateField('nightlyRate', raw);
+  }
+
+  async function handleGenerateTitle() {
+    setGeneratingTitle(true);
+    try {
+      const { AIService } = await import('@/lib/ai/AIService');
+      const title = await AIService.generateTitle({
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        maxGuests: form.maxGuests,
+        currency: form.currency,
+        nightlyRate: form.nightlyRate,
+      });
+      if (title) {
+        updateField('title', title);
+      }
+    } catch (err) {
+      console.error('Failed to generate title:', err);
+    } finally {
+      setGeneratingTitle(false);
+    }
   }
 
   return (
@@ -38,7 +62,24 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
             className="input text-base sm:text-lg py-3.5"
             required
           />
-          <p className="text-xs sm:text-sm text-ink-400 mt-2">Tip: mention the area and what makes it special</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs sm:text-sm text-ink-400">Tip: mention the area and what makes it special</p>
+            <button
+              type="button"
+              onClick={handleGenerateTitle}
+              disabled={generatingTitle || !form.district}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 disabled:text-ink-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {generatingTitle ? (
+                <>
+                  <span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>✨ Suggest title</>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

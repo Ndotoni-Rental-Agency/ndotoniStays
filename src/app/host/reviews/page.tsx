@@ -18,9 +18,12 @@ export default function HostReviewsPage() {
           listMyShortTermProperties: { properties: Array<{ propertyId: string; title: string; thumbnail: string }> };
         }>(listMyShortTermProperties, { limit: 50 });
         const properties = data.listMyShortTermProperties?.properties || [];
+        console.log('[HostReviews] Properties loaded:', properties.map(p => ({ id: p.propertyId, title: p.title, thumbnail: p.thumbnail })));
         setPropertyIds(properties.map((p) => p.propertyId));
         setPropertyMap(Object.fromEntries(properties.map((p) => [p.propertyId, p.title])));
-        setThumbnailMap(Object.fromEntries(properties.filter((p) => p.thumbnail).map((p) => [p.propertyId, p.thumbnail])));
+        const thumbs = Object.fromEntries(properties.filter((p) => p.thumbnail).map((p) => [p.propertyId, p.thumbnail]));
+        console.log('[HostReviews] Thumbnail map:', thumbs);
+        setThumbnailMap(thumbs);
       } catch (err) {
         console.error('Failed to load properties:', err);
       } finally {

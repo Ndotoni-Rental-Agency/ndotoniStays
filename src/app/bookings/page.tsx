@@ -135,21 +135,27 @@ export default function MyBookingsPage() {
 
   async function handleSubmitReview(review: ReviewFormData) {
     if (!reviewingBooking) return;
-    await GraphQLClient.executeAuthenticated(createReview, {
-      input: {
-        bookingId: reviewingBooking.bookingId,
-        propertyId: reviewingBooking.propertyId,
-        overallRating: review.overallRating,
-        cleanliness: review.cleanliness,
-        accuracy: review.accuracy,
-        communication: review.communication,
-        location: review.location,
-        value: review.value,
-        comment: review.comment.trim(),
-      },
-    });
-    toast.success('Review submitted! Thank you.');
-    setReviewingBooking(null);
+    try {
+      const result = await GraphQLClient.executeAuthenticated(createReview, {
+        input: {
+          bookingId: reviewingBooking.bookingId,
+          propertyId: reviewingBooking.propertyId,
+          overallRating: review.overallRating,
+          cleanliness: review.cleanliness,
+          accuracy: review.accuracy,
+          communication: review.communication,
+          location: review.location,
+          value: review.value,
+          comment: review.comment.trim(),
+        },
+      });
+      console.log('[ReviewSubmit] Success:', JSON.stringify(result, null, 2));
+      toast.success('Review submitted! Thank you.');
+      setReviewingBooking(null);
+    } catch (err: any) {
+      console.error('[ReviewSubmit] Error:', err);
+      throw err;
+    }
   }
 
   function formatDateShort(dateStr: string) {

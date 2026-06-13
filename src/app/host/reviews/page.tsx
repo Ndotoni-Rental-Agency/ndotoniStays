@@ -7,16 +7,20 @@ import { HostReviews } from '@/components/host/HostReviews';
 
 export default function HostReviewsPage() {
   const [propertyIds, setPropertyIds] = useState<string[]>([]);
+  const [propertyMap, setPropertyMap] = useState<Record<string, string>>({});
+  const [thumbnailMap, setThumbnailMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
       try {
         const data = await GraphQLClient.executeAuthenticated<{
-          listMyShortTermProperties: { properties: Array<{ propertyId: string }> };
+          listMyShortTermProperties: { properties: Array<{ propertyId: string; title: string; thumbnail: string }> };
         }>(listMyShortTermProperties, { limit: 50 });
-        const ids = (data.listMyShortTermProperties?.properties || []).map((p) => p.propertyId);
-        setPropertyIds(ids);
+        const properties = data.listMyShortTermProperties?.properties || [];
+        setPropertyIds(properties.map((p) => p.propertyId));
+        setPropertyMap(Object.fromEntries(properties.map((p) => [p.propertyId, p.title])));
+        setThumbnailMap(Object.fromEntries(properties.filter((p) => p.thumbnail).map((p) => [p.propertyId, p.thumbnail])));
       } catch (err) {
         console.error('Failed to load properties:', err);
       } finally {
@@ -36,7 +40,7 @@ export default function HostReviewsPage() {
           ))}
         </div>
       ) : (
-        <HostReviews propertyIds={propertyIds} />
+        <HostReviews propertyIds={propertyIds} propertyNames={propertyMap} propertyThumbnails={thumbnailMap} />
       )}
     </>
   );

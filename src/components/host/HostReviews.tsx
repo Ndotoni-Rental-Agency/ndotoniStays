@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getPropertyReviews } from '@/graphql/queries';
 import { respondToReview } from '@/graphql/mutations';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { cn } from '@/lib/utils';
+import { cn, getCdnUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
 interface ReviewGuest {
@@ -32,9 +33,11 @@ interface Review {
 
 interface Props {
   propertyIds: string[];
+  propertyNames?: Record<string, string>;
+  propertyThumbnails?: Record<string, string>;
 }
 
-export function HostReviews({ propertyIds }: Props) {
+export function HostReviews({ propertyIds, propertyNames = {}, propertyThumbnails = {} }: Props) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -197,16 +200,34 @@ export function HostReviews({ propertyIds }: Props) {
             >
               {/* Header */}
               <div className="flex items-start justify-between gap-3 mb-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-ink-900">{guestName}</p>
-                    {review.verifiedStay && (
-                      <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
-                        Verified
-                      </span>
+                <div className="flex gap-3">
+                  {propertyThumbnails[review.propertyId] && (
+                    <div className="relative h-10 w-10 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image
+                        src={getCdnUrl(propertyThumbnails[review.propertyId])}
+                        alt={propertyNames[review.propertyId] || 'Property'}
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-ink-900">{guestName}</p>
+                      {review.verifiedStay && (
+                        <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-medium">
+                          Verified
+                        </span>
+                      )}
+                    </div>
+                    {propertyNames[review.propertyId] && (
+                      <p className="text-xs text-brand-600 font-medium mt-0.5">
+                        {propertyNames[review.propertyId]}
+                      </p>
                     )}
+                    <p className="text-xs text-ink-400 mt-0.5">{formatDate(review.createdAt)}</p>
                   </div>
-                  <p className="text-xs text-ink-400 mt-0.5">{formatDate(review.createdAt)}</p>
                 </div>
                 <div className="shrink-0">{renderStars(review.overallRating)}</div>
               </div>

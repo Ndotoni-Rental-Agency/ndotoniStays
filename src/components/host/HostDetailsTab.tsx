@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
 import { PropertyFormData } from './types';
+import { AIService } from '@/lib/ai/AIService';
 
 interface Props {
   form: PropertyFormData;
@@ -15,6 +16,10 @@ interface Props {
 
 export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving }: Props) {
   const [customAmenity, setCustomAmenity] = useState('');
+  const [generatingTitle, setGeneratingTitle] = useState(false);
+  const [predictingPrice, setPredictingPrice] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
+  const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
 
   // Custom amenities are any in form.amenities that aren't in the preset list
   const customAmenities = form.amenities.filter((a) => !AMENITIES.includes(a));
@@ -33,6 +38,63 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
   function removeCustomAmenity(amenity: string) {
     onUpdate('amenities', form.amenities.filter((a) => a !== amenity));
   }
+
+  async function handleGenerateTitle() {
+    setGeneratingTitle(true);
+    try {
+      const title = await AIService.generateTitle({
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        maxGuests: form.maxGuests,
+        currency: form.currency,
+        nightlyRate: form.nightlyRate,
+      });
+      if (title) onUpdate('title', title);
+    } catch (err) {
+      console.error('Failed to generate title:', err);
+    } finally {
+      setGeneratingTitle(false);
+    }
+  }
+
+  async function handleGenerateDescription() {
+    setGeneratingDescription(true);
+    try {
+      const description = await AIService.generateDescription({
+        title: form.title,
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        maxGuests: parseInt(form.maxGuests) || 2,
+        nightlyRate: parseFloat(form.nightlyRate) || undefined,
+        currency: form.currency,
+        amenities: form.amenities,
+      });
+      if (description) onUpdate('description', description);
+    } catch (err) {
+      console.error('Failed to generate description:', err);
+    } finally {
+      setGeneratingDescription(false);
+    }
+  }
+
+  async function handleSuggestPrice() {
+    setPredictingPrice(true);
+    try {
+      const result = await AIService.predictPrice({
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        maxGuests: parseInt(form.maxGuests) || 2,
+      });
+      setPriceSuggestion(result);
+    } catch (err) {
+      console.error('Failed to predict price:', err);
+    } finally {
+      setPredictingPrice(false);
+    }
+  }
   return (
     <div className="space-y-8 max-w-3xl">
       {/* Basic Info */}
@@ -48,6 +110,20 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
               className="input text-base"
               placeholder="Give your property a catchy name"
             />
+            <div className="flex justify-end mt-1.5">
+              <button
+                type="button"
+                onClick={handleGenerateTitle}
+                disabled={generatingTitle || !form.district}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 disabled:text-ink-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {generatingTitle ? (
+                  <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Generating...</>
+                ) : (
+                  <>✨ Suggest title</>
+                )}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Description</label>
@@ -58,6 +134,20 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
               placeholder="What makes your place special? Mention the vibe, nearby attractions, and unique features."
               rows={5}
             />
+            <div className="flex justify-end mt-1.5">
+              <button
+                type="button"
+                onClick={handleGenerateDescription}
+                disabled={generatingDescription || !form.title}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 disabled:text-ink-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {generatingDescription ? (
+                  <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Writing...</>
+                ) : (
+                  <>✨ Generate description</>
+                )}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-2">Property type</label>
@@ -177,7 +267,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 <input
                   type="number"
                   value={form.nightlyRate}
-                  onChange={(e) => onUpdate('nightlyRate', e.target.value)}
+                  onChange={(e) => { onUpdate('nightlyRate', e.target.value); setPriceSuggestion(null); }}
                   className="input pl-12 text-base"
                   min="0"
                   inputMode="numeric"
@@ -192,6 +282,42 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 <option value="USD">USD</option>
               </select>
             </div>
+            <div className="flex justify-end mt-1.5">
+              <button
+                type="button"
+                onClick={handleSuggestPrice}
+                disabled={predictingPrice || !form.district}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 disabled:text-ink-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {predictingPrice ? (
+                  <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Analyzing...</>
+                ) : (
+                  <>💰 Suggest price</>
+                )}
+              </button>
+            </div>
+            {priceSuggestion && (
+              <div className="mt-2 p-3 rounded-xl bg-brand-50 border border-brand-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-brand-800">
+                      Suggested: TZS {priceSuggestion.suggestedPrice.toLocaleString()}/night
+                    </p>
+                    <p className="text-xs text-brand-600 mt-0.5">
+                      Range: TZS {priceSuggestion.range.min.toLocaleString()} – {priceSuggestion.range.max.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-ink-500 mt-1">{priceSuggestion.reasoning}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { onUpdate('nightlyRate', priceSuggestion.suggestedPrice.toString()); setPriceSuggestion(null); }}
+                    className="text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    Use
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Cleaning fee</label>

@@ -203,18 +203,19 @@ export default function MyBookingsPage() {
   const today = new Date().toISOString().split('T')[0];
 
   const filtered = bookings.filter((b) => {
-    const isPast = b.checkOutDate < today;
-    const isCancelled = b.status === 'CANCELLED' || b.status === 'DECLINED';
+    const isCancelled = b.status === 'CANCELLED' || b.status === 'DECLINED' || b.status === 'NO_SHOW';
+    const isCompleted = b.status === 'COMPLETED';
+    const checkOutPassed = b.checkOutDate <= today;
 
     if (activeTab === 'cancelled') {
       return isCancelled;
     }
     if (activeTab === 'past') {
-      // Past = checkout has passed AND not cancelled
-      return !isCancelled && isPast;
+      // Past = checkout has passed OR completed, and NOT cancelled
+      return !isCancelled && (isCompleted || checkOutPassed);
     }
-    // Upcoming = checkout hasn't passed yet AND not cancelled
-    return !isCancelled && !isPast;
+    // Upcoming = checkout hasn't passed, not completed, and not cancelled
+    return !isCancelled && !isCompleted && !checkOutPassed;
   });
 
   if (authLoading) {
@@ -280,9 +281,9 @@ export default function MyBookingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {filtered.map((booking) => {
             const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
-            const canReview = activeTab === 'past' && (
+            const canReview = (
               booking.status === 'COMPLETED' ||
-              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkOutDate < today)
+              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkInDate <= today)
             );
             const isReviewing = reviewingBooking === booking.bookingId;
             const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';

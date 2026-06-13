@@ -24,10 +24,10 @@ const getPropertyImages = /* GraphQL */ `
     }
   }
 `;
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { StarIcon as StarOutline, CalendarDaysIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { ReviewModal, ReviewFormData } from '@/components/booking/ReviewModal';
 
 interface BookingProperty {
   propertyId: string;
@@ -76,17 +76,7 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
-  const [reviewingBooking, setReviewingBooking] = useState<string | null>(null);
-  const [reviewForm, setReviewForm] = useState({
-    overallRating: 0,
-    cleanliness: 5,
-    accuracy: 5,
-    communication: 5,
-    location: 5,
-    value: 5,
-    comment: '',
-  });
-  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -143,44 +133,23 @@ export default function MyBookingsPage() {
     }
   }
 
-  async function handleSubmitReview(bookingId: string, propertyId: string) {
-    if (reviewForm.overallRating === 0) {
-      toast.error('Please select an overall rating');
-      return;
-    }
-    if (!reviewForm.comment.trim()) {
-      toast.error('Please write a short comment');
-      return;
-    }
-
-    setSubmittingReview(true);
-    try {
-      await GraphQLClient.executeAuthenticated(createReview, {
-        input: {
-          bookingId,
-          propertyId,
-          overallRating: reviewForm.overallRating,
-          cleanliness: reviewForm.cleanliness,
-          accuracy: reviewForm.accuracy,
-          communication: reviewForm.communication,
-          location: reviewForm.location,
-          value: reviewForm.value,
-          comment: reviewForm.comment.trim(),
-        },
-      });
-      toast.success('Review submitted! Thank you.');
-      setReviewingBooking(null);
-      setReviewForm({ overallRating: 0, cleanliness: 5, accuracy: 5, communication: 5, location: 5, value: 5, comment: '' });
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to submit review');
-    } finally {
-      setSubmittingReview(false);
-    }
-  }
-
-  function formatDate(dateStr: string) {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  async function handleSubmitReview(review: ReviewFormData) {
+    if (!reviewingBooking) return;
+    await GraphQLClient.executeAuthenticated(createReview, {
+      input: {
+        bookingId: reviewingBooking.bookingId,
+        propertyId: reviewingBooking.propertyId,
+        overallRating: review.overallRating,
+        cleanliness: review.cleanliness,
+        accuracy: review.accuracy,
+        communication: review.communication,
+        location: review.location,
+        value: review.value,
+        comment: review.comment.trim(),
+      },
+    });
+    toast.success('Review submitted! Thank you.');
+    setReviewingBooking(null);
   }
 
   function formatDateShort(dateStr: string) {
@@ -285,7 +254,6 @@ export default function MyBookingsPage() {
               booking.status === 'COMPLETED' ||
               (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkInDate <= today)
             );
-            const isReviewing = reviewingBooking === booking.bookingId;
             const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';
             const days = daysUntil(booking.checkInDate);
 
@@ -363,99 +331,14 @@ export default function MyBookingsPage() {
                 </div>
 
                 {/* Review CTA for completed bookings */}
-                {canReview && !isReviewing && (
+                {canReview && (
                   <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
                     <button
-                      onClick={() => setReviewingBooking(booking.bookingId)}
+                      onClick={() => setReviewingBooking(booking)}
                       className="w-full py-2.5 rounded-xl border-2 border-ink-800 text-xs font-semibold text-ink-800 hover:bg-ink-800 hover:text-white transition-colors touch-manipulation"
                     >
-                      Write a review
+                      ⭐ Write a review
                     </button>
-                  </div>
-                )}
-
-                {/* Review form */}
-                {isReviewing && (
-                  <div className="border-t border-ink-100 p-4 sm:p-5 space-y-4 bg-ink-50/50">
-                    <p className="text-base font-semibold text-ink-900">How was your stay?</p>
-
-                    {/* Overall rating */}
-                    <div>
-                      <label className="block text-sm font-medium text-ink-600 mb-2">Overall rating</label>
-                      <div className="flex gap-1.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewForm((f) => ({ ...f, overallRating: star }))}
-                            className="touch-manipulation"
-                          >
-                            {star <= reviewForm.overallRating ? (
-                              <StarSolid className="h-8 w-8 text-amber-400" />
-                            ) : (
-                              <StarOutline className="h-8 w-8 text-ink-300 hover:text-amber-300 transition-colors" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Category ratings */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {(['cleanliness', 'accuracy', 'communication', 'location', 'value'] as const).map((cat) => (
-                        <div key={cat}>
-                          <label className="block text-xs font-medium text-ink-600 mb-1.5 capitalize">{cat}</label>
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => setReviewForm((f) => ({ ...f, [cat]: star }))}
-                                className="touch-manipulation"
-                              >
-                                {star <= reviewForm[cat] ? (
-                                  <StarSolid className="h-5 w-5 text-amber-400" />
-                                ) : (
-                                  <StarOutline className="h-5 w-5 text-ink-200" />
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Comment */}
-                    <div>
-                      <label className="block text-sm font-medium text-ink-600 mb-1.5">Your review</label>
-                      <textarea
-                        value={reviewForm.comment}
-                        onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
-                        placeholder="What did you love? What could be improved?"
-                        className="input text-sm min-h-[100px]"
-                        rows={4}
-                      />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          setReviewingBooking(null);
-                          setReviewForm({ overallRating: 0, cleanliness: 5, accuracy: 5, communication: 5, location: 5, value: 5, comment: '' });
-                        }}
-                        className="btn-secondary text-sm py-2.5 px-5"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => handleSubmitReview(booking.bookingId, booking.propertyId)}
-                        disabled={submittingReview || reviewForm.overallRating === 0}
-                        className="btn-primary text-sm py-2.5 px-5 flex-1"
-                      >
-                        {submittingReview ? 'Submitting...' : 'Submit Review'}
-                      </button>
-                    </div>
                   </div>
                 )}
               </div>
@@ -463,6 +346,16 @@ export default function MyBookingsPage() {
           })}
         </div>
       )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={!!reviewingBooking}
+        onClose={() => setReviewingBooking(null)}
+        onSubmit={handleSubmitReview}
+        property={reviewingBooking?.property || null}
+        checkInDate={reviewingBooking?.checkInDate || ''}
+        checkOutDate={reviewingBooking?.checkOutDate || ''}
+      />
     </div>
   );
 }

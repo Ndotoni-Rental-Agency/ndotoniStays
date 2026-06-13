@@ -2,10 +2,36 @@
 
 import { useState, useEffect } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
-import { getPropertyReviews } from '@/graphql/queries';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
+
+// Public query — only requests fields accessible without auth
+const getPublicPropertyReviews = /* GraphQL */ `
+  query GetPropertyReviews($propertyId: ID!, $limit: Int) {
+    getPropertyReviews(propertyId: $propertyId, limit: $limit) {
+      count
+      reviews {
+        reviewId
+        overallRating
+        cleanliness
+        accuracy
+        communication
+        location
+        value
+        comment
+        hostResponse
+        hostResponseDate
+        verifiedStay
+        createdAt
+        guest {
+          firstName
+          lastName
+        }
+      }
+    }
+  }
+`;
 
 interface Review {
   reviewId: string;
@@ -63,7 +89,7 @@ export function PropertyReviews({ propertyId, ratingSummary }: Props) {
     try {
       const data = await GraphQLClient.executePublic<{
         getPropertyReviews: { reviews: Review[]; count: number; nextToken?: string };
-      }>(getPropertyReviews, { propertyId, limit: 20 });
+      }>(getPublicPropertyReviews, { propertyId, limit: 20 });
 
       const result = data.getPropertyReviews;
       console.log('[PropertyReviews] Fetched reviews:', JSON.stringify(result, null, 2));

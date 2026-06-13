@@ -66,21 +66,19 @@ export function BookingSidebar({
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
   const minStay = property.minimumStay || 1;
 
-  // Get today's date for min date
+  // Get today's date for min date (local timezone)
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const minDate = tomorrow.toISOString().split("T")[0];
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const minDate = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
 
   // Fetch blocked dates on mount
   useEffect(() => {
     async function fetchBlockedDates() {
       try {
         const now = new Date();
-        const startDate = now.toISOString().split("T")[0];
-        const endDate = new Date(now.setMonth(now.getMonth() + 6))
-          .toISOString()
-          .split("T")[0];
+        const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const future = new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
+        const endDate = `${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, '0')}-${String(future.getDate()).padStart(2, '0')}`;
         const data = await executeGql<{
           getBlockedDates: {
             blockedRanges: Array<{ startDate: string; endDate: string }>;
@@ -92,12 +90,13 @@ export function BookingSidebar({
         });
         const blocked = new Set<string>();
         for (const range of data.getBlockedDates?.blockedRanges || []) {
-          // Expand each range into individual dates
-          const start = new Date(range.startDate);
-          const end = new Date(range.endDate);
-          const current = new Date(start);
+          // Expand each range into individual dates (parse as local)
+          const [sy, sm, sd] = range.startDate.split('-').map(Number);
+          const [ey, em, ed] = range.endDate.split('-').map(Number);
+          const current = new Date(sy, sm - 1, sd);
+          const end = new Date(ey, em - 1, ed);
           while (current <= end) {
-            blocked.add(current.toISOString().split("T")[0]);
+            blocked.add(`${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`);
             current.setDate(current.getDate() + 1);
           }
         }

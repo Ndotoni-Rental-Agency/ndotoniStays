@@ -257,7 +257,10 @@ export function BookingSidebar({
           <div className="grid grid-cols-2 gap-2">
             <CalendarDatePicker
               value={checkIn}
-              onChange={setCheckIn}
+              onChange={(val) => {
+                setCheckIn(val);
+                if (checkOut && val >= checkOut) setCheckOut('');
+              }}
               min={minDate}
               label="Check-in"
               placeholder="Add date"
@@ -268,7 +271,8 @@ export function BookingSidebar({
             <CalendarDatePicker
               value={checkOut}
               onChange={setCheckOut}
-              min={checkIn || minDate}
+              minExclusive={checkIn || undefined}
+              min={minDate}
               label="Check-out"
               placeholder="Add date"
               blockedDates={blockedDates}

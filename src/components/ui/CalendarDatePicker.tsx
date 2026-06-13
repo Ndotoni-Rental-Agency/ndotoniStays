@@ -7,6 +7,8 @@ interface CalendarDatePickerProps {
   value: string;
   onChange: (value: string) => void;
   min?: string;
+  /** If set, dates <= minExclusive are disabled (useful for checkout: pass checkIn date) */
+  minExclusive?: string;
   label?: string;
   placeholder?: string;
   blockedDates?: Set<string>;
@@ -20,6 +22,7 @@ export default function CalendarDatePicker({
   value,
   onChange,
   min,
+  minExclusive,
   label,
   placeholder = 'Select date',
   blockedDates = new Set(),
@@ -67,6 +70,7 @@ export default function CalendarDatePicker({
   const isDateDisabled = (dateStr: string): boolean => {
     if (blockedDates.has(dateStr)) return true;
     if (min && dateStr < min) return true;
+    if (minExclusive && dateStr <= minExclusive) return true;
     return false;
   };
 

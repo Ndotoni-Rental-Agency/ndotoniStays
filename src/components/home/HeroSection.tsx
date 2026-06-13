@@ -213,7 +213,8 @@ export function HeroSection() {
               <CalendarDatePicker
                 value={checkOut}
                 onChange={setCheckOut}
-                min={checkIn || minCheckIn}
+                minExclusive={checkIn || undefined}
+                min={minCheckIn}
                 placeholder="Check-out"
                 rangeStart={checkIn}
                 rangeEnd={checkOut}

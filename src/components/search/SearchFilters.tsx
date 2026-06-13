@@ -51,7 +51,10 @@ export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
       <div className="min-w-[140px]">
         <CalendarDatePicker
           value={localCheckIn}
-          onChange={setLocalCheckIn}
+          onChange={(val) => {
+            setLocalCheckIn(val);
+            if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
+          }}
           label="Check-in"
           placeholder="Check-in"
           rangeStart={localCheckIn}
@@ -63,7 +66,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
         <CalendarDatePicker
           value={localCheckOut}
           onChange={setLocalCheckOut}
-          min={localCheckIn}
+          minExclusive={localCheckIn || undefined}
           label="Check-out"
           placeholder="Check-out"
           rangeStart={localCheckIn}

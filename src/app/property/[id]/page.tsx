@@ -7,6 +7,7 @@ import { getShortTermProperty } from '@/graphql/queries';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
+import { PropertyReviews } from '@/components/property/PropertyReviews';
 
 interface ShortTermProperty {
   propertyId: string;
@@ -122,6 +123,10 @@ export default function PropertyDetailPage() {
         {/* Left: Property info */}
         <div className="lg:col-span-2">
           <PropertyInfo property={property} />
+          <PropertyReviews
+            propertyId={property.propertyId}
+            ratingSummary={property.ratingSummary}
+          />
         </div>
 
         {/* Right: Booking sidebar (sticky) - desktop only */}

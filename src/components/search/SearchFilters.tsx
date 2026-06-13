@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
@@ -39,6 +39,21 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
   const [localMinPrice, setLocalMinPrice] = useState(minPrice?.toString() || '');
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice?.toString() || '');
 
+  // Auto-correct invalid price range from URL params on mount
+  useEffect(() => {
+    if (minPrice && maxPrice && minPrice >= maxPrice) {
+      setLocalMaxPrice('');
+    }
+  }, []);
+
+  // Auto-clear max if it's <= min
+  const handleMinPriceChange = (value: string) => {
+    setLocalMinPrice(value);
+    if (value && localMaxPrice && Number(localMaxPrice) <= Number(value)) {
+      setLocalMaxPrice('');
+    }
+  };
+
   const handleApply = () => {
     const params = new URLSearchParams();
     params.set('region', localRegion);
@@ -49,6 +64,8 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
     if (localMaxPrice) params.set('maxPrice', localMaxPrice);
     router.push(`/search?${params.toString()}`);
   };
+
+  const minPriceNum = localMinPrice ? Number(localMinPrice) : 0;
 
   return (
     <div className="flex flex-wrap items-end gap-3 bg-ink-50 rounded-2xl p-4">
@@ -109,7 +126,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
         <label className="block text-xs font-medium text-ink-500 mb-1">Min price</label>
         <select
           value={localMinPrice}
-          onChange={(e) => setLocalMinPrice(e.target.value)}
+          onChange={(e) => handleMinPriceChange(e.target.value)}
           className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
         >
           {PRICE_OPTIONS.map((p) => (
@@ -128,13 +145,13 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
         >
           <option value="">Any</option>
-          <option value="10000">Up to TZS 10,000</option>
-          <option value="25000">Up to TZS 25,000</option>
-          <option value="50000">Up to TZS 50,000</option>
-          <option value="100000">Up to TZS 100,000</option>
-          <option value="200000">Up to TZS 200,000</option>
-          <option value="500000">Up to TZS 500,000</option>
-          <option value="1000000">Up to TZS 1,000,000</option>
+          {[10000, 25000, 50000, 100000, 200000, 500000, 1000000]
+            .filter((v) => v > minPriceNum)
+            .map((v) => (
+              <option key={`max-${v}`} value={v}>
+                Up to TZS {v.toLocaleString()}
+              </option>
+            ))}
         </select>
       </div>
 

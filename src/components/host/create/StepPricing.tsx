@@ -12,7 +12,7 @@ function stripCommas(value: string): string {
   return value.replace(/,/g, '');
 }
 
-export function StepPricing({ form, updateField }: StepProps) {
+export function StepPricing({ form, updateField, setForm }: StepProps) {
   const displayPrice = form.nightlyRate ? formatWithCommas(form.nightlyRate) : '';
 
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -81,6 +81,29 @@ export function StepPricing({ form, updateField }: StepProps) {
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Instant Book Toggle */}
+        <div className="flex items-center justify-between p-4 rounded-xl border border-ink-200 bg-ink-50/50">
+          <div>
+            <p className="text-sm font-medium text-ink-800">⚡ Instant booking</p>
+            <p className="text-xs text-ink-500 mt-0.5">Guests can book without waiting for your approval</p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.instantBookEnabled}
+            onClick={() => setForm(prev => ({ ...prev, instantBookEnabled: !prev.instantBookEnabled }))}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.instantBookEnabled ? 'bg-brand-600' : 'bg-ink-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.instantBookEnabled ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
       </div>
     </div>

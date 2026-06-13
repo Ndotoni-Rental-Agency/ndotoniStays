@@ -10,19 +10,33 @@ const REGIONS = [
   'Mbeya', 'Morogoro', 'Tanga', 'Kilimanjaro', 'Iringa',
 ];
 
+const PRICE_OPTIONS = [
+  { value: '', label: 'Any' },
+  { value: '10000', label: '10,000' },
+  { value: '25000', label: '25,000' },
+  { value: '50000', label: '50,000' },
+  { value: '100000', label: '100,000' },
+  { value: '200000', label: '200,000' },
+  { value: '500000', label: '500,000' },
+];
+
 interface Props {
   region: string;
   checkIn: string;
   checkOut: string;
   guests: number;
+  minPrice?: number;
+  maxPrice?: number;
 }
 
-export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
+export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, maxPrice }: Props) {
   const router = useRouter();
   const [localRegion, setLocalRegion] = useState(region);
   const [localCheckIn, setLocalCheckIn] = useState(checkIn);
   const [localCheckOut, setLocalCheckOut] = useState(checkOut);
   const [localGuests, setLocalGuests] = useState(guests);
+  const [localMinPrice, setLocalMinPrice] = useState(minPrice?.toString() || '');
+  const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice?.toString() || '');
 
   const handleApply = () => {
     const params = new URLSearchParams();
@@ -30,6 +44,8 @@ export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
     params.set('checkIn', localCheckIn);
     params.set('checkOut', localCheckOut);
     params.set('guests', localGuests.toString());
+    if (localMinPrice) params.set('minPrice', localMinPrice);
+    if (localMaxPrice) params.set('maxPrice', localMaxPrice);
     router.push(`/search?${params.toString()}`);
   };
 
@@ -84,6 +100,39 @@ export function SearchFilters({ region, checkIn, checkOut, guests }: Props) {
           {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
             <option key={n} value={n}>{n} {n === 1 ? 'guest' : 'guests'}</option>
           ))}
+        </select>
+      </div>
+
+      {/* Price range */}
+      <div className="min-w-[110px]">
+        <label className="block text-xs font-medium text-ink-500 mb-1">Min price</label>
+        <select
+          value={localMinPrice}
+          onChange={(e) => setLocalMinPrice(e.target.value)}
+          className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+        >
+          {PRICE_OPTIONS.map((p) => (
+            <option key={`min-${p.value}`} value={p.value}>
+              {p.value ? `TZS ${p.label}+` : 'Any'}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="min-w-[110px]">
+        <label className="block text-xs font-medium text-ink-500 mb-1">Max price</label>
+        <select
+          value={localMaxPrice}
+          onChange={(e) => setLocalMaxPrice(e.target.value)}
+          className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+        >
+          <option value="">Any</option>
+          <option value="25000">Up to TZS 25,000</option>
+          <option value="50000">Up to TZS 50,000</option>
+          <option value="100000">Up to TZS 100,000</option>
+          <option value="200000">Up to TZS 200,000</option>
+          <option value="500000">Up to TZS 500,000</option>
+          <option value="1000000">Up to TZS 1,000,000</option>
         </select>
       </div>
 

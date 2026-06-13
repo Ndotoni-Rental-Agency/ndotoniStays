@@ -36,10 +36,12 @@ export function SearchContent() {
   const guests = parseInt(searchParams.get('guests') || '1');
   const propertyType = searchParams.get('propertyType') || undefined;
   const stayCategory = searchParams.get('category') || undefined;
+  const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
+  const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
 
   useEffect(() => {
     fetchProperties();
-  }, [region, checkIn, checkOut, guests, propertyType, stayCategory]);
+  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, minPrice, maxPrice]);
 
   async function fetchProperties() {
     setLoading(true);
@@ -55,6 +57,8 @@ export function SearchContent() {
           numberOfGuests: guests,
           ...(propertyType && { propertyType }),
           ...(stayCategory && { stayCategory }),
+          ...(minPrice && { minPrice }),
+          ...(maxPrice && { maxPrice }),
           limit: 20,
         },
       });
@@ -76,6 +80,8 @@ export function SearchContent() {
         checkIn={checkIn}
         checkOut={checkOut}
         guests={guests}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
       />
 
       {/* Results header */}

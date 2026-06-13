@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { StepProps } from './types';
+import { AIService } from '@/lib/ai/AIService';
 
 function formatWithCommas(value: string): string {
   const num = value.replace(/[^0-9]/g, '');
@@ -15,17 +16,19 @@ function stripCommas(value: string): string {
 
 export function StepPricing({ form, updateField, setForm }: StepProps) {
   const [generatingTitle, setGeneratingTitle] = useState(false);
+  const [predictingPrice, setPredictingPrice] = useState(false);
+  const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
   const displayPrice = form.nightlyRate ? formatWithCommas(form.nightlyRate) : '';
 
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = stripCommas(e.target.value);
     updateField('nightlyRate', raw);
+    setPriceSuggestion(null); // Clear suggestion when user manually types
   }
 
   async function handleGenerateTitle() {
     setGeneratingTitle(true);
     try {
-      const { AIService } = await import('@/lib/ai/AIService');
       const title = await AIService.generateTitle({
         propertyType: form.propertyType,
         district: form.district,
@@ -41,6 +44,30 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
       console.error('Failed to generate title:', err);
     } finally {
       setGeneratingTitle(false);
+    }
+  }
+
+  async function handleSuggestPrice() {
+    setPredictingPrice(true);
+    try {
+      const result = await AIService.predictPrice({
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        maxGuests: parseInt(form.maxGuests) || 2,
+      });
+      setPriceSuggestion(result);
+    } catch (err) {
+      console.error('Failed to predict price:', err);
+    } finally {
+      setPredictingPrice(false);
+    }
+  }
+
+  function applyPriceSuggestion() {
+    if (priceSuggestion) {
+      updateField('nightlyRate', priceSuggestion.suggestedPrice.toString());
+      updateField('currency', priceSuggestion.currency || 'TZS');
     }
   }
 
@@ -109,6 +136,49 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
                 <option value="USD">USD</option>
               </select>
             </div>
+
+            {/* Suggest price button */}
+            <div className="mt-2 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={handleSuggestPrice}
+                disabled={predictingPrice || !form.district}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-brand-600 hover:text-brand-700 disabled:text-ink-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {predictingPrice ? (
+                  <>
+                    <span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                    Analyzing market...
+                  </>
+                ) : (
+                  <>💰 Suggest price</>
+                )}
+              </button>
+            </div>
+
+            {/* Price suggestion result */}
+            {priceSuggestion && (
+              <div className="mt-3 p-3 rounded-xl bg-brand-50 border border-brand-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-brand-800">
+                      Suggested: TZS {priceSuggestion.suggestedPrice.toLocaleString()}/night
+                    </p>
+                    <p className="text-xs text-brand-600 mt-0.5">
+                      Range: TZS {priceSuggestion.range.min.toLocaleString()} – {priceSuggestion.range.max.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-ink-500 mt-1">{priceSuggestion.reasoning}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={applyPriceSuggestion}
+                    className="text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    Use this
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-2">Max guests</label>

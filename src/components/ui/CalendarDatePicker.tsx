@@ -89,7 +89,8 @@ export default function CalendarDatePicker({
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     const days = [];
 
@@ -101,8 +102,8 @@ export default function CalendarDatePicker({
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       const isSelected = value === dateStr;
       const isDisabled = isDateDisabled(dateStr);
-      const isPast = dateStr < today;
-      const isToday = dateStr === today;
+      const isPast = dateStr < todayStr;
+      const isToday = dateStr === todayStr;
       const inRange = isInRange(dateStr);
       const isStart = isRangeStart(dateStr);
       const isEnd = isRangeEnd(dateStr);

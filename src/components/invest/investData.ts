@@ -26,7 +26,7 @@ export interface TeamMember {
 export const TEAM: TeamMember[] = [
   {
     name: 'Emmanuel Makoye',
-    role: 'Founder & CEO',
+    role: 'Founder and Developer',
     bio: 'Oversees all Ndotoni activities and builds the platform.',
     initials: 'EM',
     gradient: 'from-brand-500 to-emerald-600',
@@ -38,7 +38,7 @@ export const TEAM: TeamMember[] = [
   },
   {
     name: 'Robinson Jackson',
-    role: 'COO',
+    role: 'Chief Operation Officer',
     bio: 'Operations, coordination, customer oversight',
     initials: 'RJ',
     gradient: 'from-blue-500 to-indigo-600',
@@ -50,7 +50,7 @@ export const TEAM: TeamMember[] = [
   },
   {
     name: 'Akil Khatri',
-    role: 'Development',
+    role: 'Software Development',
     bio: 'Referral systems, fraud prevention, tracking',
     initials: 'AK',
     gradient: 'from-cyan-500 to-blue-600',
@@ -62,7 +62,7 @@ export const TEAM: TeamMember[] = [
   },
   {
     name: 'Adam Nzinza',
-    role: 'Marketing',
+    role: 'Chief Marketing Officer',
     bio: 'Content, distribution, demand generation',
     initials: 'AN',
     gradient: 'from-purple-500 to-pink-600',
@@ -74,7 +74,7 @@ export const TEAM: TeamMember[] = [
   },
   {
     name: 'Paul Lukindo',
-    role: 'Marketing',
+    role: 'Chief Marketing Officer',
     bio: 'Social media, university outreach',
     initials: 'PL',
     gradient: 'from-teal-500 to-emerald-600',
@@ -86,7 +86,7 @@ export const TEAM: TeamMember[] = [
   },
   {
     name: 'Raymond Maohei',
-    role: 'Customer Relations',
+    role: 'Customer Relations and Business Operations',
     bio: 'Lead conversion, landlord onboarding',
     initials: 'RM',
     gradient: 'from-orange-500 to-red-600',
@@ -97,7 +97,7 @@ export const TEAM: TeamMember[] = [
     image: null,
   },
   {
-    name: 'Kelvin Makoye',
+    name: 'Kelvin Makoye and Business Operations',
     role: 'Customer Relations',
     bio: 'Landlord engagement, follow-ups',
     initials: 'KM',
@@ -109,8 +109,8 @@ export const TEAM: TeamMember[] = [
     image: null,
   },
   {
-    name: 'Japhet Kabegeje',
-    role: 'Customer Relations',
+    name: 'Japhet Kabegeje ',
+    role: 'Customer Relations and Business Operations',
     bio: 'Agent onboarding, pipeline management',
     initials: 'JK',
     gradient: 'from-amber-500 to-orange-600',

@@ -50,6 +50,7 @@ export interface GenerateCheckInInstructionsInput {
   maxGuests?: number;
   checkInTime?: string;
   checkOutTime?: string;
+  existingExamples?: Array<{ title: string; instructions: any }>;
 }
 
 class AIServiceClass {

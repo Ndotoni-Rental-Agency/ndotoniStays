@@ -10,9 +10,10 @@ interface Props {
   onUpdate: (field: string, value: any) => void;
   onSave: () => void;
   saving: boolean;
+  otherPropertyInstructions?: Array<{ title: string; instructions: CheckInInstructionsForm }>;
 }
 
-export function HostCheckInTab({ form, onUpdate, onSave, saving }: Props) {
+export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyInstructions }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
   const instructions = form.checkInInstructions;
 
@@ -33,6 +34,10 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving }: Props) {
         maxGuests: parseInt(form.maxGuests) || undefined,
         checkInTime: form.checkInTime,
         checkOutTime: form.checkOutTime,
+        existingExamples: otherPropertyInstructions?.filter(p =>
+          // Only include properties that actually have instructions set
+          Object.values(p.instructions).some(v => v && (typeof v === 'string' ? v.trim() !== '' : (Array.isArray(v) && v.length > 0)))
+        ),
       });
 
       // Merge AI suggestions with existing values (don't overwrite what the host already filled)

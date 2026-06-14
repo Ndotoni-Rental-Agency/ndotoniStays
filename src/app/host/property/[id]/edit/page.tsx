@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
-import { getShortTermProperty } from '@/graphql/queries';
+import { getShortTermProperty, listMyShortTermProperties } from '@/graphql/queries';
 import { updateShortTermProperty, publishShortTermProperty, deactivateShortTermProperty } from '@/graphql/mutations';
 import {
   ArrowLeftIcon,
@@ -56,6 +56,7 @@ export default function EditPropertyPage() {
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState('DRAFT');
   const [images, setImages] = useState<string[]>([]);
+  const [siblingInstructions, setSiblingInstructions] = useState<Array<{ title: string; instructions: any }>>([]);
 
   const [form, setForm] = useState<PropertyFormData>({
     title: '',
@@ -144,6 +145,19 @@ export default function EditPropertyPage() {
         houseRules: (p.houseRules || []).join('\n'),
         instantBookEnabled: p.instantBookEnabled ?? true,
       });
+      // Fetch sibling properties for AI context
+      try {
+        const siblingData = await GraphQLClient.executeAuthenticated<{
+          listMyShortTermProperties: { properties: Array<{ propertyId: string; title: string; checkInInstructions: any }> };
+        }>(listMyShortTermProperties, { limit: 10 });
+
+        const siblings = (siblingData.listMyShortTermProperties?.properties || [])
+          .filter((p) => p.propertyId !== propertyId && p.checkInInstructions)
+          .map((p) => ({ title: p.title, instructions: p.checkInInstructions }));
+        setSiblingInstructions(siblings);
+      } catch {
+        // Non-critical — AI just won't have examples
+      }
     } catch (err: any) {
       console.error('Failed to fetch property:', err);
       toast.error('Failed to load property');
@@ -356,6 +370,7 @@ export default function EditPropertyPage() {
           onUpdate={updateField}
           onSave={handleSave}
           saving={saving}
+          otherPropertyInstructions={siblingInstructions}
         />
       )}
     </div>

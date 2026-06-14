@@ -10,7 +10,28 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime } = body;
+    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime, existingExamples } = body;
+
+    // Build examples section from host's other properties
+    let examplesSection = '';
+    if (existingExamples && existingExamples.length > 0) {
+      examplesSection = `\n\nThis host already has check-in instructions for their other properties. Use these as reference for tone and style:\n`;
+      for (const example of existingExamples.slice(0, 3)) {
+        const instr = example.instructions;
+        const parts = [
+          instr.directions && `Directions: ${instr.directions}`,
+          instr.accessCode && `Access: ${instr.accessCode}`,
+          instr.parkingInfo && `Parking: ${instr.parkingInfo}`,
+          instr.wifiName && `WiFi: ${instr.wifiName}`,
+          instr.contactName && `Contact: ${instr.contactName}`,
+          instr.additionalNotes && `Notes: ${instr.additionalNotes}`,
+        ].filter(Boolean).join('; ');
+        if (parts) {
+          examplesSection += `- "${example.title}": ${parts}\n`;
+        }
+      }
+      examplesSection += `\nMatch this host's communication style and level of detail. Adapt for the new property's specific location and type.`;
+    }
 
     const prompt = `You are a helpful assistant for short-term rental hosts in Tanzania. Generate practical check-in instructions for a guest arriving at this property.
 
@@ -21,7 +42,7 @@ Property details:
 - Max guests: ${maxGuests || 'not specified'}
 - Check-in time: ${checkInTime || '14:00'}
 - Check-out time: ${checkOutTime || '11:00'}
-- Amenities: ${amenities?.join(', ') || 'not specified'}
+- Amenities: ${amenities?.join(', ') || 'not specified'}${examplesSection}
 
 Generate realistic, helpful check-in instructions. Be specific to Tanzania/East Africa context (mention things like security guards, askari, gates, boda boda landmarks if appropriate for the area). Keep it concise and practical.
 

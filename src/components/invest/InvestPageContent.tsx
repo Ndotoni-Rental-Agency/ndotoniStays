@@ -3,6 +3,7 @@ import { BackUsSection } from './BackUsSection';
 import { ProblemSection } from './ProblemSection';
 import { SolutionSection } from './SolutionSection';
 import { TractionSection } from './TractionSection';
+import { ProjectionsSection } from './ProjectionsSection';
 import { MarketSection } from './MarketSection';
 import { FundsSection } from './FundsSection';
 import { TeamSection } from './TeamSection';
@@ -17,6 +18,7 @@ export function InvestPageContent() {
       <ProblemSection />
       <SolutionSection />
       <TractionSection />
+      <ProjectionsSection />
       <MarketSection />
       <FundsSection />
       <TeamSection />

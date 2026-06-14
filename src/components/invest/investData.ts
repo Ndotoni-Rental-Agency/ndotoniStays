@@ -121,3 +121,19 @@ export const TEAM: TeamMember[] = [
     image: null,
   },
 ];
+
+export const PROJECTIONS_BOOKINGS = [
+  { year: 'Y1', value: 500 },
+  { year: 'Y2', value: 2500 },
+  { year: 'Y3', value: 8000 },
+  { year: 'Y4', value: 20000 },
+  { year: 'Y5', value: 50000 },
+];
+
+export const PROJECTIONS_REVENUE = [
+  { year: 'Y1', value: 25000 },
+  { year: 'Y2', value: 125000 },
+  { year: 'Y3', value: 400000 },
+  { year: 'Y4', value: 1000000 },
+  { year: 'Y5', value: 2500000 },
+];

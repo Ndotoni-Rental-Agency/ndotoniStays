@@ -30,7 +30,7 @@ export function InvestHero() {
           </div>
           <div className="h-10 w-px bg-ink-100" />
           <div className="text-center">
-            <p className="text-3xl font-bold text-brand-600">5%</p>
+            <p className="text-3xl font-bold text-brand-600">10%</p>
             <p className="mt-1 text-sm text-ink-500">Equity</p>
           </div>
           <div className="h-10 w-px bg-ink-100" />

@@ -20,8 +20,6 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
   const [predictingPrice, setPredictingPrice] = useState(false);
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
-  const [titleContext, setTitleContext] = useState('');
-  const [descContext, setDescContext] = useState('');
   const [priceContext, setPriceContext] = useState('');
 
   // Custom amenities are any in form.amenities that aren't in the preset list
@@ -52,7 +50,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
         maxGuests: form.maxGuests,
         currency: form.currency,
         nightlyRate: form.nightlyRate,
-        userContext: titleContext || undefined,
+        userContext: form.title || undefined,
       });
       if (title) onUpdate('title', title);
     } catch (err) {
@@ -74,7 +72,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
         nightlyRate: parseFloat(form.nightlyRate) || undefined,
         currency: form.currency,
         amenities: form.amenities,
-        userContext: descContext || undefined,
+        userContext: form.description || undefined,
       });
       if (description) onUpdate('description', description);
     } catch (err) {
@@ -131,13 +129,6 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 )}
               </button>
             </div>
-            <input
-              type="text"
-              value={titleContext}
-              onChange={(e) => setTitleContext(e.target.value)}
-              className="input text-xs mt-1 py-1.5 text-ink-500"
-              placeholder="Optional: hints for AI, e.g. 'beachfront, great for parties, sunset views'"
-            />
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Description</label>
@@ -162,13 +153,6 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 )}
               </button>
             </div>
-            <input
-              type="text"
-              value={descContext}
-              onChange={(e) => setDescContext(e.target.value)}
-              className="input text-xs mt-1 py-1.5 text-ink-500"
-              placeholder="Optional: what to highlight, e.g. 'rooftop pool, 5 min from beach, newly renovated'"
-            />
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-2">Property type</label>

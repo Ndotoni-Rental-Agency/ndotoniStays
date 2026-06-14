@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { SparklesIcon } from '@heroicons/react/24/outline';
+import { useState, useRef } from 'react';
+import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { PropertyFormData, CheckInInstructionsForm } from './types';
 import { AIService } from '@/lib/ai/AIService';
 
@@ -16,7 +16,9 @@ interface Props {
 export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyInstructions }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiContext, setAiContext] = useState('');
+  const [aiSuccess, setAiSuccess] = useState(false);
   const instructions = form.checkInInstructions;
+  const formStartRef = useRef<HTMLDivElement>(null);
 
   function updateInstruction(field: keyof CheckInInstructionsForm, value: any) {
     onUpdate('checkInInstructions', { ...instructions, [field]: value });
@@ -24,16 +26,8 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
 
   async function handleAiSuggest() {
     setAiGenerating(true);
+    setAiSuccess(false);
     try {
-      console.log('[AI CheckIn] Calling AI with:', {
-        title: form.title,
-        propertyType: form.propertyType,
-        district: form.district,
-        region: form.region,
-        userContext: aiContext || '(none)',
-        existingExamples: otherPropertyInstructions?.length || 0,
-      });
-
       const result = await AIService.generateCheckInInstructions({
         title: form.title,
         propertyType: form.propertyType,
@@ -50,9 +44,6 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         ),
       });
 
-      console.log('[AI CheckIn] AI returned:', result);
-      console.log('[AI CheckIn] Current instructions (will only fill empty):', instructions);
-
       // Merge AI suggestions — overwrite ALL fields (user clicked generate)
       onUpdate('checkInInstructions', {
         ...instructions,
@@ -61,6 +52,13 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         additionalNotes: result.additionalNotes || instructions.additionalNotes || '',
         contactName: result.contactName || instructions.contactName || '',
       });
+
+      // Show success and scroll to the generated fields
+      setAiSuccess(true);
+      setTimeout(() => {
+        formStartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      setTimeout(() => setAiSuccess(false), 4000);
     } catch (err) {
       console.error('[AI CheckIn] Failed:', err);
       onUpdate('checkInInstructions', {
@@ -114,8 +112,18 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         </div>
       </div>
 
+      {/* Success banner after AI generation */}
+      {aiSuccess && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <CheckCircleIcon className="h-5 w-5 text-green-600 shrink-0" />
+          <p className="text-sm font-medium text-green-800">
+            ✨ Instructions generated! Review and edit below, then save.
+          </p>
+        </div>
+      )}
+
       {/* Access & Entry */}
-      <section>
+      <section ref={formStartRef}>
         <h3 className="text-sm font-semibold text-ink-700 mb-3 uppercase tracking-wide">Access & Entry</h3>
         <div className="space-y-4">
           <div>

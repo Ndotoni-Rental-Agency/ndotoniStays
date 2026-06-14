@@ -30,14 +30,86 @@ const STRIPE_LINKS: Record<number, string> = {
 const MPESA_NUMBER = '+255 782 267 121';
 
 const TEAM = [
-  { name: 'Emmanuel Makoye', role: 'CEO & Lead Engineer', focus: 'Product direction, system design, execution', initials: 'EM', grad: 'from-brand-500 to-emerald-600' },
-  { name: 'Robinson Jackson', role: 'COO', focus: 'Operations, coordination, customer oversight', initials: 'RJ', grad: 'from-blue-500 to-indigo-600' },
-  { name: 'Akil Khatri', role: 'Development', focus: 'Referral systems, fraud prevention, tracking', initials: 'AK', grad: 'from-cyan-500 to-blue-600' },
-  { name: 'Adam Nzinza', role: 'Marketing', focus: 'Content, distribution, demand generation', initials: 'AN', grad: 'from-purple-500 to-pink-600' },
-  { name: 'Paul Lukindo', role: 'Marketing', focus: 'Social media, university outreach', initials: 'PL', grad: 'from-teal-500 to-emerald-600' },
-  { name: 'Raymond Maohei', role: 'Customer Relations', focus: 'Lead conversion, landlord onboarding', initials: 'RM', grad: 'from-orange-500 to-red-600' },
-  { name: 'Kelvin Makoye', role: 'Customer Relations', focus: 'Landlord engagement, follow-ups', initials: 'KM', grad: 'from-rose-500 to-pink-600' },
-  { name: 'Japhet Kabegeje', role: 'Customer Relations', focus: 'Agent onboarding, pipeline management', initials: 'JK', grad: 'from-amber-500 to-orange-600' },
+  {
+    name: 'Emmanuel Makoye',
+    role: 'Founder & CEO',
+    focus: 'Software Engineer at Amazon (Seattle). Oversees all Ndotoni activities and builds the platform.',
+    initials: 'EM',
+    grad: 'from-brand-500 to-emerald-600',
+    image: null,
+    linkedin: 'https://www.linkedin.com/in/emmanuel-makoye-63a7611b7/',
+    email: 'makoye224@gmail.com',
+  },
+  {
+    name: 'Robinson Jackson',
+    role: 'COO',
+    focus: 'Operations, coordination, customer oversight',
+    initials: 'RJ',
+    grad: 'from-blue-500 to-indigo-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Akil Khatri',
+    role: 'Development',
+    focus: 'Referral systems, fraud prevention, tracking',
+    initials: 'AK',
+    grad: 'from-cyan-500 to-blue-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Adam Nzinza',
+    role: 'Marketing',
+    focus: 'Content, distribution, demand generation',
+    initials: 'AN',
+    grad: 'from-purple-500 to-pink-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Paul Lukindo',
+    role: 'Marketing',
+    focus: 'Social media, university outreach',
+    initials: 'PL',
+    grad: 'from-teal-500 to-emerald-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Raymond Maohei',
+    role: 'Customer Relations',
+    focus: 'Lead conversion, landlord onboarding',
+    initials: 'RM',
+    grad: 'from-orange-500 to-red-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Kelvin Makoye',
+    role: 'Customer Relations',
+    focus: 'Landlord engagement, follow-ups',
+    initials: 'KM',
+    grad: 'from-rose-500 to-pink-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
+  {
+    name: 'Japhet Kabegeje',
+    role: 'Customer Relations',
+    focus: 'Agent onboarding, pipeline management',
+    initials: 'JK',
+    grad: 'from-amber-500 to-orange-600',
+    image: null,
+    linkedin: null,
+    email: null,
+  },
 ];
 
 export function InvestPageContent() {
@@ -233,12 +305,30 @@ export function InvestPageContent() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {TEAM.map((m) => (
               <div key={m.name} className="bg-white rounded-xl border border-ink-100 p-4 text-center">
-                <div className={`w-12 h-12 mx-auto rounded-full bg-gradient-to-br ${m.grad} flex items-center justify-center text-white text-sm font-bold mb-2`}>
-                  {m.initials}
-                </div>
+                {m.image ? (
+                  <img src={m.image} alt={m.name} className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
+                ) : (
+                  <div className={`w-14 h-14 mx-auto rounded-full bg-gradient-to-br ${m.grad} flex items-center justify-center text-white text-sm font-bold mb-2`}>
+                    {m.initials}
+                  </div>
+                )}
                 <p className="text-sm font-bold text-ink-900 leading-tight">{m.name}</p>
                 <p className="text-xs text-brand-600 font-medium mt-0.5">{m.role}</p>
-                <p className="text-xs text-ink-400 mt-1">{m.focus}</p>
+                <p className="text-xs text-ink-400 mt-1 leading-snug">{m.focus}</p>
+                {(m.linkedin || m.email) && (
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    {m.linkedin && (
+                      <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="text-ink-400 hover:text-brand-600 transition-colors" aria-label={`${m.name} LinkedIn`}>
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                      </a>
+                    )}
+                    {m.email && (
+                      <a href={`mailto:${m.email}`} className="text-ink-400 hover:text-brand-600 transition-colors" aria-label={`Email ${m.name}`}>
+                        <Mail size={14} strokeWidth={2} />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>

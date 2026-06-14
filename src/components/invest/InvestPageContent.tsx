@@ -30,14 +30,14 @@ const STRIPE_LINKS: Record<number, string> = {
 const MPESA_NUMBER = '+255 782 267 121';
 
 const TEAM = [
-  { name: 'Kelvin Makoye', role: 'Founder & CEO', focus: 'Product, Engineering, Strategy', initials: 'KM', grad: 'from-brand-500 to-emerald-600' },
-  { name: 'Robinson Jackson', role: 'Co-founder & COO', focus: 'Operations, Partnerships', initials: 'RJ', grad: 'from-blue-500 to-indigo-600' },
-  { name: 'Emmanuel Makoye', role: 'Marketing Lead', focus: 'Growth, Landlord Outreach', initials: 'EM', grad: 'from-purple-500 to-pink-600' },
-  { name: 'Raymond Maohei', role: 'Engineering', focus: 'Full-stack Development', initials: 'RM', grad: 'from-cyan-500 to-blue-600' },
-  { name: 'Paul Lukindo', role: 'Engineering', focus: 'Backend & Infrastructure', initials: 'PL', grad: 'from-teal-500 to-emerald-600' },
-  { name: 'Akil Khatri', role: 'Business Development', focus: 'Investor Relations, Finance', initials: 'AK', grad: 'from-orange-500 to-red-600' },
-  { name: 'Japhet Kabegeje', role: 'Customer Relations', focus: 'Support, Tenant Experience', initials: 'JK', grad: 'from-rose-500 to-pink-600' },
-  { name: 'Adam Nzinza', role: 'Field Operations', focus: 'Property Verification, Inspections', initials: 'AN', grad: 'from-amber-500 to-orange-600' },
+  { name: 'Emmanuel Makoye', role: 'CEO & Lead Engineer', focus: 'Product direction, system design, execution', initials: 'EM', grad: 'from-brand-500 to-emerald-600' },
+  { name: 'Robinson Jackson', role: 'COO', focus: 'Operations, coordination, customer oversight', initials: 'RJ', grad: 'from-blue-500 to-indigo-600' },
+  { name: 'Akil Khatri', role: 'Development', focus: 'Referral systems, fraud prevention, tracking', initials: 'AK', grad: 'from-cyan-500 to-blue-600' },
+  { name: 'Adam Nzinza', role: 'Marketing', focus: 'Content, distribution, demand generation', initials: 'AN', grad: 'from-purple-500 to-pink-600' },
+  { name: 'Paul Lukindo', role: 'Marketing', focus: 'Social media, university outreach', initials: 'PL', grad: 'from-teal-500 to-emerald-600' },
+  { name: 'Raymond Maohei', role: 'Customer Relations', focus: 'Lead conversion, landlord onboarding', initials: 'RM', grad: 'from-orange-500 to-red-600' },
+  { name: 'Kelvin Makoye', role: 'Customer Relations', focus: 'Landlord engagement, follow-ups', initials: 'KM', grad: 'from-rose-500 to-pink-600' },
+  { name: 'Japhet Kabegeje', role: 'Customer Relations', focus: 'Agent onboarding, pipeline management', initials: 'JK', grad: 'from-amber-500 to-orange-600' },
 ];
 
 export function InvestPageContent() {

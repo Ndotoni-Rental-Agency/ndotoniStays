@@ -40,6 +40,18 @@ export interface GenerateDescriptionInput {
   amenities?: string[];
 }
 
+export interface GenerateCheckInInstructionsInput {
+  title: string;
+  propertyType: string;
+  district: string;
+  region: string;
+  street?: string;
+  amenities?: string[];
+  maxGuests?: number;
+  checkInTime?: string;
+  checkOutTime?: string;
+}
+
 class AIServiceClass {
   private baseUrl = '/api/ai';
 
@@ -99,6 +111,29 @@ class AIServiceClass {
 
     const data = await res.json();
     return data.description || '';
+  }
+
+  /**
+   * Generate check-in instructions based on property details.
+   * Returns structured fields that can be directly applied to the form.
+   */
+  async generateCheckInInstructions(input: GenerateCheckInInstructionsInput): Promise<{
+    directions: string;
+    parkingInfo: string;
+    additionalNotes: string;
+    contactName: string;
+  }> {
+    const res = await fetch('/api/ai/generate-checkin-instructions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to generate check-in instructions');
+    }
+
+    return res.json();
   }
 }
 

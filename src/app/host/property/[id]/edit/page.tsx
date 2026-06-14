@@ -14,20 +14,23 @@ import {
   CalendarDaysIcon,
   Cog6ToothIcon,
   HomeModernIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 import { HostCalendar } from '@/components/host/HostCalendar';
 import { HostPhotos } from '@/components/host/HostPhotos';
 import { HostDetailsTab } from '@/components/host/HostDetailsTab';
 import { HostSettingsTab } from '@/components/host/HostSettingsTab';
-import { PropertyFormData, PropertyData } from '@/components/host/types';
+import { HostCheckInTab } from '@/components/host/HostCheckInTab';
+import { PropertyFormData, PropertyData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
 import toast from 'react-hot-toast';
 
-type Tab = 'details' | 'photos' | 'calendar' | 'settings';
+type Tab = 'details' | 'photos' | 'calendar' | 'checkin' | 'settings';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
   { id: 'details', label: 'Details', icon: HomeModernIcon },
   { id: 'photos', label: 'Photos', icon: PhotoIcon },
   { id: 'calendar', label: 'Calendar', icon: CalendarDaysIcon },
+  { id: 'checkin', label: 'Check-In', icon: KeyIcon },
   { id: 'settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
 
@@ -41,7 +44,7 @@ export default function EditPropertyPage() {
     // Check if navigated from dashboard with a specific tab intent
     if (typeof window !== 'undefined') {
       const stored = sessionStorage.getItem('host-edit-tab') as Tab | null;
-      if (stored && ['details', 'photos', 'calendar', 'settings'].includes(stored)) {
+      if (stored && ['details', 'photos', 'calendar', 'checkin', 'settings'].includes(stored)) {
         sessionStorage.removeItem('host-edit-tab');
         return stored;
       }
@@ -72,7 +75,7 @@ export default function EditPropertyPage() {
     maximumStay: '365',
     checkInTime: '14:00',
     checkOutTime: '11:00',
-    checkInInstructions: '',
+    checkInInstructions: EMPTY_CHECKIN_INSTRUCTIONS,
     cancellationPolicy: 'FLEXIBLE',
     houseRules: '',
     instantBookEnabled: true,
@@ -124,7 +127,19 @@ export default function EditPropertyPage() {
         maximumStay: p.maximumStay?.toString() || '365',
         checkInTime: p.checkInTime || '14:00',
         checkOutTime: p.checkOutTime || '11:00',
-        checkInInstructions: p.checkInInstructions || '',
+        checkInInstructions: p.checkInInstructions
+          ? {
+              wifiName: p.checkInInstructions.wifiName || '',
+              wifiPassword: p.checkInInstructions.wifiPassword || '',
+              accessCode: p.checkInInstructions.accessCode || '',
+              directions: p.checkInInstructions.directions || '',
+              parkingInfo: p.checkInInstructions.parkingInfo || '',
+              contactPhone: p.checkInInstructions.contactPhone || '',
+              contactName: p.checkInInstructions.contactName || '',
+              additionalNotes: p.checkInInstructions.additionalNotes || '',
+              houseRules: p.checkInInstructions.houseRules || [],
+            }
+          : EMPTY_CHECKIN_INSTRUCTIONS,
         cancellationPolicy: p.cancellationPolicy || 'FLEXIBLE',
         houseRules: (p.houseRules || []).join('\n'),
         instantBookEnabled: p.instantBookEnabled ?? true,
@@ -332,6 +347,15 @@ export default function EditPropertyPage() {
           saving={saving}
           propertyId={propertyId}
           onDelete={handleDelete}
+        />
+      )}
+
+      {activeTab === 'checkin' && (
+        <HostCheckInTab
+          form={form}
+          onUpdate={updateField}
+          onSave={handleSave}
+          saving={saving}
         />
       )}
     </div>

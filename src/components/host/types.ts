@@ -16,11 +16,35 @@ export interface PropertyFormData {
   maximumStay: string;
   checkInTime: string;
   checkOutTime: string;
-  checkInInstructions: string;
+  checkInInstructions: CheckInInstructionsForm;
   cancellationPolicy: string;
   houseRules: string;
   instantBookEnabled: boolean;
 }
+
+export interface CheckInInstructionsForm {
+  wifiName: string;
+  wifiPassword: string;
+  accessCode: string;
+  directions: string;
+  parkingInfo: string;
+  contactPhone: string;
+  contactName: string;
+  additionalNotes: string;
+  houseRules: string[];
+}
+
+export const EMPTY_CHECKIN_INSTRUCTIONS: CheckInInstructionsForm = {
+  wifiName: '',
+  wifiPassword: '',
+  accessCode: '',
+  directions: '',
+  parkingInfo: '',
+  contactPhone: '',
+  contactName: '',
+  additionalNotes: '',
+  houseRules: [],
+};
 
 export interface PropertyData {
   propertyId: string;
@@ -47,7 +71,17 @@ export interface PropertyData {
   maximumStay: number;
   checkInTime: string;
   checkOutTime: string;
-  checkInInstructions: string;
+  checkInInstructions: {
+    wifiName?: string;
+    wifiPassword?: string;
+    accessCode?: string;
+    directions?: string;
+    parkingInfo?: string;
+    contactPhone?: string;
+    contactName?: string;
+    additionalNotes?: string;
+    houseRules?: string[];
+  } | null;
   cancellationPolicy: string;
   houseRules: string[];
   instantBookEnabled: boolean;

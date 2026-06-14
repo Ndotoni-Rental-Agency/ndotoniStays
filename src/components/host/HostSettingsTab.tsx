@@ -78,16 +78,6 @@ export function HostSettingsTab({ form, onUpdate, onSave, saving, propertyId, on
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">Check-in instructions</label>
-            <textarea
-              value={form.checkInInstructions}
-              onChange={(e) => onUpdate('checkInInstructions', e.target.value)}
-              className="input min-h-[100px] text-base"
-              placeholder="How guests should find and enter the property. E.g. gate code, key location, contact guard."
-              rows={4}
-            />
-          </div>
-          <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Cancellation policy</label>
             <select
               value={form.cancellationPolicy}

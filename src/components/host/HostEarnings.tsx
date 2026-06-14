@@ -120,9 +120,28 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
         return bookingMonth === key;
       });
 
+      // Use per-night calculation to match the "Earned" logic
+      let monthEarnings = 0;
+      for (const b of monthBookings) {
+        const nights = b.numberOfNights || 1;
+        const perNight = (b.pricing?.total || 0) / nights;
+        // Count only nights that fall in this month
+        const start = new Date(b.checkInDate + 'T00:00:00');
+        const end = new Date(b.checkOutDate + 'T00:00:00');
+        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+        const cursor = new Date(start);
+        while (cursor < end) {
+          if (cursor >= monthStart && cursor < monthEnd) {
+            monthEarnings += perNight;
+          }
+          cursor.setDate(cursor.getDate() + 1);
+        }
+      }
+
       months.push({
         month: label,
-        earnings: monthBookings.reduce((sum, b) => sum + (b.pricing?.total || 0), 0),
+        earnings: Math.round(monthEarnings),
         bookings: monthBookings.length,
       });
     }

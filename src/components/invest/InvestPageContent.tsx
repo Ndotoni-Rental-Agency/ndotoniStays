@@ -33,7 +33,7 @@ const TEAM = [
   {
     name: 'Emmanuel Makoye',
     role: 'Founder & CEO',
-    focus: 'Software Engineer at Amazon (Seattle). Oversees all Ndotoni activities and builds the platform.',
+    focus: 'Software Engineer at Amazon (Seattle). BS Computer Science, Case Western Reserve University \'25. Oversees all Ndotoni activities and builds the platform.',
     initials: 'EM',
     grad: 'from-brand-500 to-emerald-600',
     image: null,

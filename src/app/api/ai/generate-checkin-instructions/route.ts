@@ -10,7 +10,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime, existingExamples } = body;
+    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime, userContext, existingExamples } = body;
+
+    // Build user context section
+    let userContextSection = '';
+    if (userContext && userContext.trim()) {
+      userContextSection = `\n\nThe host provided these additional details about the property:\n"${userContext.trim()}"\n\nUse this information to make the instructions more specific and accurate.`;
+    }
 
     // Build examples section from host's other properties
     let examplesSection = '';
@@ -42,7 +48,7 @@ Property details:
 - Max guests: ${maxGuests || 'not specified'}
 - Check-in time: ${checkInTime || '14:00'}
 - Check-out time: ${checkOutTime || '11:00'}
-- Amenities: ${amenities?.join(', ') || 'not specified'}${examplesSection}
+- Amenities: ${amenities?.join(', ') || 'not specified'}${userContextSection}${examplesSection}
 
 Generate realistic, helpful check-in instructions. Be specific to Tanzania/East Africa context (mention things like security guards, askari, gates, boda boda landmarks if appropriate for the area). Keep it concise and practical.
 

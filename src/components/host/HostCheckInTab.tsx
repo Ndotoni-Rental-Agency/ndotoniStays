@@ -15,6 +15,7 @@ interface Props {
 
 export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyInstructions }: Props) {
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiContext, setAiContext] = useState('');
   const instructions = form.checkInInstructions;
 
   function updateInstruction(field: keyof CheckInInstructionsForm, value: any) {
@@ -34,8 +35,8 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         maxGuests: parseInt(form.maxGuests) || undefined,
         checkInTime: form.checkInTime,
         checkOutTime: form.checkOutTime,
+        userContext: aiContext || undefined,
         existingExamples: otherPropertyInstructions?.filter(p =>
-          // Only include properties that actually have instructions set
           Object.values(p.instructions).some(v => v && (typeof v === 'string' ? v.trim() !== '' : (Array.isArray(v) && v.length > 0)))
         ),
       });
@@ -50,7 +51,6 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
       });
     } catch (err) {
       console.error('AI suggestion failed:', err);
-      // Fallback: basic template
       onUpdate('checkInInstructions', {
         ...instructions,
         directions: instructions.directions || `From the main road in ${form.district}, look for ${form.title}.`,
@@ -67,23 +67,39 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
 
   return (
     <div className="space-y-8 max-w-3xl pb-24 sm:pb-0">
-      {/* Header with AI button */}
-      <div className="flex items-center justify-between">
+      {/* Header with AI section */}
+      <div className="space-y-3">
         <div>
           <h2 className="text-base sm:text-lg font-semibold text-ink-900">Check-In Instructions</h2>
           <p className="text-sm text-ink-500 mt-1">
             These are sent to guests after payment is confirmed. Fill in what applies.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleAiSuggest}
-          disabled={aiGenerating}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg px-3 py-2 hover:bg-brand-100 transition-colors disabled:opacity-50"
-        >
-          <SparklesIcon className="h-4 w-4" />
-          {aiGenerating ? 'Generating...' : 'AI Suggest'}
-        </button>
+        <div className="bg-brand-50/50 border border-brand-100 rounded-xl p-4 space-y-3">
+          <label className="block text-sm font-medium text-brand-800">
+            <SparklesIcon className="h-4 w-4 inline mr-1.5 -mt-0.5" />
+            AI Assistant — describe your property to help generate instructions
+          </label>
+          <input
+            type="text"
+            value={aiContext}
+            onChange={(e) => setAiContext(e.target.value)}
+            className="input text-sm bg-white"
+            placeholder="e.g. 'Blue gate, ask askari for keys, WiFi router is in bedroom 2'"
+          />
+          <button
+            type="button"
+            onClick={handleAiSuggest}
+            disabled={aiGenerating}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-brand-600 rounded-lg px-4 py-2 hover:bg-brand-700 transition-colors disabled:opacity-50"
+          >
+            <SparklesIcon className="h-4 w-4" />
+            {aiGenerating ? 'Generating...' : 'Generate Instructions'}
+          </button>
+          <p className="text-xs text-brand-600">
+            {aiContext ? 'Will use your hints above.' : 'Or leave blank to generate from property details alone.'}
+          </p>
+        </div>
       </div>
 
       {/* Access & Entry */}

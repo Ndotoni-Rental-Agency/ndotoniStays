@@ -37,7 +37,10 @@ export function BackUsSection() {
             <p className="text-center text-sm font-medium text-ink-500">Or pay via M-Pesa</p>
             <div className="mt-3 flex items-center justify-center gap-3 rounded-xl bg-brand-50 px-4 py-3">
               <Phone className="h-5 w-5 text-brand-600" />
-              <span className="text-lg font-semibold text-brand-700">{MPESA_NUMBER}</span>
+              <div className="text-center">
+                <span className="text-lg font-semibold text-brand-700 block">{MPESA_NUMBER}</span>
+                <span className="text-xs text-ink-500">Name: Kelvin Makoye</span>
+              </div>
             </div>
           </div>
         </div>

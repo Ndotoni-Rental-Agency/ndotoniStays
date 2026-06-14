@@ -75,7 +75,7 @@ export function InvestPageContent() {
 
           <div className="mt-10 grid grid-cols-3 gap-4 max-w-sm mx-auto">
             <div><div className="text-2xl sm:text-3xl font-bold text-gray-900">$200K</div><div className="text-xs text-gray-400 mt-1">Raising</div></div>
-            <div className="border-x border-gray-200"><div className="text-2xl sm:text-3xl font-bold text-gray-900">10–20%</div><div className="text-xs text-gray-400 mt-1">Equity</div></div>
+            <div className="border-x border-gray-200"><div className="text-2xl sm:text-3xl font-bold text-gray-900 whitespace-nowrap">10–20%</div><div className="text-xs text-gray-400 mt-1">Equity</div></div>
             <div><div className="text-2xl sm:text-3xl font-bold text-gray-900">18mo</div><div className="text-xs text-gray-400 mt-1">Runway</div></div>
           </div>
 
@@ -212,26 +212,41 @@ export function InvestPageContent() {
 
       {/* ===== TEAM ===== */}
       <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3">Team</h2>
-          <p className="text-gray-500 text-center max-w-lg mx-auto mb-10">8 people based in Tanzania and the US. Builders, marketers, operators.</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <p className="text-gray-500 text-center max-w-lg mx-auto mb-12">8 people based in Tanzania and the US. Builders, marketers, operators.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TEAM.map((m) => (
-              <div key={m.name} className="rounded-xl border border-gray-200 bg-white p-4 text-center">
+              <div key={m.name} className="bg-white rounded-xl border border-gray-200 p-5 text-center">
                 {m.image ? (
-                  <img src={m.image} alt={m.name} className="w-14 h-14 mx-auto rounded-full object-cover mb-2" />
+                  <img src={m.image} alt={m.name} className="w-16 h-16 mx-auto rounded-full object-cover mb-3" />
                 ) : (
-                  <div className={`w-14 h-14 mx-auto rounded-full bg-gradient-to-br ${m.grad} flex items-center justify-center text-white text-sm font-bold mb-2`}>{m.initials}</div>
+                  <div className={`w-16 h-16 mx-auto rounded-full bg-gradient-to-br ${m.grad} flex items-center justify-center text-white text-base font-bold mb-3`}>{m.initials}</div>
                 )}
-                <p className="text-sm font-bold text-gray-900 leading-tight">{m.name}</p>
+                <p className="text-sm font-bold text-gray-900">{m.name}</p>
                 <p className="text-xs text-brand-600 font-medium mt-0.5">{m.role}</p>
-                <p className="text-xs text-gray-500 mt-1 leading-snug">{m.bio}</p>
-                {m.company && <p className="text-xs text-gray-600 mt-1 font-medium">{m.company}</p>}
-                {m.education && <p className="text-xs text-gray-400 mt-0.5">{m.education}</p>}
+                <p className="text-sm text-gray-500 mt-3 leading-relaxed">{m.bio}</p>
+                {(m.company || m.education) && (
+                  <div className="mt-3 space-y-1.5 text-left">
+                    {m.company && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wide w-16 flex-shrink-0 pt-px">Work</span>
+                        <span className="text-xs text-gray-600">{m.company}</span>
+                      </div>
+                    )}
+                    {m.education && (
+                      <div className="flex items-start gap-2">
+                        <span className="text-xs text-gray-400 font-medium uppercase tracking-wide w-16 flex-shrink-0 pt-px">Edu</span>
+                        <span className="text-xs text-gray-600">{m.education}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 {(m.linkedin || m.email) && (
-                  <div className="mt-2 flex items-center justify-center gap-2">
-                    {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-900 transition-colors" aria-label="LinkedIn"><svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>}
-                    {m.email && <a href={`mailto:${m.email}`} className="text-gray-400 hover:text-gray-900 transition-colors" aria-label="Email"><Mail size={13} strokeWidth={2} /></a>}
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    {m.linkedin && <a href={m.linkedin} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-brand-600 transition-colors" aria-label="LinkedIn"><svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>}
+                    {m.email && <a href={`mailto:${m.email}`} className="text-gray-400 hover:text-brand-600 transition-colors" aria-label="Email"><Mail size={13} strokeWidth={2} /></a>}
                   </div>
                 )}
               </div>

@@ -9,7 +9,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { title, propertyType, district, region, maxGuests, nightlyRate, currency, amenities } = await request.json();
+    const { title, propertyType, district, region, maxGuests, nightlyRate, currency, amenities, userContext } = await request.json();
+
+    const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nIncorporate these details into the description.\n` : '';
 
     const prompt = `Write a short, appealing property description for a vacation rental listing in Tanzania.
 
@@ -20,7 +22,7 @@ Property details:
 - Max guests: ${maxGuests || 2}
 ${nightlyRate ? `- Price: ${currency || 'TZS'} ${nightlyRate}/night` : ''}
 ${amenities?.length ? `- Amenities: ${amenities.join(', ')}` : ''}
-
+${contextLine}
 Rules:
 - Keep it 2-3 sentences (under 200 characters)
 - Highlight the best features and location

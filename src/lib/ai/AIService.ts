@@ -17,6 +17,7 @@ export interface GenerateTitleInput {
   maxGuests?: string;
   currency?: string;
   nightlyRate?: string;
+  userContext?: string;
 }
 
 export interface PricePredictionInput {
@@ -27,6 +28,7 @@ export interface PricePredictionInput {
   bedrooms?: number;
   bathrooms?: number;
   amenities?: string[];
+  userContext?: string;
 }
 
 export interface GenerateDescriptionInput {
@@ -38,6 +40,7 @@ export interface GenerateDescriptionInput {
   nightlyRate?: number;
   currency?: string;
   amenities?: string[];
+  userContext?: string;
 }
 
 export interface GenerateCheckInInstructionsInput {

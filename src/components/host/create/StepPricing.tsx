@@ -18,6 +18,8 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const [predictingPrice, setPredictingPrice] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
+  const [titleContext, setTitleContext] = useState('');
+  const [priceContext, setPriceContext] = useState('');
   const displayPrice = form.nightlyRate ? formatWithCommas(form.nightlyRate) : '';
 
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -36,6 +38,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         maxGuests: form.maxGuests,
         currency: form.currency,
         nightlyRate: form.nightlyRate,
+        userContext: titleContext || undefined,
       });
       if (title) {
         updateField('title', title);
@@ -55,6 +58,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         district: form.district,
         region: form.region,
         maxGuests: parseInt(form.maxGuests) || 2,
+        userContext: priceContext || undefined,
       });
       setPriceSuggestion(result);
     } catch (err) {
@@ -107,6 +111,13 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
               )}
             </button>
           </div>
+          <input
+            type="text"
+            value={titleContext}
+            onChange={(e) => setTitleContext(e.target.value)}
+            className="input text-xs mt-1.5 py-1.5 text-ink-500"
+            placeholder="Optional: hints for AI, e.g. 'beachfront villa, great for parties'"
+          />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -155,6 +166,13 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
                 )}
               </button>
             </div>
+            <input
+              type="text"
+              value={priceContext}
+              onChange={(e) => setPriceContext(e.target.value)}
+              className="input text-xs mt-1.5 py-1.5 text-ink-500"
+              placeholder="Optional: e.g. 'luxury finish, private pool, premium location'"
+            />
 
             {/* Price suggestion result */}
             {priceSuggestion && (

@@ -9,7 +9,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { propertyType, district, region, maxGuests, bedrooms, bathrooms, amenities } = await request.json();
+    const { propertyType, district, region, maxGuests, bedrooms, bathrooms, amenities, userContext } = await request.json();
+
+    const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nFactor this into your pricing assessment.\n` : '';
 
     const prompt = `You are a pricing expert for short-term rental properties in Tanzania. 
 Based on the following property details, suggest a competitive nightly rate in TZS.
@@ -21,7 +23,7 @@ Property details:
 - Bedrooms: ${bedrooms || 1}
 - Bathrooms: ${bathrooms || 1}
 ${amenities?.length ? `- Amenities: ${amenities.join(', ')}` : ''}
-
+${contextLine}
 Consider:
 - Tanzania market rates for ${district || region}
 - Property type and capacity

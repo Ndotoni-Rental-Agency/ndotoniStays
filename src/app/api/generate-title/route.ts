@@ -12,7 +12,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { propertyType, district, region, maxGuests, currency, nightlyRate } = await request.json();
+    const { propertyType, district, region, maxGuests, currency, nightlyRate, userContext } = await request.json();
+
+    const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nUse this to make the title more specific and relevant.\n` : '';
 
     const prompt = `Generate a short, catchy property listing title for a vacation rental in Tanzania. 
 
@@ -21,7 +23,7 @@ Property details:
 - Location: ${district || region || 'Dar es Salaam'}
 - Max guests: ${maxGuests || 2}
 ${nightlyRate ? `- Nightly rate: ${currency || 'TZS'} ${nightlyRate}` : ''}
-
+${contextLine}
 Rules:
 - Keep it under 60 characters
 - Make it appealing to travelers

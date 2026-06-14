@@ -25,6 +25,15 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
   async function handleAiSuggest() {
     setAiGenerating(true);
     try {
+      console.log('[AI CheckIn] Calling AI with:', {
+        title: form.title,
+        propertyType: form.propertyType,
+        district: form.district,
+        region: form.region,
+        userContext: aiContext || '(none)',
+        existingExamples: otherPropertyInstructions?.length || 0,
+      });
+
       const result = await AIService.generateCheckInInstructions({
         title: form.title,
         propertyType: form.propertyType,
@@ -41,16 +50,19 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         ),
       });
 
-      // Merge AI suggestions with existing values (don't overwrite what the host already filled)
+      console.log('[AI CheckIn] AI returned:', result);
+      console.log('[AI CheckIn] Current instructions (will only fill empty):', instructions);
+
+      // Merge AI suggestions — overwrite ALL fields (user clicked generate)
       onUpdate('checkInInstructions', {
         ...instructions,
-        directions: instructions.directions || result.directions || '',
-        parkingInfo: instructions.parkingInfo || result.parkingInfo || '',
-        additionalNotes: instructions.additionalNotes || result.additionalNotes || '',
-        contactName: instructions.contactName || result.contactName || '',
+        directions: result.directions || instructions.directions || '',
+        parkingInfo: result.parkingInfo || instructions.parkingInfo || '',
+        additionalNotes: result.additionalNotes || instructions.additionalNotes || '',
+        contactName: result.contactName || instructions.contactName || '',
       });
     } catch (err) {
-      console.error('AI suggestion failed:', err);
+      console.error('[AI CheckIn] Failed:', err);
       onUpdate('checkInInstructions', {
         ...instructions,
         directions: instructions.directions || `From the main road in ${form.district}, look for ${form.title}.`,

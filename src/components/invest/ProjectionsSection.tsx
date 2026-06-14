@@ -1,4 +1,29 @@
+'use client';
+
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { PROJECTIONS_BOOKINGS, PROJECTIONS_REVENUE } from './investData';
+
+const bookingsData = PROJECTIONS_BOOKINGS.map((d) => ({
+  name: d.year,
+  value: d.value,
+}));
+
+const revenueData = PROJECTIONS_REVENUE.map((d) => ({
+  name: d.year,
+  value: d.value,
+}));
+
+function formatNumber(val: number) {
+  if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
+  if (val >= 1_000) return `${(val / 1_000).toFixed(0)}K`;
+  return String(val);
+}
+
+function formatRevenue(val: number) {
+  if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(1)}M`;
+  if (val >= 1_000) return `$${(val / 1_000).toFixed(0)}K`;
+  return `$${val}`;
+}
 
 export function ProjectionsSection() {
   return (
@@ -9,52 +34,36 @@ export function ProjectionsSection() {
           Conservative growth starting with Dar es Salaam and Zanzibar, then expanding nationally.
         </p>
 
-        <div className="mt-12 grid gap-12 sm:grid-cols-2">
+        <div className="mt-12 grid gap-10 sm:grid-cols-2">
           {/* Bookings Chart */}
           <div>
-            <h3 className="mb-4 text-center text-lg font-semibold">Bookings per Year</h3>
-            <div className="flex items-end justify-between gap-2" style={{ height: 200 }}>
-              {PROJECTIONS_BOOKINGS.map((item) => {
-                const maxVal = PROJECTIONS_BOOKINGS[PROJECTIONS_BOOKINGS.length - 1].value;
-                const heightPct = (item.value / maxVal) * 100;
-                return (
-                  <div key={item.year} className="flex flex-1 flex-col items-center gap-2">
-                    <span className="text-xs font-semibold text-ink-700">
-                      {item.value >= 1000 ? `${(item.value / 1000).toFixed(0)}K` : item.value}
-                    </span>
-                    <div
-                      className="w-full rounded-t-lg bg-gradient-to-t from-brand-600 to-brand-400"
-                      style={{ height: `${Math.max(heightPct, 5)}%` }}
-                    />
-                    <span className="text-xs font-medium text-ink-500">{item.year}</span>
-                  </div>
-                );
-              })}
+            <h3 className="mb-6 text-center text-lg font-semibold">Bookings per Year</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bookingsData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatNumber} width={45} />
+                  <Tooltip formatter={(value: number) => [formatNumber(value), 'Bookings']} />
+                  <Bar dataKey="value" fill="#16a34a" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
           {/* Revenue Chart */}
           <div>
-            <h3 className="mb-4 text-center text-lg font-semibold">Revenue (USD)</h3>
-            <div className="flex items-end justify-between gap-2" style={{ height: 200 }}>
-              {PROJECTIONS_REVENUE.map((item) => {
-                const maxVal = PROJECTIONS_REVENUE[PROJECTIONS_REVENUE.length - 1].value;
-                const heightPct = (item.value / maxVal) * 100;
-                return (
-                  <div key={item.year} className="flex flex-1 flex-col items-center gap-2">
-                    <span className="text-xs font-semibold text-ink-700">
-                      {item.value >= 1000000
-                        ? `$${(item.value / 1000000).toFixed(1)}M`
-                        : `$${(item.value / 1000).toFixed(0)}K`}
-                    </span>
-                    <div
-                      className="w-full rounded-t-lg bg-gradient-to-t from-brand-500 to-brand-300"
-                      style={{ height: `${Math.max(heightPct, 5)}%` }}
-                    />
-                    <span className="text-xs font-medium text-ink-500">{item.year}</span>
-                  </div>
-                );
-              })}
+            <h3 className="mb-6 text-center text-lg font-semibold">Revenue (USD)</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenueData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={formatRevenue} width={50} />
+                  <Tooltip formatter={(value: number) => [formatRevenue(value), 'Revenue']} />
+                  <Bar dataKey="value" fill="#22c55e" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>

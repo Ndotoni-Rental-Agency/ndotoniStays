@@ -33,7 +33,9 @@ const TEAM = [
   {
     name: 'Emmanuel Makoye',
     role: 'Founder & CEO',
-    focus: 'Software Engineer at Amazon (Seattle). BS Computer Science, Case Western Reserve University \'25. Oversees all Ndotoni activities and builds the platform.',
+    bio: 'Oversees all Ndotoni activities and builds the platform.',
+    company: 'Software Engineer at Amazon, Seattle',
+    education: 'BS Computer Science, Case Western Reserve University \'25',
     initials: 'EM',
     grad: 'from-brand-500 to-emerald-600',
     image: null,
@@ -43,7 +45,9 @@ const TEAM = [
   {
     name: 'Robinson Jackson',
     role: 'COO',
-    focus: 'Operations, coordination, customer oversight',
+    bio: 'Operations, coordination, customer oversight',
+    company: null,
+    education: null,
     initials: 'RJ',
     grad: 'from-blue-500 to-indigo-600',
     image: null,
@@ -53,7 +57,9 @@ const TEAM = [
   {
     name: 'Akil Khatri',
     role: 'Development',
-    focus: 'Referral systems, fraud prevention, tracking',
+    bio: 'Referral systems, fraud prevention, tracking',
+    company: null,
+    education: null,
     initials: 'AK',
     grad: 'from-cyan-500 to-blue-600',
     image: null,
@@ -63,7 +69,9 @@ const TEAM = [
   {
     name: 'Adam Nzinza',
     role: 'Marketing',
-    focus: 'Content, distribution, demand generation',
+    bio: 'Content, distribution, demand generation',
+    company: null,
+    education: null,
     initials: 'AN',
     grad: 'from-purple-500 to-pink-600',
     image: null,
@@ -73,7 +81,9 @@ const TEAM = [
   {
     name: 'Paul Lukindo',
     role: 'Marketing',
-    focus: 'Social media, university outreach',
+    bio: 'Social media, university outreach',
+    company: null,
+    education: null,
     initials: 'PL',
     grad: 'from-teal-500 to-emerald-600',
     image: null,
@@ -83,7 +93,9 @@ const TEAM = [
   {
     name: 'Raymond Maohei',
     role: 'Customer Relations',
-    focus: 'Lead conversion, landlord onboarding',
+    bio: 'Lead conversion, landlord onboarding',
+    company: null,
+    education: null,
     initials: 'RM',
     grad: 'from-orange-500 to-red-600',
     image: null,
@@ -93,7 +105,9 @@ const TEAM = [
   {
     name: 'Kelvin Makoye',
     role: 'Customer Relations',
-    focus: 'Landlord engagement, follow-ups',
+    bio: 'Landlord engagement, follow-ups',
+    company: null,
+    education: null,
     initials: 'KM',
     grad: 'from-rose-500 to-pink-600',
     image: null,
@@ -103,7 +117,9 @@ const TEAM = [
   {
     name: 'Japhet Kabegeje',
     role: 'Customer Relations',
-    focus: 'Agent onboarding, pipeline management',
+    bio: 'Agent onboarding, pipeline management',
+    company: null,
+    education: null,
     initials: 'JK',
     grad: 'from-amber-500 to-orange-600',
     image: null,
@@ -314,7 +330,13 @@ export function InvestPageContent() {
                 )}
                 <p className="text-sm font-bold text-ink-900 leading-tight">{m.name}</p>
                 <p className="text-xs text-brand-600 font-medium mt-0.5">{m.role}</p>
-                <p className="text-xs text-ink-400 mt-1 leading-snug">{m.focus}</p>
+                <p className="text-xs text-ink-400 mt-1 leading-snug">{m.bio}</p>
+                {m.company && (
+                  <p className="text-xs text-ink-500 mt-1 font-medium">{m.company}</p>
+                )}
+                {m.education && (
+                  <p className="text-xs text-ink-400 mt-0.5">{m.education}</p>
+                )}
                 {(m.linkedin || m.email) && (
                   <div className="mt-2 flex items-center justify-center gap-2">
                     {m.linkedin && (

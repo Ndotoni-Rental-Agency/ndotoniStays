@@ -8,7 +8,7 @@ export function MarketSection() {
           {[
             { stat: '65M', label: 'Population' },
             { stat: '1.5M+', label: 'Tourists yearly' },
-            { stat: '$0', label: 'Local competitors' },
+            { stat: '0', label: 'Local stays platforms' },
             { stat: '20%+', label: 'Internet growth YoY' },
           ].map((item) => (
             <div key={item.label} className="rounded-2xl border border-ink-100 bg-ink-50 p-6 text-center shadow-sm">

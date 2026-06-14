@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { submitContactInquiry } from '@/graphql/mutations';
 import {
   ArrowRight,
   CheckCircle2,
@@ -157,14 +159,27 @@ const TEAM: TeamMember[] = [
 
 export function InvestPageContent() {
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`Investment Inquiry from ${contactForm.name}`);
-    const body = encodeURIComponent(
-      `Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\n${contactForm.message}`
-    );
-    window.location.href = `mailto:makoye224@gmail.com?subject=${subject}&body=${body}`;
+    setSubmitState('loading');
+    try {
+      await GraphQLClient.executePublic(submitContactInquiry, {
+        input: {
+          name: contactForm.name,
+          email: contactForm.email,
+          inquiryType: 'PARTNERSHIP',
+          subject: 'Investment Inquiry – Ndotoni Stays',
+          message: contactForm.message,
+        },
+      });
+      setSubmitState('success');
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err) {
+      console.error('Failed to submit inquiry:', err);
+      setSubmitState('error');
+    }
   };
 
   return (
@@ -515,6 +530,13 @@ export function InvestPageContent() {
 
           <div className="mt-12 grid gap-10 sm:grid-cols-2">
             {/* Form */}
+            {submitState === 'success' ? (
+              <div className="rounded-xl bg-brand-50 border border-brand-100 p-6 text-center">
+                <CheckCircle2 className="mx-auto h-8 w-8 text-brand-600" />
+                <p className="mt-3 font-semibold text-ink-900">Message sent!</p>
+                <p className="mt-1 text-sm text-ink-500">We&apos;ll get back to you within 24 hours.</p>
+              </div>
+            ) : (
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-ink-700">Name</label>
@@ -546,14 +568,19 @@ export function InvestPageContent() {
                   required
                 />
               </div>
+              {submitState === 'error' && (
+                <p className="text-sm text-red-600">Something went wrong. Please try again.</p>
+              )}
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
+                disabled={submitState === 'loading'}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
               >
-                Send Message
+                {submitState === 'loading' ? 'Sending...' : 'Send Message'}
                 <Send className="h-4 w-4" />
               </button>
             </form>
+            )}
 
             {/* Quick Links */}
             <div className="space-y-4">

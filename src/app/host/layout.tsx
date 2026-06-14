@@ -58,7 +58,7 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-white">
       <HostSidebar />
 
       {/* Main content */}

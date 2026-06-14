@@ -170,7 +170,7 @@ export function InvestPageContent() {
   return (
     <div className="min-h-screen bg-white text-ink-900">
       {/* ─── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-32">
+      <section className="relative overflow-hidden bg-white px-6 py-16 sm:py-20">
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-brand-50 opacity-60 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-brand-50 opacity-40 blur-3xl" />
@@ -186,23 +186,24 @@ export function InvestPageContent() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-ink-500 sm:text-xl">
-            Tanzania has no local Airbnb. We&apos;re building the platform for short-term stays —
-            serving <span className="font-semibold text-secondary-500">1.5M+ tourists</span> and a growing domestic travel market.
+            There&apos;s no local short-stay platform in Tanzania — and global players like Airbnb
+            don&apos;t serve the domestic market. We&apos;re bridging that gap with verified listings,
+            local payments, and a platform built for Tanzanians first, travelers second.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-8">
             <div className="text-center">
-              <p className="text-3xl font-bold text-secondary-500">$150K</p>
+              <p className="text-3xl font-bold text-brand-600">$150K</p>
               <p className="mt-1 text-sm text-ink-500">Raising</p>
             </div>
             <div className="h-10 w-px bg-ink-100" />
             <div className="text-center">
-              <p className="text-3xl font-bold text-secondary-500">5%</p>
+              <p className="text-3xl font-bold text-brand-600">5%</p>
               <p className="mt-1 text-sm text-ink-500">Equity</p>
             </div>
             <div className="h-10 w-px bg-ink-100" />
             <div className="text-center">
-              <p className="text-3xl font-bold text-secondary-500">18 mo</p>
+              <p className="text-3xl font-bold text-brand-600">18 mo</p>
               <p className="mt-1 text-sm text-ink-500">Runway</p>
             </div>
           </div>
@@ -297,8 +298,8 @@ export function InvestPageContent() {
                 key={item.title}
                 className="rounded-2xl border border-ink-100 bg-white p-6 shadow-sm"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-secondary-50">
-                  <item.icon className="h-6 w-6 text-secondary-500" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50">
+                  <item.icon className="h-6 w-6 text-brand-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
                 <p className="mt-2 text-sm text-ink-500">{item.description}</p>
@@ -347,7 +348,7 @@ export function InvestPageContent() {
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-ink-100 bg-white p-6 text-center shadow-sm">
                 <item.icon className="mx-auto h-8 w-8 text-brand-500" />
-                <p className="mt-3 text-3xl font-bold text-secondary-500">{item.stat}</p>
+                <p className="mt-3 text-3xl font-bold text-brand-600">{item.stat}</p>
                 <p className="mt-1 text-sm text-ink-500">{item.label}</p>
               </div>
             ))}
@@ -387,7 +388,7 @@ export function InvestPageContent() {
               { stat: '20%+', label: 'Internet growth YoY' },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-ink-100 bg-ink-50 p-6 text-center shadow-sm">
-                <p className="text-2xl font-bold text-secondary-500">{item.stat}</p>
+                <p className="text-2xl font-bold text-brand-600">{item.stat}</p>
                 <p className="mt-2 text-sm text-ink-500">{item.label}</p>
               </div>
             ))}
@@ -412,7 +413,7 @@ export function InvestPageContent() {
                   <item.icon className="h-5 w-5 text-brand-600" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-1 text-2xl font-bold text-secondary-500">{item.pct}</p>
+                <p className="mt-1 text-2xl font-bold text-brand-600">{item.pct}</p>
                 <p className="mt-2 text-sm text-ink-500">{item.desc}</p>
               </div>
             ))}

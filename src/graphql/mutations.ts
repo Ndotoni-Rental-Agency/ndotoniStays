@@ -307,7 +307,17 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
       amenities
       averageRating
       cancellationPolicy
-      checkInInstructions
+      checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
       checkInTime
       checkOutTime
       cleaningFee
@@ -544,7 +554,17 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
         amenities
         averageRating
         cancellationPolicy
-        checkInInstructions
+        checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
         checkInTime
         checkOutTime
         cleaningFee
@@ -689,7 +709,17 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         amenities
         averageRating
         cancellationPolicy
-        checkInInstructions
+        checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
         checkInTime
         checkOutTime
         cleaningFee
@@ -934,7 +964,17 @@ export const createShortTermProperty = /* GraphQL */ `mutation CreateShortTermPr
     amenities
     averageRating
     cancellationPolicy
-    checkInInstructions
+    checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
     checkInTime
     checkOutTime
     cleaningFee
@@ -1080,7 +1120,17 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
       amenities
       averageRating
       cancellationPolicy
-      checkInInstructions
+      checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
       checkInTime
       checkOutTime
       cleaningFee
@@ -1657,7 +1707,17 @@ export const publishShortTermProperty = /* GraphQL */ `mutation PublishShortTerm
     amenities
     averageRating
     cancellationPolicy
-    checkInInstructions
+    checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
     checkInTime
     checkOutTime
     cleaningFee
@@ -2637,7 +2697,17 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     amenities
     averageRating
     cancellationPolicy
-    checkInInstructions
+    checkInInstructions {
+        wifiName
+        wifiPassword
+        accessCode
+        directions
+        parkingInfo
+        contactPhone
+        contactName
+        additionalNotes
+        houseRules
+      }
     checkInTime
     checkOutTime
     cleaningFee

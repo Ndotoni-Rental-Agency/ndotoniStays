@@ -173,7 +173,7 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
         <div className="rounded-xl p-3 border border-amber-200 bg-amber-50">
           <div className="flex items-center gap-1.5 mb-0.5">
             <ArrowTrendingUpIcon className="h-3.5 w-3.5 text-amber-600" />
-            <span className="text-[10px] sm:text-xs text-amber-700 font-medium">Potential</span>
+            <span className="text-[10px] sm:text-xs text-amber-700 font-medium">Total Pipeline</span>
           </div>
           <p className="text-sm sm:text-lg font-bold text-amber-800 truncate">
             {formatPriceFull(potentialEarnings)}
@@ -192,7 +192,7 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
             <span className="text-[10px] sm:text-xs text-ink-500 font-medium">This Month</span>
           </div>
           <p className="text-sm sm:text-lg font-bold text-ink-900">
-            {monthlyData.length > 0 ? formatPrice(monthlyData[monthlyData.length - 1].earnings) : '—'}
+            {monthlyData.length > 0 ? formatPriceFull(monthlyData[monthlyData.length - 1].earnings) : '—'}
           </p>
         </div>
       </div>

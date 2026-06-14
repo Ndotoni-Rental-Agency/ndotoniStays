@@ -87,9 +87,9 @@ export function calculateEarnings(
   dateMap.forEach((entry) => {
     if (entry.paid) {
       totalPaid += entry.perNight;
-    } else {
-      totalPotential += entry.perNight;
     }
+    // Potential includes ALL active bookings (paid + unpaid)
+    totalPotential += entry.perNight;
   });
 
   // Detect currency from first paid booking, or first booking, or fallback

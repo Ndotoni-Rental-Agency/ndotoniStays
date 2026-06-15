@@ -308,7 +308,7 @@ export default function EditPropertyPage() {
       {/* Tabs — scrollable on mobile, no visible scrollbar */}
       <div className="border-b border-ink-100 mb-6 sm:mb-8">
         <nav
-          className="flex -mb-px overflow-x-auto no-scrollbar"
+          className="flex -mb-px overflow-x-auto no-scrollbar gap-1"
           aria-label="Property sections"
         >
           {TABS.map((tab) => {
@@ -318,7 +318,7 @@ export default function EditPropertyPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap min-w-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
                   isActive
                     ? 'border-brand-600 text-brand-700'
                     : 'border-transparent text-ink-500 hover:text-ink-700 hover:border-ink-200'

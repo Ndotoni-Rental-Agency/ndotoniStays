@@ -254,15 +254,12 @@ export function HeroSection() {
                 key={tag}
                 type="button"
                 onClick={() => {
-                  if (tag === 'Zanzibar') {
-                    setSelectedLocation({ type: 'region', name: 'ZANZIBAR', displayName: 'Zanzibar' } as FlattenedLocation);
-                    setSearchQuery('Zanzibar');
-                  }
+                  if (tag === 'Zanzibar') router.push('/search?region=Zanzibar');
                   if (tag === 'Instant Book') router.push('/search?instantBook=true');
                   if (tag === 'Under TZS 50K') router.push('/search?maxPrice=50000');
                   if (tag === 'Beachfront') router.push('/search?amenities=Beachfront');
                   if (tag === 'Long Term Rentals') window.open('https://www.ndotoni.com', '_blank');
-                }}
+                }}}
                 className={`px-3.5 py-1.5 rounded-full backdrop-blur-sm border text-sm transition-colors ${
                   tag === 'Long Term Rentals'
                     ? 'bg-brand-500/20 border-brand-300/30 text-white hover:bg-brand-500/30'

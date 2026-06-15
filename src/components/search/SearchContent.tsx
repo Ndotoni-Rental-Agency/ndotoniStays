@@ -38,6 +38,7 @@ export function SearchContent() {
   const stayCategory = searchParams.get('category') || undefined;
   const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
   const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+  const instantBookOnly = searchParams.get('instantBook') === 'true';
 
   // Guard: don't send invalid price ranges to backend
   const validMinPrice = (minPrice !== undefined && maxPrice !== undefined && minPrice >= maxPrice) ? undefined : minPrice;
@@ -45,7 +46,7 @@ export function SearchContent() {
 
   useEffect(() => {
     fetchProperties();
-  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice]);
+  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly]);
 
   async function fetchProperties() {
     setLoading(true);
@@ -63,6 +64,7 @@ export function SearchContent() {
           ...(stayCategory && { stayCategory }),
           ...(validMinPrice && { minPrice: validMinPrice }),
           ...(validMaxPrice && { maxPrice: validMaxPrice }),
+          ...(instantBookOnly && { instantBookOnly: true }),
           limit: 20,
         },
       });

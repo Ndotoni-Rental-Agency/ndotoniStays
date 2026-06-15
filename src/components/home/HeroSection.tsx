@@ -259,7 +259,7 @@ export function HeroSection() {
                   if (tag === 'Under TZS 50K') router.push('/search?maxPrice=50000');
                   if (tag === 'Beachfront') router.push('/search?amenities=Beachfront');
                   if (tag === 'Long Term Rentals') window.open('https://www.ndotoni.com', '_blank');
-                }}}
+                }}
                 className={`px-3.5 py-1.5 rounded-full backdrop-blur-sm border text-sm transition-colors ${
                   tag === 'Long Term Rentals'
                     ? 'bg-brand-500/20 border-brand-300/30 text-white hover:bg-brand-500/30'

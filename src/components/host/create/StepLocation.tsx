@@ -109,6 +109,20 @@ export function StepLocation({ form, setForm }: StepProps) {
           {/* Street (free text) */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
+              Ward / Neighbourhood
+            </label>
+            <input
+              type="text"
+              value={form.ward}
+              onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
+              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
+              placeholder="e.g., Msasani, Mikocheni, Masaki"
+            />
+          </div>
+
+          {/* Street address */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">
               Street address
             </label>
             <input

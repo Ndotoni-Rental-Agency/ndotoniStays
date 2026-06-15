@@ -114,6 +114,9 @@ export default function ListYourPlacePage() {
     if (canAdvance() && step < 4) {
       setStep(step + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Fallback for mobile browsers where smooth scroll may not fire
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
   }
 
@@ -121,6 +124,8 @@ export default function ListYourPlacePage() {
     if (step > 1) {
       setStep(step - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
   }
 
@@ -247,7 +252,7 @@ export default function ListYourPlacePage() {
               <div key={s.id} className="flex items-center">
                 <button
                   type="button"
-                  onClick={() => { if (s.id < step || canAdvance()) setStep(s.id); }}
+                  onClick={() => { if (s.id < step || canAdvance()) { setStep(s.id); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}
                   className="flex items-center gap-1.5"
                 >
                   <span

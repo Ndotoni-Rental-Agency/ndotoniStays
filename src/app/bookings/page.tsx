@@ -152,14 +152,14 @@ export default function MyBookingsPage() {
       });
       console.log('[ReviewSubmit] Success:', JSON.stringify(result, null, 2));
       toast.success('Review submitted! Thank you.');
-      setReviewedBookingIds(prev => new Set([...prev, reviewingBooking.bookingId]));
+      setReviewedBookingIds(prev => new Set([...Array.from(prev), reviewingBooking.bookingId]));
       setReviewingBooking(null);
     } catch (err: any) {
       console.error('[ReviewSubmit] Error:', err);
       const errorMsg = err?.errors?.[0]?.message || err?.message || '';
       if (errorMsg.includes('already reviewed')) {
         toast.error('You have already reviewed this booking.');
-        setReviewedBookingIds(prev => new Set([...prev, reviewingBooking.bookingId]));
+        setReviewedBookingIds(prev => new Set([...Array.from(prev), reviewingBooking.bookingId]));
         setReviewingBooking(null);
       } else {
         throw err;

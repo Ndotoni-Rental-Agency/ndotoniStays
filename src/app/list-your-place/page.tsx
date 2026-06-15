@@ -113,19 +113,22 @@ export default function ListYourPlacePage() {
   function nextStep() {
     if (canAdvance() && step < 4) {
       setStep(step + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // Fallback for mobile browsers where smooth scroll may not fire
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 50);
     }
   }
 
   function prevStep() {
     if (step > 1) {
       setStep(step - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }, 50);
     }
   }
 

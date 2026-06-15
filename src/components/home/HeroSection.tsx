@@ -140,7 +140,7 @@ export function HeroSection() {
                     value={searchQuery}
                     onFocus={() => setShowLocationDropdown(true)}
                     placeholder="Where?"
-                    className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer hover:bg-ink-100 transition-colors"
+                    className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer hover:bg-ink-100 transition-colors"
                     aria-label="Location"
                     readOnly
                   />
@@ -161,7 +161,7 @@ export function HeroSection() {
                             value={modalSearchQuery}
                             onChange={(e) => setModalSearchQuery(e.target.value)}
                             placeholder="Search region or district..."
-                            className="w-full rounded-xl bg-ink-50 border-0 px-4 py-3 text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                            className="w-full rounded-xl bg-ink-50 border-0 px-4 py-3 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                             autoFocus
                           />
                         </div>

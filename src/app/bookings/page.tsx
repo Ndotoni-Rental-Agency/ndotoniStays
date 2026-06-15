@@ -77,6 +77,7 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
+  const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -151,10 +152,18 @@ export default function MyBookingsPage() {
       });
       console.log('[ReviewSubmit] Success:', JSON.stringify(result, null, 2));
       toast.success('Review submitted! Thank you.');
+      setReviewedBookingIds(prev => new Set([...prev, reviewingBooking.bookingId]));
       setReviewingBooking(null);
     } catch (err: any) {
       console.error('[ReviewSubmit] Error:', err);
-      throw err;
+      const errorMsg = err?.errors?.[0]?.message || err?.message || '';
+      if (errorMsg.includes('already reviewed')) {
+        toast.error('You have already reviewed this booking.');
+        setReviewedBookingIds(prev => new Set([...prev, reviewingBooking.bookingId]));
+        setReviewingBooking(null);
+      } else {
+        throw err;
+      }
     }
   }
 
@@ -257,8 +266,9 @@ export default function MyBookingsPage() {
           {filtered.map((booking) => {
             const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
             const canReview = (
-              booking.status === 'COMPLETED' ||
-              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkInDate <= today)
+              !reviewedBookingIds.has(booking.bookingId) &&
+              (booking.status === 'COMPLETED' ||
+              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkInDate <= today))
             );
             const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';
             const days = daysUntil(booking.checkInDate);

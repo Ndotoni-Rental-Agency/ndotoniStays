@@ -162,6 +162,11 @@ export default function ListYourPlacePage() {
       if (propertyId) {
         setCreatedPropertyId(propertyId);
         setShowSuccess(true);
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 50);
       } else {
         setError('Property created but no ID returned.');
       }

@@ -1,4 +1,4 @@
-import { ArrowRight, Phone } from 'lucide-react';
+import { ArrowRight, Phone, ShieldCheck } from 'lucide-react';
 import { STRIPE_LINKS, MPESA_NUMBER } from './investData';
 
 export function BackUsSection() {
@@ -6,8 +6,10 @@ export function BackUsSection() {
     <section id="back-us" className="overflow-hidden bg-white px-6 py-20">
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl border border-ink-100 bg-white p-8 shadow-xl shadow-ink-900/5">
-          <h2 className="text-center text-2xl font-bold">Back Us</h2>
-          <p className="mt-2 text-center text-ink-500">Choose an amount and invest via Stripe or M-Pesa.</p>
+          <h2 className="text-center text-2xl font-bold">Back This Round</h2>
+          <p className="mt-2 text-center text-ink-500">
+            Contribute to our pre-seed equity round. Choose an amount below.
+          </p>
 
           <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-5">
             {Object.entries(STRIPE_LINKS).map(([amount, link]) => (
@@ -29,18 +31,31 @@ export function BackUsSection() {
             rel="noopener noreferrer"
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700"
           >
-            Pay with Stripe
+            Contribute via Stripe
             <ArrowRight className="h-4 w-4" />
           </a>
 
           <div className="mt-8 border-t border-ink-100 pt-6">
-            <p className="text-center text-sm font-medium text-ink-500">Or pay via M-Pesa</p>
+            <p className="text-center text-sm font-medium text-ink-500">Or contribute via M-Pesa</p>
             <div className="mt-3 flex items-center justify-center gap-3 rounded-xl bg-brand-50 px-4 py-3">
               <Phone className="h-5 w-5 text-brand-600" />
               <div className="text-center">
                 <span className="text-lg font-semibold text-brand-700 block">{MPESA_NUMBER}</span>
                 <span className="text-xs text-ink-500">Name: Kelvin Makoye</span>
               </div>
+            </div>
+          </div>
+
+          {/* Legal disclaimer */}
+          <div className="mt-8 border-t border-ink-100 pt-6">
+            <div className="flex items-start gap-3 rounded-xl bg-ink-50 px-4 py-3">
+              <ShieldCheck className="h-5 w-5 text-ink-400 shrink-0 mt-0.5" />
+              <p className="text-xs text-ink-500 leading-relaxed">
+                This is a contribution toward a pre-seed equity financing round for Ndotoni Stays.
+                Equity terms, ownership percentage, and legal agreements will be finalized in a
+                separate SAFE or equity agreement with each backer. This is not a regulated
+                investment product and does not guarantee returns.
+              </p>
             </div>
           </div>
         </div>

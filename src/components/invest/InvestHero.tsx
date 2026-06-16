@@ -1,4 +1,4 @@
-import { ArrowRight, TrendingUp } from 'lucide-react';
+import { ArrowRight, Rocket } from 'lucide-react';
 
 export function InvestHero() {
   return (
@@ -9,17 +9,17 @@ export function InvestHero() {
 
       <div className="relative mx-auto max-w-4xl text-center">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-1.5 text-sm font-medium text-brand-700">
-          <TrendingUp className="h-4 w-4" />
-          Pre-Seed Round Open
+          <Rocket className="h-4 w-4" />
+          Pre-Seed Equity Round — Now Open
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-          Invest in <span className="text-brand-600">Ndotoni Stays</span>
+          Back the Future of <span className="text-brand-600">Stays in Tanzania</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-ink-500 sm:text-xl">
-          Global platforms weren&apos;t built for Tanzania. Ndotoni Stays offers verified spaces
-          and local-first booking for stays, events, and short-term rentals.
+          We&apos;re building Tanzania&apos;s leading short-term stays marketplace — verified spaces,
+          local payments, and a booking experience built for East Africa. Join our pre-seed round.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-8">
@@ -44,7 +44,7 @@ export function InvestHero() {
             href="#back-us"
             className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-600/25 transition hover:bg-brand-700"
           >
-            Back Us Now
+            Back This Round
             <ArrowRight className="h-4 w-4" />
           </a>
           <a

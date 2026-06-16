@@ -36,8 +36,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/host" className="hover:text-ink-900 transition-colors">
-                  List Your Place
+                <Link href="/become-host" className="hover:text-ink-900 transition-colors">
+                  Become a Host
                 </Link>
               </li>
               <li>

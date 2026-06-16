@@ -99,7 +99,7 @@ export function HostSidebar() {
           {/* Add property CTA */}
           <div className="pt-4 mt-4 border-t border-ink-100">
             <Link
-              href="/host/create"
+              href="/become-host"
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-600 hover:bg-brand-50 transition-colors"
             >
               <PlusIcon className="h-5 w-5" />

@@ -4,15 +4,14 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 /**
- * /host/create — redirects to /host
- * The /host page shows the create flow for unauthenticated users
- * and the dashboard for authenticated hosts.
+ * /host/create — redirects to /become-host (the standalone create form)
+ * Works for both authenticated and unauthenticated users.
  */
 export default function HostCreateRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/host');
+    router.replace('/become-host');
   }, [router]);
 
   return (

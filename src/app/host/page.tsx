@@ -88,7 +88,7 @@ export default function HostPropertiesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-ink-900">My Properties</h1>
-        <Link href="/host/create" className="btn-primary flex items-center gap-1.5 text-sm">
+        <Link href="/become-host" className="btn-primary flex items-center gap-1.5 text-sm">
           <PlusIcon className="h-4 w-4" />
           <span className="hidden sm:inline">Add Property</span>
           <span className="sm:hidden">Add</span>
@@ -118,7 +118,7 @@ export default function HostPropertiesPage() {
           <HomeModernIcon className="h-16 w-16 text-ink-200 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-ink-700 mb-2">No properties yet</h2>
           <p className="text-ink-500 mb-6 text-sm">List your first property and start earning.</p>
-          <Link href="/host/create" className="btn-primary inline-flex items-center gap-2">
+          <Link href="/become-host" className="btn-primary inline-flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
             Add Your First Property
           </Link>

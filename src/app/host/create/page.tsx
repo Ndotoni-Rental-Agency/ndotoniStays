@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 /**
- * /host/create — redirects to /list-your-place
+ * /host/create — redirects to /become-host
  * The create flow now lives outside the /host layout so unauthenticated
  * users can fill out the form before signing in.
  */
@@ -12,7 +12,7 @@ export default function HostCreateRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/list-your-place');
+    router.replace('/become-host');
   }, [router]);
 
   return (

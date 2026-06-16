@@ -26,7 +26,7 @@ export function CTASection() {
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/list-your-place"
+                href="/become-host"
                 className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-sm font-bold text-brand-700 hover:bg-brand-50 transition-colors shadow-lg"
               >
                 List Your Place – Free

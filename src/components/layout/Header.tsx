@@ -43,7 +43,7 @@ export function Header() {
                 Search
               </Link>
               <Link
-                href="/list-your-place"
+                href="/become-host"
                 className="text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
               >
                 List Your Place
@@ -127,7 +127,7 @@ export function Header() {
                   Search Places
                 </Link>
                 <Link
-                  href="/list-your-place"
+                  href="/become-host"
                   className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >

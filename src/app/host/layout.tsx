@@ -12,7 +12,7 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // /host/create is allowed without auth — it just redirects to /list-your-place
+  // /host/create is allowed without auth — it just redirects to /become-host
   const isCreatePage = pathname === '/host/create';
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { ArrowRight, Rocket } from 'lucide-react';
 
 export function InvestHero() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-16 sm:py-20">
+    <section className="relative overflow-hidden bg-white px-6 py-10 sm:py-14">
       {/* Decorative blobs */}
       <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-brand-50 opacity-60 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-brand-50 opacity-40 blur-3xl" />

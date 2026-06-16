@@ -5,6 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import { Header } from '@/components/layout/Header';
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter';
 import { ClientProviders } from '@/components/providers/ClientProviders';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -67,6 +69,8 @@ export default function RootLayout({
           <main className="min-h-screen">{children}</main>
           <ConditionalFooter />
         </ClientProviders>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -14,7 +14,7 @@ export function InvestHero() {
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-          Back the Future of <span className="text-brand-600">Stays in Tanzania</span>
+          Back <span className="text-brand-600">Ndotoni Stays</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-ink-500 sm:text-xl">

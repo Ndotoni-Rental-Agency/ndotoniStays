@@ -18,8 +18,8 @@ export function InvestHero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-ink-500 sm:text-xl">
-          We&apos;re building Tanzania&apos;s leading short-term stays marketplace — verified spaces,
-          local payments, and a booking experience built for East Africa. Join our pre-seed round.
+          Global platforms weren&apos;t built for Tanzania. Ndotoni Stays offers verified spaces
+          and local-first booking for stays, events, and short-term rentals.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-8">

@@ -1,28 +1,30 @@
 'use client';
 
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { HostSidebar } from '@/components/host/HostSidebar';
+import BecomeHostPage from '@/app/become-host/page';
 
 export default function HostLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // /host/create is allowed without auth — it just redirects to /become-host
+  // /host/create is allowed without auth — it redirects to /host
   const isCreatePage = pathname === '/host/create';
+  // Show create flow for unauthenticated users on /host (the root page)
+  const isHostRoot = pathname === '/host';
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !isCreatePage) {
+    if (!isLoading && !isAuthenticated && !isCreatePage && !isHostRoot) {
       if (typeof window !== 'undefined') {
         localStorage.setItem('ndotoni_booking_redirect', window.location.href);
       }
       setShowAuthModal(true);
     }
-  }, [isLoading, isAuthenticated, isCreatePage]);
+  }, [isLoading, isAuthenticated, isCreatePage, isHostRoot]);
 
   // Let the create page pass through without auth — it redirects itself
   if (isCreatePage) {
@@ -35,6 +37,11 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
         <div className="animate-pulse text-ink-400">Loading...</div>
       </div>
     );
+  }
+
+  // Unauthenticated users on /host see the create property flow
+  if (!isAuthenticated && isHostRoot) {
+    return <BecomeHostPage />;
   }
 
   if (!isAuthenticated) {

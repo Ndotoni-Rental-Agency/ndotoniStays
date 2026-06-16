@@ -56,10 +56,13 @@ Respond ONLY with valid JSON in this exact format (no other text):
     const text = data.content?.[0]?.text?.trim() || '';
 
     try {
-      const parsed = JSON.parse(text);
+      // Strip markdown code blocks if present
+      const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
       return NextResponse.json(parsed);
     } catch {
-      return NextResponse.json({ error: 'Invalid AI response' }, { status: 500 });
+      console.error('Failed to parse AI response:', text);
+      return NextResponse.json({ error: 'Invalid AI response', details: text }, { status: 500 });
     }
   } catch (error) {
     console.error('Price prediction error:', error);

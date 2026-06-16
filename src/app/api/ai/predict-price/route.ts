@@ -40,14 +40,16 @@ Respond ONLY with valid JSON in this exact format (no other text):
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6',
         max_tokens: 200,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to predict price' }, { status: 500 });
+      const errorText = await response.text();
+      console.error('Anthropic API error:', response.status, errorText);
+      return NextResponse.json({ error: 'Failed to predict price', details: errorText }, { status: 500 });
     }
 
     const data = await response.json();

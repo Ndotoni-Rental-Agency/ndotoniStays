@@ -28,6 +28,8 @@ interface Property {
   status: string;
   instantBookEnabled: boolean;
   maxGuests: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
 }
 
 const STATUS_BADGES: Record<string, { label: string; classes: string }> = {
@@ -165,7 +167,11 @@ export default function HostPropertiesPage() {
                       {property.currency} {property.nightlyRate?.toLocaleString()}
                       <span className="text-ink-400 font-normal">/night</span>
                     </p>
-                    <span className="text-xs text-ink-400">{property.maxGuests} guests</span>
+                    <span className="text-xs text-ink-400">
+                      {property.bedrooms && `${property.bedrooms} bed`}
+                      {property.bathrooms && ` · ${property.bathrooms} bath`}
+                      {' · '}{property.maxGuests} guests
+                    </span>
                   </div>
 
                   {/* Actions */}

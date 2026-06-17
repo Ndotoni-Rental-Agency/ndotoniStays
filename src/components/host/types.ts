@@ -11,6 +11,8 @@ export interface PropertyFormData {
   currency: string;
   cleaningFee: string;
   maxGuests: string;
+  bedrooms: string;
+  bathrooms: string;
   amenities: string[];
   minimumStay: string;
   maximumStay: string;
@@ -65,6 +67,8 @@ export interface PropertyData {
   currency: string;
   cleaningFee: number;
   maxGuests: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
   amenities: string[];
   images: string[];
   minimumStay: number;

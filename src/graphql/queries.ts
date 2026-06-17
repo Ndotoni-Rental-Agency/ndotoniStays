@@ -3246,6 +3246,8 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       maxAdults
       maxChildren
       maxGuests
+      bedrooms
+      bathrooms
       maxInfants
       maximumStay
       minimumStay

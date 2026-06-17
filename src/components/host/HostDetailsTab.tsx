@@ -354,17 +354,43 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
       {/* Capacity */}
       <section>
         <h2 className="text-base sm:text-lg font-semibold text-ink-900 mb-3 sm:mb-4">Capacity</h2>
-        <div>
-          <label className="block text-sm font-medium text-ink-700 mb-1.5">Max guests</label>
-          <select
-            value={form.maxGuests}
-            onChange={(e) => onUpdate('maxGuests', e.target.value)}
-            className="input text-base w-full sm:w-48"
-          >
-            {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
-              <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Max guests</label>
+            <select
+              value={form.maxGuests}
+              onChange={(e) => onUpdate('maxGuests', e.target.value)}
+              className="input text-base w-full"
+            >
+              {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
+                <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Bedrooms</label>
+            <select
+              value={form.bedrooms}
+              onChange={(e) => onUpdate('bedrooms', e.target.value)}
+              className="input text-base w-full"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 10].map((n) => (
+                <option key={n} value={n}>{n} bedroom{n > 1 ? 's' : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Bathrooms</label>
+            <select
+              value={form.bathrooms}
+              onChange={(e) => onUpdate('bathrooms', e.target.value)}
+              className="input text-base w-full"
+            >
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>{n} bathroom{n > 1 ? 's' : ''}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </section>
 

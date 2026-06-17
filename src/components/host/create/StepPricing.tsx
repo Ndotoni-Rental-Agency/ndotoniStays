@@ -204,6 +204,34 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
           </div>
         </div>
 
+        {/* Bedrooms & Bathrooms */}
+        <div className="grid grid-cols-2 gap-5">
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-2">Bedrooms</label>
+            <select
+              value={form.bedrooms}
+              onChange={(e) => updateField('bedrooms', e.target.value)}
+              className="input text-base py-3.5 w-full"
+            >
+              {[1, 2, 3, 4, 5, 6, 7, 8, 10].map((n) => (
+                <option key={n} value={n}>{n} bedroom{n > 1 ? 's' : ''}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-2">Bathrooms</label>
+            <select
+              value={form.bathrooms}
+              onChange={(e) => updateField('bathrooms', e.target.value)}
+              className="input text-base py-3.5 w-full"
+            >
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>{n} bathroom{n > 1 ? 's' : ''}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {/* Instant Book Toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-ink-200 bg-ink-50/50">
           <div>

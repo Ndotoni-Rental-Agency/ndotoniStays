@@ -9,6 +9,8 @@ export interface CreatePropertyFormData {
   nightlyRate: string;
   currency: string;
   maxGuests: string;
+  bedrooms: string;
+  bathrooms: string;
   instantBookEnabled: boolean;
   images: string[];
   phoneNumber: string;

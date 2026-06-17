@@ -1691,6 +1691,8 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     maxAdults
     maxChildren
     maxGuests
+    bedrooms
+    bathrooms
     maxInfants
     maximumStay
     minimumStay

@@ -16,6 +16,8 @@ interface ShortTermProperty {
   averageRating: number | null;
   ratingSummary: { averageRating: number; totalReviews: number } | null;
   maxGuests: number;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
   instantBookEnabled: boolean;
 }
 
@@ -71,7 +73,10 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
         </div>
 
         <p className="text-xs text-ink-500 mt-1">
-          {property.district}, {property.region} · Up to {property.maxGuests} guests
+          {property.district}, {property.region}
+          {property.bedrooms && ` · ${property.bedrooms} bed${property.bedrooms > 1 ? 's' : ''}`}
+          {property.bathrooms && ` · ${property.bathrooms} bath`}
+          {' · '}{property.maxGuests} guest{property.maxGuests > 1 ? 's' : ''}
         </p>
 
         <p className="mt-3 text-sm">

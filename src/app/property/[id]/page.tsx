@@ -35,6 +35,8 @@ interface ShortTermProperty {
   checkOutTime: string | null;
   checkInInstructions: string | null;
   maxGuests: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
   allowsPets: boolean | null;
   allowsChildren: boolean | null;
   allowsSmoking: boolean | null;

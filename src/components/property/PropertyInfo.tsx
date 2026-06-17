@@ -11,6 +11,8 @@ interface Props {
     host: { firstName: string; lastName: string } | null;
     amenities: string[];
     maxGuests: number | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
     checkInTime: string | null;
     checkOutTime: string | null;
     cancellationPolicy: string | null;
@@ -52,6 +54,15 @@ export function PropertyInfo({ property }: Props) {
               <UserGroupIcon className="h-4 w-4" />
               Up to {property.maxGuests} guests
             </span>
+          )}
+          {property.bedrooms && (
+            <span className="text-ink-400">·</span>
+          )}
+          {property.bedrooms && (
+            <span>{property.bedrooms} bed{property.bedrooms > 1 ? 's' : ''}</span>
+          )}
+          {property.bathrooms && (
+            <span>{property.bathrooms} bath{property.bathrooms > 1 ? 's' : ''}</span>
           )}
           {property.ratingSummary && property.ratingSummary.totalReviews > 0 && (
             <span className="flex items-center gap-1">

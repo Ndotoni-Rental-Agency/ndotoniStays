@@ -28,9 +28,10 @@ interface Props {
   guests: number;
   minPrice?: number;
   maxPrice?: number;
+  bedrooms?: number;
 }
 
-export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, maxPrice }: Props) {
+export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, maxPrice, bedrooms }: Props) {
   const router = useRouter();
   const [localRegion, setLocalRegion] = useState(region);
   const [localCheckIn, setLocalCheckIn] = useState(checkIn);
@@ -38,6 +39,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
   const [localGuests, setLocalGuests] = useState(guests);
   const [localMinPrice, setLocalMinPrice] = useState(minPrice?.toString() || '');
   const [localMaxPrice, setLocalMaxPrice] = useState(maxPrice?.toString() || '');
+  const [localBedrooms, setLocalBedrooms] = useState(bedrooms?.toString() || '');
 
   // Auto-correct invalid price range from URL params on mount
   useEffect(() => {
@@ -62,6 +64,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
     params.set('guests', localGuests.toString());
     if (localMinPrice) params.set('minPrice', localMinPrice);
     if (localMaxPrice) params.set('maxPrice', localMaxPrice);
+    if (localBedrooms) params.set('bedrooms', localBedrooms);
     router.push(`/search?${params.toString()}`);
   };
 
@@ -117,6 +120,20 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
         >
           {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
             <option key={n} value={n}>{n} {n === 1 ? 'guest' : 'guests'}</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="min-w-[100px]">
+        <label className="block text-xs font-medium text-ink-500 mb-1">Bedrooms</label>
+        <select
+          value={localBedrooms}
+          onChange={(e) => setLocalBedrooms(e.target.value)}
+          className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+        >
+          <option value="">Any</option>
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <option key={n} value={n}>{n}+ bed{n > 1 ? 's' : ''}</option>
           ))}
         </select>
       </div>

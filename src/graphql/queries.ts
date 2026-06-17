@@ -3775,6 +3775,8 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       maxAdults
       maxChildren
       maxGuests
+      bedrooms
+      bathrooms
       maxInfants
       maximumStay
       minimumStay

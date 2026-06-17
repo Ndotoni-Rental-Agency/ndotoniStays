@@ -21,6 +21,8 @@ interface ShortTermProperty {
   averageRating: number | null;
   ratingSummary: { averageRating: number; totalReviews: number } | null;
   maxGuests: number;
+  bedrooms: number | null;
+  bathrooms: number | null;
   instantBookEnabled: boolean;
 }
 
@@ -39,6 +41,7 @@ export function SearchContent() {
   const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
   const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
   const instantBookOnly = searchParams.get('instantBook') === 'true';
+  const bedrooms = searchParams.get('bedrooms') ? parseInt(searchParams.get('bedrooms')!) : undefined;
 
   // Guard: don't send invalid price ranges to backend
   const validMinPrice = (minPrice !== undefined && maxPrice !== undefined && minPrice >= maxPrice) ? undefined : minPrice;
@@ -46,7 +49,7 @@ export function SearchContent() {
 
   useEffect(() => {
     fetchProperties();
-  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly]);
+  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
 
   async function fetchProperties() {
     setLoading(true);
@@ -65,11 +68,14 @@ export function SearchContent() {
           ...(validMinPrice && { minPrice: validMinPrice }),
           ...(validMaxPrice && { maxPrice: validMaxPrice }),
           ...(instantBookOnly && { instantBookOnly: true }),
+          ...(bedrooms && { bedrooms }),
           limit: 20,
         },
       });
 
-      setProperties(data.searchShortTermProperties?.properties || []);
+      let results = data.searchShortTermProperties?.properties || [];
+
+      setProperties(results);
     } catch (err: any) {
       console.error('Search error:', err);
       setError('Failed to load properties. Please try again.');
@@ -88,6 +94,7 @@ export function SearchContent() {
         guests={guests}
         minPrice={minPrice}
         maxPrice={maxPrice}
+        bedrooms={bedrooms}
       />
 
       {/* Results header */}

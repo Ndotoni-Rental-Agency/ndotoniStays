@@ -2398,6 +2398,7 @@ export type ShortTermProperty = {
   hostId: Scalars['ID']['output'];
   houseRules?: Maybe<Array<Scalars['String']['output']>>;
   images?: Maybe<Array<Scalars['String']['output']>>;
+  videos?: Maybe<Array<Scalars['String']['output']>>;
   instantBookEnabled?: Maybe<Scalars['Boolean']['output']>;
   maxAdults?: Maybe<Scalars['Int']['output']>;
   maxChildren?: Maybe<Scalars['Int']['output']>;

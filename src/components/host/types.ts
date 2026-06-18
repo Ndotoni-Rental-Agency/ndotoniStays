@@ -71,6 +71,7 @@ export interface PropertyData {
   bathrooms: number | null;
   amenities: string[];
   images: string[];
+  videos?: string[];
   minimumStay: number;
   maximumStay: number;
   checkInTime: string;

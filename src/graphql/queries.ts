@@ -1687,6 +1687,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     hostId
     houseRules
     images
+    videos
     instantBookEnabled
     maxAdults
     maxChildren

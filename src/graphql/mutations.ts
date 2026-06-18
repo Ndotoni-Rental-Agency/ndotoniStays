@@ -2729,6 +2729,7 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     hostId
     houseRules
     images
+    videos
     instantBookEnabled
     maxAdults
     maxChildren

@@ -56,6 +56,7 @@ export default function EditPropertyPage() {
   const [publishing, setPublishing] = useState(false);
   const [status, setStatus] = useState('DRAFT');
   const [images, setImages] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
   const [siblingInstructions, setSiblingInstructions] = useState<Array<{ title: string; instructions: any }>>([]);
 
   const [form, setForm] = useState<PropertyFormData>({
@@ -112,6 +113,7 @@ export default function EditPropertyPage() {
 
       setStatus(p.status);
       setImages(p.images || []);
+      setVideos(p.videos || []);
       setForm({
         title: p.title || '',
         description: p.description || '',
@@ -351,7 +353,7 @@ export default function EditPropertyPage() {
 
       {activeTab === 'photos' && (
         <div className="max-w-3xl">
-          <HostPhotos propertyId={propertyId} initialImages={images} />
+          <HostPhotos propertyId={propertyId} initialImages={images} initialVideos={videos} />
         </div>
       )}
 

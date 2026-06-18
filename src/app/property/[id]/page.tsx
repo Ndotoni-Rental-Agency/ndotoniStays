@@ -20,6 +20,7 @@ interface ShortTermProperty {
   region: string;
   district: string;
   images: string[];
+  videos?: string[];
   thumbnail: string;
   amenities: string[];
   nightlyRate: number;
@@ -108,7 +109,7 @@ export default function PropertyDetailPage() {
     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
       {/* Gallery — full-bleed on mobile, padded on desktop */}
       <div className="sm:px-0">
-        <PropertyGallery images={property.images} title={property.title} />
+        <PropertyGallery images={property.images} videos={property.videos} title={property.title} />
       </div>
 
       {/* Mobile booking card - shown above property details on small screens */}

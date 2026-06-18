@@ -6088,6 +6088,7 @@ export type GetShortTermPropertyQuery = {
     hostId: string,
     houseRules?: Array< string > | null,
     images?: Array< string > | null,
+    videos?: Array< string > | null,
     instantBookEnabled?: boolean | null,
     maxAdults?: number | null,
     maxChildren?: number | null,

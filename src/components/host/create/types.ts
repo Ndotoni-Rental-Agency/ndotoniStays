@@ -13,6 +13,7 @@ export interface CreatePropertyFormData {
   bathrooms: string;
   instantBookEnabled: boolean;
   images: string[];
+  videos: string[];
   phoneNumber: string;
   lat: number;
   lng: number;

@@ -31,8 +31,8 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
 
   // Combine images and videos into a unified media array
   const mediaItems: MediaItem[] = [
-    ...images.map(url => ({ type: 'image' as const, url })),
-    ...videos.map(url => ({ type: 'video' as const, url })),
+    ...(images || []).map(url => ({ type: 'image' as const, url })),
+    ...(videos || []).map(url => ({ type: 'video' as const, url })),
   ];
 
   const displayMedia = mediaItems.length > 0 ? mediaItems : [{ type: 'image' as const, url: '/placeholder.jpg' }];

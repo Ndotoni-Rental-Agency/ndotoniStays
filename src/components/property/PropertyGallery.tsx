@@ -173,6 +173,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             loop
             playsInline
             preload="auto"
+            onLoadedData={(e) => {
+              const v = e.currentTarget;
+              v.play().catch(() => {});
+            }}
           />
         </div>
       );
@@ -271,7 +275,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       {/* Mobile: Full-bleed swipeable carousel */}
       <div
         ref={containerRef}
-        className="sm:hidden relative overflow-hidden aspect-[4/3] select-none bg-black"
+        className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
         style={{ overscrollBehavior: 'none' }}
       >
         <div className="absolute inset-0 overflow-hidden">
@@ -285,19 +289,23 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             {displayMedia.map((media, i) => (
               <div
                 key={i}
-                className="relative min-w-full h-full flex-shrink-0 bg-black"
+                className="relative min-w-full h-full flex-shrink-0"
                 onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
               >
                 {media.type === 'video' ? (
                   <div className="relative w-full h-full">
                     <video
                       src={getCdnUrl(media.url)}
-                      className="w-full h-full object-contain pointer-events-none"
+                      className="w-full h-full object-cover pointer-events-none"
                       autoPlay
                       muted
                       loop
                       playsInline
                       preload="auto"
+                      onLoadedData={(e) => {
+                        const v = e.currentTarget;
+                        v.play().catch(() => {});
+                      }}
                     />
                   </div>
                 ) : (
@@ -305,7 +313,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     src={getCdnUrl(media.url)}
                     alt={`${title} ${i + 1}`}
                     fill
-                    className="object-contain pointer-events-none"
+                    className="object-cover pointer-events-none"
                     priority={i === 0}
                     sizes="100vw"
                     draggable={false}

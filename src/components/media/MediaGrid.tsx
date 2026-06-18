@@ -19,7 +19,7 @@ interface MediaGridProps {
 
 /**
  * Reusable drag-to-reorder media grid with upload support.
- * Supports both desktop (HTML5 DnD) and mobile (touch events).
+ * Supports both desktop (HTML5 DnD) and mobile (touch events with passive: false).
  */
 export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGridProps) {
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -27,17 +27,20 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragItemRef = useRef<number | null>(null);
 
-  // Touch drag state
+  // Touch state refs (use refs for imperative event handlers)
+  const touchActiveRef = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
-  const touchDragging = useRef(false);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Unified ordered list
+  // Keep mediaItems in a ref so imperative handlers access latest value
+  const mediaItemsRef = useRef<MediaItem[]>([]);
+
   const mediaItems: MediaItem[] = [
     ...images.map(url => ({ type: 'image' as const, url })),
     ...videos.map(url => ({ type: 'video' as const, url })),
   ];
+  mediaItemsRef.current = mediaItems;
   const totalMedia = mediaItems.length;
 
   function emitChange(items: MediaItem[]) {
@@ -67,7 +70,7 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
 
   function reorder(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex) return;
-    const newItems = [...mediaItems];
+    const newItems = [...mediaItemsRef.current];
     const [moved] = newItems.splice(fromIndex, 1);
     newItems.splice(toIndex, 0, moved);
     emitChange(newItems);
@@ -98,87 +101,122 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
     setDragIndex(null);
     setDragOverIndex(null);
     dragItemRef.current = null;
+    touchActiveRef.current = false;
   }
 
-  // === Mobile touch handlers ===
-  const getItemIndexFromTouch = useCallback((clientX: number, clientY: number): number | null => {
+  // === Mobile: imperative touch handlers registered with passive: false ===
+  const getItemIndexFromPoint = useCallback((x: number, y: number): number | null => {
     if (!gridRef.current) return null;
     const children = Array.from(gridRef.current.children) as HTMLElement[];
     for (let i = 0; i < children.length; i++) {
       const rect = children[i].getBoundingClientRect();
-      if (
-        clientX >= rect.left &&
-        clientX <= rect.right &&
-        clientY >= rect.top &&
-        clientY <= rect.bottom
-      ) {
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
         return i;
       }
     }
     return null;
   }, []);
 
-  const handleTouchStart = useCallback((index: number, e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    touchDragging.current = false;
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
 
-    // Long press to initiate drag (300ms)
-    longPressTimer.current = setTimeout(() => {
-      touchDragging.current = true;
-      dragItemRef.current = index;
-      setDragIndex(index);
-      // Haptic feedback if available
-      if (navigator.vibrate) navigator.vibrate(30);
-    }, 300);
-  }, []);
+    function onTouchStart(e: TouchEvent) {
+      const touch = e.touches[0];
+      const target = e.target as HTMLElement;
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
+      // Only activate drag from the grid items, not the remove button
+      if (target.closest('button')) return;
 
-    // Cancel long press if moved too much before it triggers
-    if (!touchDragging.current && touchStartPos.current) {
-      const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-      const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-      if (dx > 10 || dy > 10) {
-        if (longPressTimer.current) {
-          clearTimeout(longPressTimer.current);
-          longPressTimer.current = null;
+      const index = getItemIndexFromPoint(touch.clientX, touch.clientY);
+      if (index === null) return;
+
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+      touchActiveRef.current = false;
+
+      // Long press to start drag
+      longPressTimer.current = setTimeout(() => {
+        touchActiveRef.current = true;
+        dragItemRef.current = index;
+        setDragIndex(index);
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 250);
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      const touch = e.touches[0];
+
+      // If not yet in drag mode, check if we should cancel the long press
+      if (!touchActiveRef.current) {
+        if (touchStartPos.current) {
+          const dx = Math.abs(touch.clientX - touchStartPos.current.x);
+          const dy = Math.abs(touch.clientY - touchStartPos.current.y);
+          if (dx > 8 || dy > 8) {
+            // User is scrolling, cancel long press
+            if (longPressTimer.current) {
+              clearTimeout(longPressTimer.current);
+              longPressTimer.current = null;
+            }
+          }
         }
         return;
       }
+
+      // We're actively dragging — prevent scroll
+      e.preventDefault();
+
+      const overIndex = getItemIndexFromPoint(touch.clientX, touch.clientY);
+      setDragOverIndex(overIndex);
     }
 
-    if (!touchDragging.current) return;
+    function onTouchEnd() {
+      // Clear long press timer
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
 
-    // Prevent scroll while dragging
-    e.preventDefault();
+      // If we were dragging, perform the reorder
+      if (touchActiveRef.current && dragItemRef.current !== null) {
+        // Read dragOverIndex from the DOM state — we use a ref trick
+        const grid = gridRef.current;
+        if (grid) {
+          // Find the element with the ring highlight
+          const children = Array.from(grid.children) as HTMLElement[];
+          let dropIdx: number | null = null;
+          for (let i = 0; i < children.length; i++) {
+            if (children[i].dataset.dragover === 'true') {
+              dropIdx = i;
+              break;
+            }
+          }
+          if (dropIdx !== null && dropIdx !== dragItemRef.current) {
+            reorder(dragItemRef.current, dropIdx);
+          }
+        }
+      }
 
-    const overIndex = getItemIndexFromTouch(touch.clientX, touch.clientY);
-    setDragOverIndex(overIndex);
-  }, [getItemIndexFromTouch]);
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
+      touchActiveRef.current = false;
+      touchStartPos.current = null;
+      dragItemRef.current = null;
+      setDragIndex(null);
+      setDragOverIndex(null);
     }
 
-    if (touchDragging.current && dragItemRef.current !== null && dragOverIndex !== null) {
-      reorder(dragItemRef.current, dragOverIndex);
-    }
+    // Register with passive: false so we can preventDefault on touchmove
+    grid.addEventListener('touchstart', onTouchStart, { passive: true });
+    grid.addEventListener('touchmove', onTouchMove, { passive: false });
+    grid.addEventListener('touchend', onTouchEnd, { passive: true });
+    grid.addEventListener('touchcancel', onTouchEnd, { passive: true });
 
-    touchDragging.current = false;
-    touchStartPos.current = null;
-    resetDrag();
-  }, [dragOverIndex, mediaItems]);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
     return () => {
+      grid.removeEventListener('touchstart', onTouchStart);
+      grid.removeEventListener('touchmove', onTouchMove);
+      grid.removeEventListener('touchend', onTouchEnd);
+      grid.removeEventListener('touchcancel', onTouchEnd);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
     };
-  }, []);
+  }, [getItemIndexFromPoint]);
 
   return (
     <div className="space-y-3">
@@ -193,23 +231,20 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
 
       {/* Grid */}
       {totalMedia > 0 && (
-        <div ref={gridRef} className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        <div ref={gridRef} className="grid grid-cols-3 sm:grid-cols-4 gap-2 touch-none sm:touch-auto">
           {mediaItems.map((item, i) => (
             <div
               key={`${item.type}-${item.url}-${i}`}
+              data-dragover={dragOverIndex === i && dragIndex !== i ? 'true' : 'false'}
               // Desktop DnD
               draggable
               onDragStart={() => handleDragStart(i)}
               onDragOver={(e) => handleDragOver(e, i)}
               onDrop={(e) => handleDrop(e, i)}
               onDragEnd={resetDrag}
-              // Mobile touch
-              onTouchStart={(e) => handleTouchStart(i, e)}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              className={`relative aspect-square rounded-xl overflow-hidden group select-none transition-all ${
-                dragIndex === i ? 'opacity-40 scale-95 ring-2 ring-brand-400' : ''
-              } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-brand-500 ring-offset-2' : ''} ${
+              className={`relative aspect-square rounded-xl overflow-hidden group select-none transition-all duration-150 ${
+                dragIndex === i ? 'opacity-40 scale-90 ring-2 ring-brand-400' : ''
+              } ${dragOverIndex === i && dragIndex !== i ? 'ring-2 ring-brand-500 ring-offset-2 scale-105' : ''} ${
                 dragIndex === null ? 'cursor-grab active:cursor-grabbing' : ''
               }`}
             >
@@ -238,7 +273,7 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
               <button
                 type="button"
                 onClick={() => removeItem(i)}
-                className="absolute top-1.5 right-1.5 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className="absolute top-1.5 right-1.5 h-7 w-7 rounded-full bg-black/60 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-10"
               >
                 <XMarkIcon className="h-4 w-4 text-white" />
               </button>

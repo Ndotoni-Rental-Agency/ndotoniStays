@@ -271,7 +271,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       {/* Mobile: Full-bleed swipeable carousel */}
       <div
         ref={containerRef}
-        className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
+        className="sm:hidden relative overflow-hidden aspect-[3/4] select-none"
         style={{ overscrollBehavior: 'none' }}
       >
         <div className="absolute inset-0 overflow-hidden">

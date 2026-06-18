@@ -168,12 +168,12 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
           <video
             src={getCdnUrl(media.url)}
             className="w-full h-full object-cover"
-            preload="metadata"
-            onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <PlayIcon className="h-10 w-10 text-white/90" />
-          </div>
         </div>
       );
     }
@@ -293,12 +293,12 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     <video
                       src={getCdnUrl(media.url)}
                       className="w-full h-full object-cover pointer-events-none"
-                      preload="metadata"
-                      onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-                      <PlayIcon className="h-12 w-12 text-white/90" />
-                    </div>
                   </div>
                 ) : (
                   <Image
@@ -419,10 +419,11 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     ref={lightboxVideoRef}
                     src={getCdnUrl(displayMedia[currentIndex].url)}
                     className="max-w-full max-h-full rounded-lg cursor-pointer"
+                    autoPlay
                     loop
                     playsInline
                     muted={isMuted}
-                    preload="metadata"
+                    preload="auto"
                     onClick={() => togglePlayPause(lightboxVideoRef)}
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}

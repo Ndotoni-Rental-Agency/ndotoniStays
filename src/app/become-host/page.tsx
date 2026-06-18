@@ -8,6 +8,7 @@ import { createShortTermPropertyDraft } from '@/graphql/mutations';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { generateVideoThumbnail } from '@/lib/video-thumbnail';
 import {
   StepTypeCategory,
   StepLocation,
@@ -140,6 +141,12 @@ export default function ListYourPlacePage() {
     setError(null);
 
     try {
+      // Generate thumbnail from first video if no images exist
+      let thumbnail: string | undefined;
+      if (form.images.length === 0 && form.videos.length > 0) {
+        thumbnail = (await generateVideoThumbnail(form.videos[0])) || undefined;
+      }
+
       const data = await GraphQLClient.executeAuthenticated<{
         createShortTermPropertyDraft: { propertyId: string; success: boolean; message: string };
       }>(createShortTermPropertyDraft, {
@@ -155,7 +162,7 @@ export default function ListYourPlacePage() {
           bedrooms: parseInt(form.bedrooms) || 1,
           bathrooms: parseInt(form.bathrooms) || 1,
           instantBookEnabled: form.instantBookEnabled,
-          images: form.images.length > 0 ? form.images : undefined,
+          images: form.images.length > 0 ? form.images : thumbnail ? [thumbnail] : undefined,
           videos: form.videos.length > 0 ? form.videos : undefined,
           guestPhoneNumber: form.phoneNumber || undefined,
           guestWhatsappNumber: form.phoneNumber || undefined,

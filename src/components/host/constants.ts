@@ -8,6 +8,8 @@ export const PROPERTY_TYPES = [
   { value: 'HOTEL', label: 'Hotel', icon: '🏨' },
   { value: 'COTTAGE', label: 'Cottage', icon: '🛖' },
   { value: 'BUNGALOW', label: 'Bungalow', icon: '🌴' },
+  { value: 'LODGE', label: 'Lodge', icon: '🏕️' },
+  { value: 'OTHER', label: 'Other', icon: '🏗️' },
 ];
 
 export const STAY_CATEGORIES = [

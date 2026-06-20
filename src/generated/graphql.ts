@@ -2450,6 +2450,8 @@ export type ShortTermPropertyType =
   | 'HOSTEL'
   | 'HOTEL'
   | 'HOUSE'
+  | 'LODGE'
+  | 'OTHER'
   | 'RESORT'
   | 'ROOM'
   | 'STUDIO'

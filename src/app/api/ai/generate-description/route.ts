@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nIncorporate these details into the description.\n` : '';
 
-    const prompt = `Write a short, appealing property description for a vacation rental listing in Tanzania.
+    const prompt = `You are a professional short-term rental copywriter for the Tanzania market. Write a compelling property description that converts browsers into bookers.
 
 Property details:
 - Title: ${title}
@@ -23,12 +23,31 @@ Property details:
 ${nightlyRate ? `- Price: ${currency || 'TZS'} ${nightlyRate}/night` : ''}
 ${amenities?.length ? `- Amenities: ${amenities.join(', ')}` : ''}
 ${contextLine}
-Rules:
-- Keep it 2-3 sentences (under 200 characters)
-- Highlight the best features and location
-- Make it sound welcoming and professional
-- Can mix English and Swahili naturally
-- Just return the description text, nothing else`;
+DESCRIPTION WRITING RULES:
+- 2-3 sentences, maximum 250 characters
+- First sentence: paint a picture — what's the EXPERIENCE like? (not just "This is a nice place")
+- Second sentence: highlight 1-2 standout features or amenities
+- Third sentence (optional): mention proximity to attractions, beaches, restaurants, or transport
+- Write in English
+- Use sensory language: "wake up to ocean breezes", "unwind on the private terrace", "steps from the beach"
+- Be SPECIFIC to the location — mention real nearby landmarks, beaches, or neighborhoods
+- Match tone to property type:
+  • Luxury (Villa/Resort): sophisticated, exclusive
+  • Budget (Room/Hostel): practical, clean, convenient
+  • Mid-range (Apartment/House): comfortable, well-equipped, homey
+  • Nature (Lodge/Cottage): tranquil, scenic, escape
+
+DO NOT:
+- Start with "Welcome to..." or "This is a..." (boring openings)
+- List amenities as a sentence ("It has WiFi, AC, and parking")
+- Use superlatives you can't prove ("best view in Dar")
+- Mention the host or "we"
+
+GOOD EXAMPLES:
+- "A sun-drenched penthouse where city skyline meets ocean horizon. Fully equipped kitchen, fast WiFi, and a rooftop lounge perfect for sundowners. Five minutes from Slipway and Oyster Bay restaurants."
+- "Your private beach escape — fall asleep to the sound of waves and wake up steps from white sand. Two spacious bedrooms, outdoor shower, and a hammock garden."
+
+Just return the description text, nothing else.`;
 
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',

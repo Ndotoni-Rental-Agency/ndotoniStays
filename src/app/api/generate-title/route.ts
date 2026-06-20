@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nUse this to make the title more specific and relevant.\n` : '';
 
-    const prompt = `Generate a short, catchy property listing title for a vacation rental in Tanzania. 
+    const prompt = `You are a top-tier vacation rental copywriter specializing in Tanzania's short-term rental market.
+Generate an irresistible property listing title that makes travelers immediately want to book.
 
 Property details:
 - Type: ${propertyType || 'Hotel'}
@@ -24,13 +25,40 @@ Property details:
 - Max guests: ${maxGuests || 2}
 ${nightlyRate ? `- Nightly rate: ${currency || 'TZS'} ${nightlyRate}` : ''}
 ${contextLine}
-Rules:
-- Keep it under 60 characters
-- Make it appealing to travelers
-- Mention the location or area
-- Can be in English or Swahili (prefer English)
-- Do NOT use quotes around the title
-- Just return the title text, nothing else`;
+TITLE WRITING RULES:
+- Maximum 60 characters
+- MUST be in English (international guests are the target)
+- Lead with the most compelling feature or feeling (not generic "Beautiful" or "Nice")
+- Include the specific area/neighborhood — travelers search by location
+- Use power words that evoke emotion: "Serene", "Oceanfront", "Rooftop", "Penthouse", "Hideaway", "Oasis", "Retreat", "Lush", "Breezy"
+- Match the property type to appropriate language:
+  • Villa/House: "Spacious", "Private", "Family-friendly", capacity highlights
+  • Apartment/Studio: "Modern", "Chic", "City views", walkability
+  • Hotel/Resort: "Luxury", "Getaway", "All-inclusive vibes"
+  • Room: "Cozy", "Private", proximity to attractions
+  • Lodge: "Safari", "Bush", "Wildlife", "Nature escape"
+  • Cottage/Bungalow: "Charming", "Quaint", "Garden", "Peaceful"
+- DO NOT use: "Beautiful", "Nice", "Good", "Great" (too generic)
+- DO NOT use ALL CAPS or excessive punctuation
+- DO NOT include the price in the title
+- DO NOT wrap in quotes
+
+GOOD EXAMPLES:
+- "Oceanfront Villa with Pool in Masaki"
+- "Chic Penthouse · Rooftop Terrace · Oyster Bay"
+- "Serene Beach Cottage Steps from Coco Beach"
+- "Modern 3BR Apartment in the Heart of Mikocheni"
+- "Private Safari Lodge · Arusha National Park Gateway"
+- "Breezy Loft with City Views · Kariakoo"
+- "Cozy Studio Retreat near Slipway"
+
+BAD EXAMPLES (never generate these):
+- "Nice house in Dar es Salaam" (generic, boring)
+- "BEAUTIFUL VILLA!!!" (caps, exclamation)
+- "Property for rent" (not a title)
+- "2 bedroom apartment" (just specs, no appeal)
+
+Just return the title text, nothing else.`;
 
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',

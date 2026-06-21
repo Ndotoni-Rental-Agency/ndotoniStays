@@ -21,6 +21,30 @@ interface UploadingFile {
   error?: string;
 }
 
+/**
+ * Resolve the content type for a file.
+ * Some mobile browsers (especially iOS Safari) return empty file.type for videos.
+ * Fall back to extension-based detection.
+ */
+function getContentType(file: File): string {
+  if (file.type) return file.type;
+
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  const mimeMap: Record<string, string> = {
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    mp4: 'video/mp4',
+    mov: 'video/quicktime',
+    avi: 'video/x-msvideo',
+    webm: 'video/webm',
+    pdf: 'application/pdf',
+  };
+  return mimeMap[ext || ''] || 'application/octet-stream';
+}
+
 export default function MediaUpload({
   onMediaUploaded,
   accept = 'image/*,video/*',
@@ -32,17 +56,17 @@ export default function MediaUpload({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, contentType: string) => {
     try {
       // Get upload URL from GraphQL
       const data = user 
         ? await GraphQLClient.executeAuthenticated<{ getMediaUploadUrl: any }>(
             getMediaUploadUrl,
-            { fileName: file.name, contentType: file.type }
+            { fileName: file.name, contentType }
           )
         : await GraphQLClient.execute<{ getMediaUploadUrl: any }>(
             getMediaUploadUrl,
-            { fileName: file.name, contentType: file.type }
+            { fileName: file.name, contentType }
           );
 
       const uploadData = data.getMediaUploadUrl;
@@ -54,14 +78,14 @@ export default function MediaUpload({
       const uploadResponse = await fetch(uploadData.uploadUrl, {
         method: 'PUT',
         body: file,
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': contentType },
       });
 
       if (!uploadResponse.ok) {
         throw new Error(`Upload failed (${uploadResponse.status})`);
       }
 
-      onMediaUploaded?.(uploadData.fileUrl, file.name, file.type);
+      onMediaUploaded?.(uploadData.fileUrl, file.name, contentType);
       return { success: true, url: uploadData.fileUrl };
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -84,7 +108,9 @@ export default function MediaUpload({
       const file = fileArray[i];
       
       try {
-        const isVideo = file.type.startsWith('video/');
+        // Determine content type — fall back to extension if file.type is empty
+        const contentType = getContentType(file);
+        const isVideo = contentType.startsWith('video/');
         const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
         
         if (file.size > maxSize) {
@@ -96,7 +122,7 @@ export default function MediaUpload({
           prev.map(uf => uf.file === file ? { ...uf, progress: 50 } : uf)
         );
 
-        const result = await uploadFile(file);
+        const result = await uploadFile(file, contentType);
         
         setUploadingFiles(prev => 
           prev.map(uf => 

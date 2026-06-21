@@ -31,7 +31,6 @@ interface PriceBreakdown {
   subtotal: number;
   cleaningFee: number;
   serviceFee: number;
-  taxes: number;
   total: number;
   currency: string;
 }
@@ -191,7 +190,6 @@ export function BookingSidebar({
         subtotal: property.nightlyRate * nights,
         cleaningFee: property.cleaningFee || 0,
         serviceFee: 0,
-        taxes: 0,
         total: property.nightlyRate * nights + (property.cleaningFee || 0),
         currency: property.currency,
       };

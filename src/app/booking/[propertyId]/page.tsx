@@ -130,8 +130,7 @@ export default function BookingPage() {
   const subtotal = property.nightlyRate * nights;
   const cleaningFee = property.cleaningFee || 0;
   const serviceFee = Math.round(subtotal * ((property.serviceFeePercentage || 10) / 100));
-  const taxes = Math.round((subtotal + cleaningFee + serviceFee) * ((property.taxPercentage || 0) / 100));
-  const total = subtotal + cleaningFee + serviceFee + taxes;
+  const total = subtotal + cleaningFee + serviceFee;
   const depositAmount = Math.round(total * (DEPOSIT_PERCENTAGE / 100));
   const payNowAmount = paymentOption === 'full' ? total : depositAmount;
   const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
@@ -406,12 +405,6 @@ export default function BookingPage() {
                   <span>{formatPrice(serviceFee, property.currency)}</span>
                 </div>
               )}
-              {taxes > 0 && (
-                <div className="flex justify-between text-ink-600">
-                  <span>Taxes</span>
-                  <span>{formatPrice(taxes, property.currency)}</span>
-                </div>
-              )}
               <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
                 <span>Total</span>
                 <span>{formatPrice(total, property.currency)}</span>
@@ -519,12 +512,6 @@ export default function BookingPage() {
               <div className="flex justify-between text-ink-600">
                 <span>Service fee</span>
                 <span>{formatPrice(serviceFee, property.currency)}</span>
-              </div>
-            )}
-            {taxes > 0 && (
-              <div className="flex justify-between text-ink-600">
-                <span>Taxes</span>
-                <span>{formatPrice(taxes, property.currency)}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">

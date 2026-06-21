@@ -13,6 +13,7 @@ import {
   StarIcon,
   PlusIcon,
   ChatBubbleLeftRightIcon,
+  BanknotesIcon,
 } from '@heroicons/react/24/outline';
 
 export function HostSidebar() {
@@ -65,6 +66,7 @@ export function HostSidebar() {
     { name: 'Bookings', href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
     { name: 'Calendar', href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },
     { name: 'Reviews', href: '/host/reviews', icon: StarIcon, badge: 0 },
+    { name: 'Payouts', href: '/host/payouts', icon: BanknotesIcon, badge: 0 },
     { name: 'WhatsApp', href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
   ];
 

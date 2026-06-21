@@ -36,6 +36,12 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
   // Keep mediaItems in a ref so imperative handlers access latest value
   const mediaItemsRef = useRef<MediaItem[]>([]);
 
+  // Keep images/videos in refs so upload callbacks always see latest values
+  const imagesRef = useRef(images);
+  const videosRef = useRef(videos);
+  imagesRef.current = images;
+  videosRef.current = videos;
+
   const mediaItems: MediaItem[] = [
     ...images.map(url => ({ type: 'image' as const, url })),
     ...videos.map(url => ({ type: 'video' as const, url })),
@@ -58,9 +64,9 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
     setUploadError(null);
 
     if (contentType.startsWith('video/')) {
-      onChange(images, [...videos, fileUrl]);
+      onChange(imagesRef.current, [...videosRef.current, fileUrl]);
     } else {
-      onChange([...images, fileUrl], videos);
+      onChange([...imagesRef.current, fileUrl], videosRef.current);
     }
   }
 

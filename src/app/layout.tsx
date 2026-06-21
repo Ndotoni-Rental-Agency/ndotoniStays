@@ -7,6 +7,7 @@ import { ConditionalFooter } from '@/components/layout/ConditionalFooter';
 import { ClientProviders } from '@/components/providers/ClientProviders';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import WhatsAppFAB from '@/components/ui/WhatsAppFAB';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -68,6 +69,7 @@ export default function RootLayout({
           <Header />
           <main className="min-h-screen">{children}</main>
           <ConditionalFooter />
+          <WhatsAppFAB />
         </ClientProviders>
         <Analytics />
         <SpeedInsights />

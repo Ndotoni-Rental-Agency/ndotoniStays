@@ -62,6 +62,7 @@ export default function PayoutsPage() {
 
   useEffect(() => {
     if (user) {
+      console.log('[Payouts] User object:', JSON.stringify(user, null, 2));
       const u = user as unknown as Record<string, string | undefined>;
       setFormData({
         payoutMethod: (u.payoutMethod as PayoutMethod) || 'MPESA',

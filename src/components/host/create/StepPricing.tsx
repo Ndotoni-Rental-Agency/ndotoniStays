@@ -16,7 +16,7 @@ function stripCommas(value: string): string {
 }
 
 export function StepPricing({ form, updateField, setForm }: StepProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const [predictingPrice, setPredictingPrice] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
@@ -40,6 +40,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         currency: form.currency,
         nightlyRate: form.nightlyRate,
         userContext: form.title || undefined,
+        language,
       });
       if (title) {
         updateField('title', title);
@@ -60,6 +61,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         region: form.region,
         maxGuests: parseInt(form.maxGuests) || 2,
         userContext: priceContext || undefined,
+        language,
       });
       setPriceSuggestion(result);
     } catch (err) {

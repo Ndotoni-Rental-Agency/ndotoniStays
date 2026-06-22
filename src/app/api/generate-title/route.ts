@@ -12,13 +12,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { propertyType, district, region, maxGuests, currency, nightlyRate, userContext } = await request.json();
+    const { propertyType, district, region, maxGuests, currency, nightlyRate, userContext, language } = await request.json();
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nUse this to make the title more specific and relevant.\n` : '';
 
+    const languageInstruction = language === 'sw'
+      ? `\nIMPORTANT: Write the title in SWAHILI (Kiswahili). Use natural Swahili that Tanzanian travelers would find appealing. You may mix in common English words that are widely used in Tanzania (e.g., "Beach", "Pool", "View") if they sound natural.\n`
+      : `\nIMPORTANT: Write the title in ENGLISH.\n`;
+
     const prompt = `You are a top-tier vacation rental copywriter specializing in Tanzania's short-term rental market.
 Generate an irresistible property listing title that makes travelers immediately want to book.
-
+${languageInstruction}
 Property details:
 - Type: ${propertyType || 'Hotel'}
 - Location: ${district || region || 'Dar es Salaam'}
@@ -27,7 +31,6 @@ ${nightlyRate ? `- Nightly rate: ${currency || 'TZS'} ${nightlyRate}` : ''}
 ${contextLine}
 TITLE WRITING RULES:
 - Maximum 60 characters
-- MUST be in English (international guests are the target)
 - Lead with the most compelling feature or feeling (not generic "Beautiful" or "Nice")
 - Include the specific area/neighborhood — travelers search by location
 - Use power words that evoke emotion: "Serene", "Oceanfront", "Rooftop", "Penthouse", "Hideaway", "Oasis", "Retreat", "Lush", "Breezy"

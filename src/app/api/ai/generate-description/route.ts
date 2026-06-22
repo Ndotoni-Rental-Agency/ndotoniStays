@@ -9,12 +9,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { title, propertyType, district, region, maxGuests, nightlyRate, currency, amenities, userContext } = await request.json();
+    const { title, propertyType, district, region, maxGuests, nightlyRate, currency, amenities, userContext, language } = await request.json();
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nIncorporate these details into the description.\n` : '';
 
-    const prompt = `You are a professional short-term rental copywriter for the Tanzania market. Write a compelling property description that converts browsers into bookers.
+    const languageInstruction = language === 'sw'
+      ? `\nIMPORTANT: Write the description in SWAHILI (Kiswahili). Use natural, appealing Swahili that Tanzanian travelers would relate to. You may keep proper nouns and well-known English terms (e.g., "WiFi", "pool") as-is.\n`
+      : `\nWrite the description in English.\n`;
 
+    const prompt = `You are a professional short-term rental copywriter for the Tanzania market. Write a compelling property description that converts browsers into bookers.
+${languageInstruction}
 Property details:
 - Title: ${title}
 - Type: ${propertyType}
@@ -28,7 +32,6 @@ DESCRIPTION WRITING RULES:
 - First sentence: paint a picture — what's the EXPERIENCE like? (not just "This is a nice place")
 - Second sentence: highlight 1-2 standout features or amenities
 - Third sentence (optional): mention proximity to attractions, beaches, restaurants, or transport
-- Write in English
 - Use sensory language: "wake up to ocean breezes", "unwind on the private terrace", "steps from the beach"
 - Be SPECIFIC to the location — mention real nearby landmarks, beaches, or neighborhoods
 - Match tone to property type:

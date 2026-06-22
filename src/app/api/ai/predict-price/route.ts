@@ -9,13 +9,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { propertyType, district, region, maxGuests, bedrooms, bathrooms, amenities, userContext } = await request.json();
+    const { propertyType, district, region, maxGuests, bedrooms, bathrooms, amenities, userContext, language } = await request.json();
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nFactor this into your pricing assessment.\n` : '';
 
+    const languageInstruction = language === 'sw'
+      ? `\nIMPORTANT: Write the "reasoning" field in SWAHILI (Kiswahili). Keep it natural and concise.\n`
+      : '';
+
     const prompt = `You are a pricing analyst for Tanzania's short-term rental market (like Airbnb).
 Suggest a competitive nightly rate in TZS based on real market conditions.
-
+${languageInstruction}
 Property details:
 - Type: ${propertyType}
 - Location: ${district}, ${region}

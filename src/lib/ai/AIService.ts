@@ -18,6 +18,7 @@ export interface GenerateTitleInput {
   currency?: string;
   nightlyRate?: string;
   userContext?: string;
+  language?: string;
 }
 
 export interface PricePredictionInput {
@@ -29,6 +30,7 @@ export interface PricePredictionInput {
   bathrooms?: number;
   amenities?: string[];
   userContext?: string;
+  language?: string;
 }
 
 export interface GenerateDescriptionInput {
@@ -41,6 +43,7 @@ export interface GenerateDescriptionInput {
   currency?: string;
   amenities?: string[];
   userContext?: string;
+  language?: string;
 }
 
 export interface GenerateCheckInInstructionsInput {
@@ -55,6 +58,7 @@ export interface GenerateCheckInInstructionsInput {
   checkOutTime?: string;
   userContext?: string;
   existingExamples?: Array<{ title: string; instructions: any }>;
+  language?: string;
 }
 
 class AIServiceClass {

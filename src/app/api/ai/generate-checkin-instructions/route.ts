@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime, userContext, existingExamples } = body;
+    const { title, propertyType, district, region, street, amenities, maxGuests, checkInTime, checkOutTime, userContext, existingExamples, language } = body;
 
     // Build user context section
     let userContextSection = '';
@@ -39,8 +39,12 @@ export async function POST(request: NextRequest) {
       examplesSection += `\nMatch this host's communication style and level of detail. Adapt for the new property's specific location and type.`;
     }
 
-    const prompt = `You are a helpful assistant for short-term rental hosts in Tanzania. Generate practical check-in instructions for a guest arriving at this property.
+    const languageInstruction = language === 'sw'
+      ? `\nIMPORTANT: Write ALL instruction text in SWAHILI (Kiswahili). Use natural Swahili that a Tanzanian guest would easily follow.\n`
+      : '';
 
+    const prompt = `You are a helpful assistant for short-term rental hosts in Tanzania. Generate practical check-in instructions for a guest arriving at this property.
+${languageInstruction}
 Property details:
 - Title: ${title}
 - Type: ${propertyType}

@@ -37,7 +37,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     const normalized = normalizePhone(phone);
 
     if (normalized.length < 10 || normalized.length > 15) {
-      setError('Tafadhali weka nambari sahihi ya simu na country code (mfano 255789123456)');
+      setError('Please enter a valid phone number with country code (e.g. 255789123456)');
       setLoading(false);
       return;
     }
@@ -53,8 +53,8 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     } catch (e: any) {
       const raw = e?.errors?.[0]?.message || e?.message || '';
       const msg = raw.includes('non-nullable') || raw.includes('Cannot return null')
-        ? 'Huduma hii haipatikani kwa sasa. Jaribu tena baadaye.'
-        : raw || 'Imeshindikana kutuma code';
+        ? 'This feature is not available yet. Please try again later.'
+        : raw || 'Failed to send code';
       setError(msg);
     } finally {
       setLoading(false);
@@ -76,8 +76,8 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     } catch (e: any) {
       const raw = e?.errors?.[0]?.message || e?.message || '';
       const msg = raw.includes('non-nullable') || raw.includes('Cannot return null')
-        ? 'Huduma hii haipatikani kwa sasa. Jaribu tena baadaye.'
-        : raw || 'Code si sahihi au imeisha muda. Jaribu tena.';
+        ? 'This feature is not available yet. Please try again later.'
+        : raw || 'Invalid or expired code. Please try again.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -89,7 +89,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
       <div className="bg-white rounded-2xl shadow-sm border border-ink-100 p-6">
         <div className="text-center">
           <div className="text-4xl mb-3">✅</div>
-          <h3 className="text-lg font-semibold text-ink-900 mb-2">Akaunti Imeunganishwa</h3>
+          <h3 className="text-lg font-semibold text-ink-900 mb-2">Account Linked</h3>
           <p className="text-sm text-ink-500">{message}</p>
         </div>
       </div>
@@ -101,9 +101,9 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
       <div className="flex items-center gap-3 mb-4">
         <span className="text-2xl">🔗</span>
         <div>
-          <h3 className="font-semibold text-ink-900">Unganisha WhatsApp</h3>
+          <h3 className="font-semibold text-ink-900">Link WhatsApp</h3>
           <p className="text-xs text-ink-500">
-            Unganisha nambari yako ya WhatsApp ili kuhamisha nyumba ulizosajili kupitia WhatsApp
+            Link your WhatsApp number to transfer listings you created via WhatsApp
           </p>
         </div>
       </div>
@@ -112,17 +112,17 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-ink-500 mb-1">
-              Nambari ya WhatsApp
+              WhatsApp Number
             </label>
             <input
               className="w-full px-4 py-2.5 rounded-xl border border-ink-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-sm"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="mfano 255712345678"
+              placeholder="e.g. 255712345678"
             />
             <p className="text-xs text-ink-400 mt-1">
-              Weka country code bila + (mfano 255 kwa Tanzania)
+              Include country code without + (e.g. 255 for Tanzania)
             </p>
           </div>
 
@@ -135,18 +135,18 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
             disabled={loading || !phone.trim()}
             className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
           >
-            {loading ? 'Inatuma…' : 'Tuma Code'}
+            {loading ? 'Sending…' : 'Send Code'}
           </button>
 
           <p className="text-xs text-ink-400 text-center">
-            Tutajaribu kukutumia code kwenye WhatsApp yako. Kama haijafika, tuma &quot;associate&quot; kwa nambari yetu ya WhatsApp.
+            We&apos;ll try to send a code to your WhatsApp. If it doesn&apos;t arrive, send &quot;associate&quot; to our WhatsApp number.
           </p>
 
           <button
             onClick={() => setStep('code')}
             className="w-full py-2 text-sm text-green-600 hover:text-green-700"
           >
-            Nina code tayari
+            I already have a code
           </button>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
 
           {!message && (
             <p className="text-sm text-ink-600 bg-ink-50 rounded-xl px-4 py-2">
-              Tumetuma code kwenye <span className="font-medium">{phone}</span>. Kama haijafika, tuma &quot;associate&quot; kwa{' '}
+              We sent a code to <span className="font-medium">{phone}</span>. If it didn&apos;t arrive, send &quot;associate&quot; to{' '}
               <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium hover:underline">
                 +255 790 720 329
               </a>
@@ -168,7 +168,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
 
           <div>
             <label className="block text-xs font-medium text-ink-500 mb-1">
-              Code ya Tarakimu 5
+              5-Digit Code
             </label>
             <input
               className="w-full px-4 py-2.5 rounded-xl border border-ink-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-center text-2xl tracking-widest font-mono"
@@ -190,14 +190,14 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
             disabled={loading || code.length !== 5}
             className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
           >
-            {loading ? 'Inathibitisha…' : 'Unganisha Akaunti'}
+            {loading ? 'Verifying…' : 'Link Account'}
           </button>
 
           <button
             onClick={() => { setStep('input'); setError(null); setCode(''); }}
             className="w-full py-2 text-sm text-ink-500 hover:text-ink-700"
           >
-            ← Badilisha nambari
+            ← Change number
           </button>
         </div>
       )}

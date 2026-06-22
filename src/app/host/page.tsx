@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyShortTermProperties } from '@/graphql/queries';
 import { deactivateShortTermProperty } from '@/graphql/mutations';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -32,13 +33,14 @@ interface Property {
   bathrooms: number | null;
 }
 
-const STATUS_BADGES: Record<string, { label: string; classes: string }> = {
-  DRAFT: { label: 'Draft', classes: 'bg-yellow-100 text-yellow-800' },
-  AVAILABLE: { label: 'Live', classes: 'bg-green-100 text-green-800' },
-  INACTIVE: { label: 'Inactive', classes: 'bg-gray-100 text-gray-600' },
+const STATUS_BADGES: Record<string, { labelKey: string; classes: string }> = {
+  DRAFT: { labelKey: 'host.status.draft', classes: 'bg-yellow-100 text-yellow-800' },
+  AVAILABLE: { labelKey: 'host.status.live', classes: 'bg-green-100 text-green-800' },
+  INACTIVE: { labelKey: 'host.status.inactive', classes: 'bg-gray-100 text-gray-600' },
 };
 
 export default function HostPropertiesPage() {
+  const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export default function HostPropertiesPage() {
     try {
       await GraphQLClient.executeAuthenticated(deactivateShortTermProperty, { propertyId: id });
       setProperties(prev => prev.filter(p => p.propertyId !== id));
-      toast.success('Property deleted');
+      toast.success(t('host.propertyDeleted'));
     } catch (err: any) {
       console.error('Failed to delete property:', err);
       toast.error(err?.message || 'Failed to delete');
@@ -89,11 +91,11 @@ export default function HostPropertiesPage() {
     <>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-ink-900">My Properties</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-ink-900">{t('host.myProperties')}</h1>
         <Link href="/become-host" className="btn-primary flex items-center gap-1.5 text-sm">
           <PlusIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">Add Property</span>
-          <span className="sm:hidden">Add</span>
+          <span className="hidden sm:inline">{t('host.nav.addProperty')}</span>
+          <span className="sm:hidden">{t('host.add')}</span>
         </Link>
       </div>
 
@@ -118,11 +120,11 @@ export default function HostPropertiesPage() {
       ) : properties.length === 0 ? (
         <div className="text-center py-16">
           <HomeModernIcon className="h-16 w-16 text-ink-200 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-ink-700 mb-2">No properties yet</h2>
-          <p className="text-ink-500 mb-6 text-sm">List your first property and start earning.</p>
+          <h2 className="text-xl font-semibold text-ink-700 mb-2">{t('host.noProperties')}</h2>
+          <p className="text-ink-500 mb-6 text-sm">{t('host.noProperties.desc')}</p>
           <Link href="/become-host" className="btn-primary inline-flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
-            Add Your First Property
+            {t('host.addFirst')}
           </Link>
         </div>
       ) : (
@@ -149,7 +151,7 @@ export default function HostPropertiesPage() {
                       </div>
                     )}
                     <span className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full ${badge.classes}`}>
-                      {badge.label}
+                      {t(badge.labelKey)}
                     </span>
                   </div>
                 </Link>
@@ -165,12 +167,12 @@ export default function HostPropertiesPage() {
                   <div className="flex items-center justify-between mt-2.5">
                     <p className="text-sm font-medium text-ink-700">
                       {property.currency} {property.nightlyRate?.toLocaleString()}
-                      <span className="text-ink-400 font-normal">/night</span>
+                      <span className="text-ink-400 font-normal">{t('host.perNight')}</span>
                     </p>
                     <span className="text-xs text-ink-400">
-                      {property.bedrooms && `${property.bedrooms} bed`}
-                      {property.bathrooms && ` · ${property.bathrooms} bath`}
-                      {' · '}{property.maxGuests} guests
+                      {property.bedrooms && `${property.bedrooms} ${t('host.bed')}`}
+                      {property.bathrooms && ` · ${property.bathrooms} ${t('host.bath')}`}
+                      {' · '}{property.maxGuests} {t('host.guests')}
                     </span>
                   </div>
 
@@ -181,7 +183,7 @@ export default function HostPropertiesPage() {
                       className="flex-1 flex items-center justify-center gap-1.5 btn-secondary text-xs py-2 touch-manipulation"
                     >
                       <PencilSquareIcon className="h-3.5 w-3.5" />
-                      Edit
+                      {t('host.edit')}
                     </Link>
                     <Link
                       href={`/host/property/${property.propertyId}/edit`}
@@ -215,10 +217,10 @@ export default function HostPropertiesPage() {
       {/* Delete confirmation modal */}
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Delete property?"
-        message={`"${deleteTarget?.title}" will be permanently removed. This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Keep it"
+        title={t('host.delete')}
+        message={`"${deleteTarget?.title}" ${t('host.delete.message')}`}
+        confirmLabel={t('host.delete.confirm')}
+        cancelLabel={t('host.delete.cancel')}
         variant="danger"
         loading={!!deletingId}
         onConfirm={confirmDelete}

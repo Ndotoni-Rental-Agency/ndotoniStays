@@ -7,23 +7,25 @@ import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { MapPinIcon } from '@heroicons/react/24/solid';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 import { useRegionSearch } from '@/hooks/useRegionSearch';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { FlattenedLocation } from '@/lib/location/cloudfront-locations';
 
 function toTitleCase(str: string): string {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-const ROTATING_WORDS = [
-  'tonight',
-  'your party',
-  'a photoshoot',
-  'your getaway',
-  'a meeting',
-  'your celebration',
+const ROTATING_KEYS = [
+  'hero.rotating.tonight',
+  'hero.rotating.party',
+  'hero.rotating.photoshoot',
+  'hero.rotating.getaway',
+  'hero.rotating.meeting',
+  'hero.rotating.celebration',
 ];
 
 export function HeroSection() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('Dar es Salaam');
   const [modalSearchQuery, setModalSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<FlattenedLocation | null>({
@@ -49,7 +51,7 @@ export function HeroSection() {
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length);
+        setWordIndex((prev) => (prev + 1) % ROTATING_KEYS.length);
         setIsAnimating(false);
       }, 300);
     }, 3000);
@@ -108,21 +110,21 @@ export function HeroSection() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500" />
             </span>
             <span className="text-sm text-white/90 font-medium">
-              Over 100+ places available now
+              {t('hero.badge')}
             </span>
           </div>
 
           {/* Headline with rotating text */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-            Book a perfect place
+            {t('hero.title')}
             <br />
-            for{' '}
+            {t('hero.titleFor')}{' '}
             <span
               className={`inline-block text-brand-400 transition-all duration-300 ${
                 isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
               }`}
             >
-              {ROTATING_WORDS[wordIndex]}
+              {t(ROTATING_KEYS[wordIndex])}
             </span>
           </h1>
         </div>
@@ -160,7 +162,7 @@ export function HeroSection() {
                             type="text"
                             value={modalSearchQuery}
                             onChange={(e) => setModalSearchQuery(e.target.value)}
-                            placeholder="Search region or district..."
+                            placeholder={t('hero.search.region')}
                             className="w-full rounded-xl bg-ink-50 border-0 px-4 py-3 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                             autoFocus
                           />
@@ -178,13 +180,13 @@ export function HeroSection() {
                                   {toTitleCase(location.displayName)}
                                 </div>
                                 <div className="text-xs text-ink-500">
-                                  {location.type === 'region' ? 'Region' : 'District'}
+                                  {location.type === 'region' ? t('common.region') : t('common.district')}
                                 </div>
                               </button>
                             ))
                           ) : (
                             <div className="px-4 py-6 text-center text-sm text-ink-400">
-                              No locations found
+                              {t('hero.search.noLocations')}
                             </div>
                           )}
                         </div>
@@ -230,7 +232,7 @@ export function HeroSection() {
                 >
                   {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
                     <option key={n} value={n}>
-                      {n} {n === 1 ? 'Guest' : 'Guests'}
+                      {n} {n === 1 ? t('hero.search.guest') : t('hero.search.guests')}
                     </option>
                   ))}
                 </select>
@@ -242,31 +244,31 @@ export function HeroSection() {
                 className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700 hover:shadow-brand-700/30 transition-all active:scale-[0.98]"
               >
                 <MagnifyingGlassIcon className="h-5 w-5" />
-                <span>Search</span>
+                <span>{t('hero.search.button')}</span>
               </button>
             </div>
           </div>
 
           {/* Quick filters below search */}
           <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {['Instant Book', 'Under TZS 50K', 'Zanzibar', 'Beachfront', 'Long Term Rentals'].map((tag) => (
+            {[
+              { label: t('hero.filter.instantBook'), action: () => router.push('/search?instantBook=true') },
+              { label: t('hero.filter.under50k'), action: () => router.push('/search?maxPrice=50000') },
+              { label: t('hero.filter.zanzibar'), action: () => router.push('/search?region=Zanzibar') },
+              { label: t('hero.filter.beachfront'), action: () => router.push('/search?amenities=Beachfront') },
+              { label: t('hero.filter.longTerm'), action: () => window.open('https://www.ndotoni.com', '_blank'), highlight: true },
+            ].map((tag) => (
               <button
-                key={tag}
+                key={tag.label}
                 type="button"
-                onClick={() => {
-                  if (tag === 'Zanzibar') router.push('/search?region=Zanzibar');
-                  if (tag === 'Instant Book') router.push('/search?instantBook=true');
-                  if (tag === 'Under TZS 50K') router.push('/search?maxPrice=50000');
-                  if (tag === 'Beachfront') router.push('/search?amenities=Beachfront');
-                  if (tag === 'Long Term Rentals') window.open('https://www.ndotoni.com', '_blank');
-                }}
+                onClick={tag.action}
                 className={`px-3.5 py-1.5 rounded-full backdrop-blur-sm border text-sm transition-colors ${
-                  tag === 'Long Term Rentals'
+                  tag.highlight
                     ? 'bg-brand-500/20 border-brand-300/30 text-white hover:bg-brand-500/30'
                     : 'bg-white/15 border-white/25 text-white/90 hover:bg-white/25'
                 }`}
               >
-                {tag}
+                {tag.label}
               </button>
             ))}
           </div>

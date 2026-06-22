@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 
 export function Header() {
   const { user, isAuthenticated, signOut } = useAuth();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -35,18 +38,13 @@ export function Header() {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-5">
-              <Link
-                href="/search"
-                className="flex items-center gap-1.5 text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
-              >
-                <MagnifyingGlassIcon className="h-4 w-4" />
-                Search
-              </Link>
+              <LanguageToggle />
+
               <Link
                 href="/become-host"
                 className="text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
               >
-                Become a Host
+                {t('nav.becomeHost')}
               </Link>
 
               {isAuthenticated ? (
@@ -70,19 +68,19 @@ export function Header() {
                           <p className="text-xs text-ink-500 truncate">{user?.email}</p>
                         </div>
                         <Link href="/profile" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
-                          Profile
+                          {t('nav.profile')}
                         </Link>
                         <Link href="/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
-                          My Bookings
+                          {t('nav.myBookings')}
                         </Link>
                         <Link href="/host" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
-                          My Properties
+                          {t('nav.myProperties')}
                         </Link>
                         <button
                           onClick={() => { signOut(); setUserMenuOpen(false); }}
                           className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
-                          Sign out
+                          {t('nav.signOut')}
                         </button>
                       </div>
                     </>
@@ -119,20 +117,16 @@ export function Header() {
             <div className="md:hidden py-4 border-t border-ink-100">
               <div className="flex flex-col gap-2">
                 <Link
-                  href="/search"
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                  Search Places
-                </Link>
-                <Link
                   href="/become-host"
                   className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Become a Host
+                  {t('nav.becomeHost')}
                 </Link>
+
+                <div className="px-3 py-2.5">
+                  <LanguageToggle />
+                </div>
 
                 {isAuthenticated ? (
                   <>
@@ -141,27 +135,27 @@ export function Header() {
                       className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Profile
+                      {t('nav.profile')}
                     </Link>
                     <Link
                       href="/bookings"
                       className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      My Bookings
+                      {t('nav.myBookings')}
                     </Link>
                     <Link
                       href="/host"
                       className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      My Properties
+                      {t('nav.myProperties')}
                     </Link>
                     <button
                       onClick={() => { signOut(); setMobileMenuOpen(false); }}
                       className="text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
                     >
-                      Sign out ({user?.firstName})
+                      {t('nav.signOut')} ({user?.firstName})
                     </button>
                   </>
                 ) : (
@@ -169,7 +163,7 @@ export function Header() {
                     onClick={() => { setAuthModalOpen(true); setMobileMenuOpen(false); }}
                     className="btn-primary text-center mt-2"
                   >
-                    Sign In / Sign Up
+                    {t('nav.signIn')}
                   </button>
                 )}
               </div>

@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="bg-white border-t border-ink-100">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -21,33 +26,32 @@ export function Footer() {
               </span>
             </div>
             <p className="text-ink-500 text-sm max-w-md">
-              Book nightly stays, party venues, photoshoot locations, and event
-              spaces across Tanzania. Simple, fast, and reliable.
+              {t('footer.description')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-sm text-ink-900 mb-3">Explore</h4>
+            <h4 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.explore')}</h4>
             <ul className="space-y-2 text-sm text-ink-500">
               <li>
                 <Link href="/search" className="hover:text-ink-900 transition-colors">
-                  Search Places
+                  {t('footer.searchPlaces')}
                 </Link>
               </li>
               <li>
                 <Link href="/become-host" className="hover:text-ink-900 transition-colors">
-                  Become a Host
+                  {t('footer.becomeHost')}
                 </Link>
               </li>
               <li>
                 <Link href="/invest" className="hover:text-ink-900 transition-colors">
-                  Invest
+                  {t('footer.invest')}
                 </Link>
               </li>
               <li>
                 <Link href="/about" className="hover:text-ink-900 transition-colors">
-                  About Us
+                  {t('footer.aboutUs')}
                 </Link>
               </li>
             </ul>
@@ -55,7 +59,7 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-sm text-ink-900 mb-3">Support</h4>
+            <h4 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.support')}</h4>
             <ul className="space-y-2 text-sm text-ink-500">
               <li>
                 <a
@@ -64,7 +68,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-ink-900 transition-colors"
                 >
-                  WhatsApp Us
+                  {t('footer.whatsapp')}
                 </a>
               </li>
               <li>
@@ -77,7 +81,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-ink-100 text-center text-sm text-ink-400">
-          © {new Date().getFullYear()} ndotoni Stays. All rights reserved.
+          {t('footer.copyright').replace('{year}', new Date().getFullYear().toString())}
         </div>
       </div>
     </footer>

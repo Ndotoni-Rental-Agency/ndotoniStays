@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { createShortTermPropertyDraft } from '@/graphql/mutations';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
@@ -21,14 +22,15 @@ const STORAGE_KEY = 'ndotoni_create_property_draft';
 const PENDING_SUBMIT_KEY = 'ndotoni_create_pending_submit';
 
 const STEPS = [
-  { id: 1, label: 'Type & Category' },
-  { id: 2, label: 'Location' },
-  { id: 3, label: 'Pricing & Details' },
-  { id: 4, label: 'Photos & Contact' },
+  { id: 1, labelKey: 'create.step1' },
+  { id: 2, labelKey: 'create.step2' },
+  { id: 3, labelKey: 'create.step3' },
+  { id: 4, labelKey: 'create.step4' },
 ];
 
 export default function ListYourPlacePage() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,10 +224,10 @@ export default function ListYourPlacePage() {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-3">
-            Your property is listed!
+            {t('create.success.title')}
           </h1>
           <p className="text-ink-500 text-base mb-8">
-            Congratulations! Guests can now find and book your space. Add more details to attract even more bookings.
+            {t('create.success.desc')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -233,13 +235,13 @@ export default function ListYourPlacePage() {
               onClick={() => router.push(`/host/property/${createdPropertyId}/edit`)}
               className="btn-primary px-6 py-3 text-base"
             >
-              Add More Details
+              {t('create.success.addDetails')}
             </button>
             <button
               onClick={() => router.push('/host')}
               className="btn-secondary px-6 py-3 text-base"
             >
-              Go to My Properties
+              {t('create.success.goToProperties')}
             </button>
           </div>
         </div>
@@ -264,7 +266,7 @@ export default function ListYourPlacePage() {
         <div className="mx-auto max-w-5xl flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700">
             <ArrowLeftIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{t('create.back')}</span>
           </Link>
 
           {/* Step indicator */}
@@ -290,7 +292,7 @@ export default function ListYourPlacePage() {
                   <span className={`hidden lg:inline text-xs font-medium ${
                     s.id === step ? 'text-brand-700' : s.id < step ? 'text-green-600' : 'text-ink-400'
                   }`}>
-                    {s.label}
+                    {t(s.labelKey)}
                   </span>
                 </button>
                 {i < STEPS.length - 1 && (
@@ -301,7 +303,7 @@ export default function ListYourPlacePage() {
           </div>
 
           <div className="text-xs text-ink-400 hidden sm:block">
-            Step {step} of 4
+            {t('create.step').replace('{current}', String(step)).replace('{total}', '4')}
           </div>
         </div>
       </div>
@@ -312,8 +314,8 @@ export default function ListYourPlacePage() {
         <div className="flex items-center gap-3 bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 mb-6">
           <span className="text-2xl">⚡</span>
           <div>
-            <p className="text-sm font-medium text-brand-800">This takes less than 2 minutes</p>
-            <p className="text-xs text-brand-600">Just the basics — you can add more details anytime after.</p>
+            <p className="text-sm font-medium text-brand-800">{t('create.reassurance')}</p>
+            <p className="text-xs text-brand-600">{t('create.reassurance.desc')}</p>
           </div>
         </div>
 
@@ -337,7 +339,7 @@ export default function ListYourPlacePage() {
                   className="inline-flex items-center gap-2 text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors py-3 px-4 -ml-4 rounded-xl hover:bg-ink-50"
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
-                  Back
+                  {t('create.back')}
                 </button>
               ) : (
                 <div />
@@ -350,7 +352,7 @@ export default function ListYourPlacePage() {
                   disabled={!canAdvance()}
                   className="btn-primary inline-flex items-center gap-2 px-6 sm:px-8 py-3 text-sm sm:text-base disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Continue
+                  {t('create.continue')}
                   <ArrowRightIcon className="h-4 w-4" />
                 </button>
               ) : (
@@ -362,17 +364,17 @@ export default function ListYourPlacePage() {
                   {loading ? (
                     <>
                       <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creating...
+                      {t('create.creating')}
                     </>
                   ) : !isAuthenticated ? (
                     <>
                       <CheckIcon className="h-5 w-5" />
-                      Sign in to Create Property
+                      {t('create.submitSignIn')}
                     </>
                   ) : (
                     <>
                       <CheckIcon className="h-5 w-5" />
-                      Create Property
+                      {t('create.submit')}
                     </>
                   )}
                 </button>

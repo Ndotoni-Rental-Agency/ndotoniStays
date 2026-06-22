@@ -3,12 +3,14 @@
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { HostSidebar } from '@/components/host/HostSidebar';
 import BecomeHostPage from '@/app/become-host/page';
 
 export default function HostLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const pathname = usePathname();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -48,12 +50,12 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-ink-500 mb-4">Sign in to access your host dashboard</p>
+          <p className="text-ink-500 mb-4">{t('host.signInDashboard')}</p>
           <button
             onClick={() => setShowAuthModal(true)}
             className="btn-primary"
           >
-            Sign In
+            {t('auth.signIn')}
           </button>
         </div>
         <AuthModal

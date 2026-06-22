@@ -1,8 +1,11 @@
 'use client';
 
 import { Home, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function LongTermBanner() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-6 sm:py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="rounded-2xl bg-gradient-to-r from-brand-50 to-brand-100/50 border border-brand-200/60 p-6 sm:p-8 lg:p-10 relative overflow-hidden">
@@ -18,10 +21,10 @@ export function LongTermBanner() {
           {/* Text */}
           <div className="flex-1 text-center sm:text-left">
             <h3 className="text-lg sm:text-xl font-bold text-ink-900 mb-1.5">
-              Looking for a long-term rental?
+              {t('longTerm.title')}
             </h3>
             <p className="text-ink-500 text-sm sm:text-base leading-relaxed max-w-lg">
-              Find apartments, houses, rooms, and more for monthly rent on Ndotoni.
+              {t('longTerm.description')}
             </p>
           </div>
 
@@ -33,7 +36,7 @@ export function LongTermBanner() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-brand-600/20"
             >
-              Browse Ndotoni
+              {t('longTerm.cta')}
               <ArrowRight size={16} strokeWidth={2.5} />
             </a>
           </div>

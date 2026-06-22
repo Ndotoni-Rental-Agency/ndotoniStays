@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyShortTermProperties, listPropertyBookings } from '@/graphql/queries';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   HomeModernIcon,
   ClipboardDocumentListIcon,
@@ -18,6 +19,7 @@ import {
 
 export function HostSidebar() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [pendingCount, setPendingCount] = useState(0);
 
   const fetchPendingCount = useCallback(async () => {
@@ -62,12 +64,12 @@ export function HostSidebar() {
   }
 
   const NAV_ITEMS = [
-    { name: 'Properties', href: '/host', icon: HomeModernIcon, exact: true, badge: 0 },
-    { name: 'Bookings', href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
-    { name: 'Calendar', href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },
-    { name: 'Reviews', href: '/host/reviews', icon: StarIcon, badge: 0 },
-    { name: 'Payouts', href: '/host/payouts', icon: BanknotesIcon, badge: 0 },
-    { name: 'WhatsApp', href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
+    { name: t('host.nav.properties'), href: '/host', icon: HomeModernIcon, exact: true, badge: 0 },
+    { name: t('host.nav.bookings'), href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
+    { name: t('host.nav.calendar'), href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },
+    { name: t('host.nav.reviews'), href: '/host/reviews', icon: StarIcon, badge: 0 },
+    { name: t('host.nav.payouts'), href: '/host/payouts', icon: BanknotesIcon, badge: 0 },
+    { name: t('host.nav.whatsapp'), href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
   ];
 
   return (
@@ -107,7 +109,7 @@ export function HostSidebar() {
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-600 hover:bg-brand-50 transition-colors"
             >
               <PlusIcon className="h-5 w-5" />
-              <span>Add Property</span>
+              <span>{t('host.nav.addProperty')}</span>
             </Link>
           </div>
         </nav>

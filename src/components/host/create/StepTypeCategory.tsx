@@ -1,6 +1,7 @@
 'use client';
 
 import { STAY_CATEGORIES } from '@/components/host/constants';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 
 const PROPERTY_TYPES = [
@@ -18,33 +19,35 @@ const PROPERTY_TYPES = [
 ];
 
 export function StepTypeCategory({ form, updateField, setForm }: StepProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="space-y-10">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">What type of space is this?</h2>
-        <p className="text-sm sm:text-base text-ink-500 mb-5">Choose the option that best describes your property</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">{t('create.type.title')}</h2>
+        <p className="text-sm sm:text-base text-ink-500 mb-5">{t('create.type.subtitle')}</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-3.5">
-          {PROPERTY_TYPES.map((t) => (
+          {PROPERTY_TYPES.map((pt) => (
             <button
-              key={t.value}
+              key={pt.value}
               type="button"
-              onClick={() => updateField('propertyType', t.value)}
+              onClick={() => updateField('propertyType', pt.value)}
               className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 sm:p-5 transition-all active:scale-95 ${
-                form.propertyType === t.value
+                form.propertyType === pt.value
                   ? 'border-brand-500 bg-brand-50 shadow-md'
                   : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50 hover:shadow-sm'
               }`}
             >
-              <span className="text-3xl sm:text-4xl">{t.icon}</span>
-              <span className="text-xs sm:text-sm font-medium text-ink-700">{t.label}</span>
+              <span className="text-3xl sm:text-4xl">{pt.icon}</span>
+              <span className="text-xs sm:text-sm font-medium text-ink-700">{pt.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div className="border-t border-ink-100 pt-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">What's this space great for?</h2>
-        <p className="text-sm sm:text-base text-ink-500 mb-5">Select all that apply — helps guests find your listing</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">{t('create.type.categoryTitle')}</h2>
+        <p className="text-sm sm:text-base text-ink-500 mb-5">{t('create.type.categorySubtitle')}</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
           {STAY_CATEGORIES.map((cat) => {
             const isSelected = form.stayCategories.includes(cat.value);
@@ -73,7 +76,7 @@ export function StepTypeCategory({ form, updateField, setForm }: StepProps) {
           })}
         </div>
         {form.stayCategories.length === 0 && (
-          <p className="text-sm text-amber-600 mt-3">Select at least one category</p>
+          <p className="text-sm text-amber-600 mt-3">{t('create.type.categoryRequired')}</p>
         )}
       </div>
     </div>

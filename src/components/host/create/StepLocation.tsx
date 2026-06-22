@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
 import LocationMapPicker from '@/components/location/LocationMapPicker';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 
 function toTitleCase(str: string): string {
@@ -13,6 +14,7 @@ function toTitleCase(str: string): string {
 }
 
 export function StepLocation({ form, setForm }: StepProps) {
+  const { t } = useLanguage();
   const [locations, setLocations] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,8 +47,8 @@ export function StepLocation({ form, setForm }: StepProps) {
     return (
       <div className="space-y-8">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">Where is your property?</h2>
-          <p className="text-sm sm:text-base text-ink-500 mb-6">Help guests find you by adding your location</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">{t('create.location.title')}</h2>
+          <p className="text-sm sm:text-base text-ink-500 mb-6">{t('create.location.subtitle')}</p>
           <div className="max-w-xl animate-pulse space-y-4">
             <div className="h-11 bg-ink-100 rounded-xl" />
             <div className="h-11 bg-ink-100 rounded-xl" />
@@ -59,14 +61,14 @@ export function StepLocation({ form, setForm }: StepProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">Where is your property?</h2>
-        <p className="text-sm sm:text-base text-ink-500 mb-6">Help guests find you by adding your location</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">{t('create.location.title')}</h2>
+        <p className="text-sm sm:text-base text-ink-500 mb-6">{t('create.location.subtitle')}</p>
 
         <div className="max-w-xl space-y-4">
           {/* Region */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              Region <span className="text-red-500">*</span>
+              {t('create.location.region')} <span className="text-red-500">*</span>
             </label>
             <select
               value={form.region}
@@ -74,7 +76,7 @@ export function StepLocation({ form, setForm }: StepProps) {
               className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-base"
               required
             >
-              <option value="">Select Region</option>
+              <option value="">{t('create.location.selectRegion')}</option>
               {regions.map((r) => (
                 <option key={r} value={r}>
                   {toTitleCase(r)}
@@ -86,7 +88,7 @@ export function StepLocation({ form, setForm }: StepProps) {
           {/* District */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              District <span className="text-red-500">*</span>
+              {t('create.location.district')} <span className="text-red-500">*</span>
             </label>
             <select
               value={form.district}
@@ -97,7 +99,7 @@ export function StepLocation({ form, setForm }: StepProps) {
               }`}
               required
             >
-              <option value="">Select District</option>
+              <option value="">{t('create.location.selectDistrict')}</option>
               {districts.map((d) => (
                 <option key={d} value={d}>
                   {toTitleCase(d)}
@@ -106,31 +108,31 @@ export function StepLocation({ form, setForm }: StepProps) {
             </select>
           </div>
 
-          {/* Street (free text) */}
+          {/* Ward */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              Ward / Neighbourhood
+              {t('create.location.ward')}
             </label>
             <input
               type="text"
               value={form.ward}
               onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
               className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-              placeholder="e.g., Msasani, Mikocheni, Masaki"
+              placeholder={t('create.location.wardPlaceholder')}
             />
           </div>
 
           {/* Street address */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              Street address
+              {t('create.location.street')}
             </label>
             <input
               type="text"
               value={form.street}
               onChange={(e) => setForm((prev) => ({ ...prev, street: e.target.value }))}
               className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-              placeholder="e.g., Haile Selassie Road"
+              placeholder={t('create.location.streetPlaceholder')}
             />
           </div>
         </div>
@@ -138,8 +140,8 @@ export function StepLocation({ form, setForm }: StepProps) {
 
       {form.region && form.district && (
         <div className="border-t border-ink-100 pt-8">
-          <h3 className="text-base sm:text-lg font-semibold text-ink-900 mb-1">Pin exact location</h3>
-          <p className="text-sm text-ink-500 mb-4">Optional — makes your listing more discoverable on the map</p>
+          <h3 className="text-base sm:text-lg font-semibold text-ink-900 mb-1">{t('create.location.pinTitle')}</h3>
+          <p className="text-sm text-ink-500 mb-4">{t('create.location.pinSubtitle')}</p>
           <LocationMapPicker
             location={{
               region: form.region,

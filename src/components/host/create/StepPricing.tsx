@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 import { AIService } from '@/lib/ai/AIService';
 
@@ -15,6 +16,7 @@ function stripCommas(value: string): string {
 }
 
 export function StepPricing({ form, updateField, setForm }: StepProps) {
+  const { t } = useLanguage();
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const [predictingPrice, setPredictingPrice] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
@@ -24,7 +26,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
   function handlePriceChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = stripCommas(e.target.value);
     updateField('nightlyRate', raw);
-    setPriceSuggestion(null); // Clear suggestion when user manually types
+    setPriceSuggestion(null);
   }
 
   async function handleGenerateTitle() {
@@ -77,23 +79,23 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">Name and price your space</h2>
-        <p className="text-sm sm:text-base text-ink-500 mb-6">A good title and fair price attract more bookings</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">{t('create.pricing.title')}</h2>
+        <p className="text-sm sm:text-base text-ink-500 mb-6">{t('create.pricing.subtitle')}</p>
       </div>
 
       <div className="max-w-2xl space-y-6">
         <div>
-          <label className="block text-sm font-medium text-ink-700 mb-2">Property name</label>
+          <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.pricing.name')}</label>
           <input
             type="text"
             value={form.title}
             onChange={(e) => updateField('title', e.target.value)}
-            placeholder="e.g. Cozy Beach Apartment in Msasani"
+            placeholder={t('create.pricing.namePlaceholder')}
             className="input text-base sm:text-lg py-3.5"
             required
           />
           <div className="flex items-center justify-between mt-2">
-            <p className="text-xs sm:text-sm text-ink-400">Tip: mention the area and what makes it special</p>
+            <p className="text-xs sm:text-sm text-ink-400">{t('create.pricing.nameTip')}</p>
             <button
               type="button"
               onClick={handleGenerateTitle}
@@ -103,10 +105,10 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
               {generatingTitle ? (
                 <>
                   <span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
-                  Generating...
+                  {t('create.pricing.generating')}
                 </>
               ) : (
-                <>✨ Suggest title</>
+                <>{t('create.pricing.suggestTitle')}</>
               )}
             </button>
           </div>
@@ -114,7 +116,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Price per night</label>
+            <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.pricing.pricePerNight')}</label>
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-500 text-sm font-semibold">
@@ -140,7 +142,6 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
               </select>
             </div>
 
-            {/* Suggest price button */}
             <div className="mt-2 flex items-center justify-between">
               <button
                 type="button"
@@ -151,10 +152,10 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
                 {predictingPrice ? (
                   <>
                     <span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
-                    Analyzing market...
+                    {t('create.pricing.analyzing')}
                   </>
                 ) : (
-                  <>💰 Suggest price</>
+                  <>{t('create.pricing.suggestPrice')}</>
                 )}
               </button>
             </div>
@@ -163,19 +164,18 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
               value={priceContext}
               onChange={(e) => setPriceContext(e.target.value)}
               className="input text-xs mt-1.5 py-1.5 text-ink-500"
-              placeholder="Optional: e.g. 'luxury finish, private pool, premium location'"
+              placeholder={t('create.pricing.pricePlaceholder')}
             />
 
-            {/* Price suggestion result */}
             {priceSuggestion && (
               <div className="mt-3 p-3 rounded-xl bg-brand-50 border border-brand-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-brand-800">
-                      Suggested: TZS {priceSuggestion.suggestedPrice.toLocaleString()}/night
+                      {t('create.pricing.suggested')} TZS {priceSuggestion.suggestedPrice.toLocaleString()}/night
                     </p>
                     <p className="text-xs text-brand-600 mt-0.5">
-                      Range: TZS {priceSuggestion.range.min.toLocaleString()} – {priceSuggestion.range.max.toLocaleString()}
+                      {t('create.pricing.range')} TZS {priceSuggestion.range.min.toLocaleString()} – {priceSuggestion.range.max.toLocaleString()}
                     </p>
                     <p className="text-xs text-ink-500 mt-1">{priceSuggestion.reasoning}</p>
                   </div>
@@ -184,21 +184,21 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
                     onClick={applyPriceSuggestion}
                     className="text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
                   >
-                    Use this
+                    {t('create.pricing.useThis')}
                   </button>
                 </div>
               </div>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Max guests</label>
+            <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.pricing.maxGuests')}</label>
             <select
               value={form.maxGuests}
               onChange={(e) => updateField('maxGuests', e.target.value)}
               className="input text-base py-3.5 w-full"
             >
               {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
-                <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>
+                <option key={n} value={n}>{n} {n === 1 ? t('create.pricing.guest') : t('create.pricing.guests')}</option>
               ))}
             </select>
           </div>
@@ -207,26 +207,26 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         {/* Bedrooms & Bathrooms */}
         <div className="grid grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Bedrooms</label>
+            <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.pricing.bedrooms')}</label>
             <select
               value={form.bedrooms}
               onChange={(e) => updateField('bedrooms', e.target.value)}
               className="input text-base py-3.5 w-full"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 10].map((n) => (
-                <option key={n} value={n}>{n} bedroom{n > 1 ? 's' : ''}</option>
+                <option key={n} value={n}>{n} {n === 1 ? t('create.pricing.bedroom') : t('create.pricing.bedroomsPlural')}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">Bathrooms</label>
+            <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.pricing.bathrooms')}</label>
             <select
               value={form.bathrooms}
               onChange={(e) => updateField('bathrooms', e.target.value)}
               className="input text-base py-3.5 w-full"
             >
               {[1, 2, 3, 4, 5, 6].map((n) => (
-                <option key={n} value={n}>{n} bathroom{n > 1 ? 's' : ''}</option>
+                <option key={n} value={n}>{n} {n === 1 ? t('create.pricing.bathroom') : t('create.pricing.bathroomsPlural')}</option>
               ))}
             </select>
           </div>
@@ -235,8 +235,8 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         {/* Instant Book Toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-ink-200 bg-ink-50/50">
           <div>
-            <p className="text-sm font-medium text-ink-800">⚡ Instant booking</p>
-            <p className="text-xs text-ink-500 mt-0.5">Guests can book without waiting for your approval</p>
+            <p className="text-sm font-medium text-ink-800">{t('create.pricing.instantBook')}</p>
+            <p className="text-xs text-ink-500 mt-0.5">{t('create.pricing.instantBookDesc')}</p>
           </div>
           <button
             type="button"

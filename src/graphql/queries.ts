@@ -1114,6 +1114,13 @@ export const getMe = /* GraphQL */ `query GetMe {
       lastName
       nationalIdLast4
       occupation
+      payoutMethod
+      payoutMpesaPhone
+      payoutMpesaName
+      payoutBankName
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
       permissions
       phoneNumber
       profileImage

@@ -38,10 +38,15 @@ export default function TokenEditPage() {
 
   useEffect(() => {
     if (!token) return;
+    console.log('[EditToken] Fetching token:', token);
+    console.log('[EditToken] API URL:', `${API_BASE}/edit-token/${token}`);
     fetch(`${API_BASE}/edit-token/${token}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Kiungo hakipatikani au kimeisha');
-        return res.json();
+        const body = await res.json().catch(() => ({}));
+        console.log('[EditToken] Response status:', res.status);
+        console.log('[EditToken] Response body:', JSON.stringify(body, null, 2));
+        if (!res.ok) throw new Error(body.error || 'Kiungo hakipatikani au kimeisha');
+        return body;
       })
       .then((d) => {
         setProperties(d.properties || []);
@@ -51,7 +56,10 @@ export default function TokenEditPage() {
           setEditingProperty(d.properties[0]);
         }
       })
-      .catch((e) => setError(e.message))
+      .catch((e) => {
+        console.error('[EditToken] Error:', e.message);
+        setError(e.message);
+      })
       .finally(() => setLoading(false));
   }, [token]);
 

@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { initiateWhatsAppAssociation, confirmWhatsAppAssociation } from '@/graphql/mutations';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const WHATSAPP_NUMBER = '255703290148';
+const WHATSAPP_DISPLAY = '+255 703 290 148';
 
 interface Props {
   existingWhatsappNumber?: string;
@@ -22,6 +26,7 @@ function normalizePhone(input: string): string {
 }
 
 export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
+  const { t } = useLanguage();
   const [step, setStep] = useState<Step>('input');
   const [phone, setPhone] = useState(existingWhatsappNumber || '');
   const [code, setCode] = useState('');
@@ -37,7 +42,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     const normalized = normalizePhone(phone);
 
     if (normalized.length < 10 || normalized.length > 15) {
-      setError('Please enter a valid phone number with country code (e.g. 255789123456)');
+      setError(t('wa.link.invalidPhone'));
       setLoading(false);
       return;
     }
@@ -53,8 +58,8 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     } catch (e: any) {
       const raw = e?.errors?.[0]?.message || e?.message || '';
       const msg = raw.includes('non-nullable') || raw.includes('Cannot return null')
-        ? 'This feature is not available yet. Please try again later.'
-        : raw || 'Failed to send code';
+        ? t('wa.link.unavailable')
+        : raw || t('wa.link.unavailable');
       setError(msg);
     } finally {
       setLoading(false);
@@ -76,20 +81,31 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     } catch (e: any) {
       const raw = e?.errors?.[0]?.message || e?.message || '';
       const msg = raw.includes('non-nullable') || raw.includes('Cannot return null')
-        ? 'This feature is not available yet. Please try again later.'
-        : raw || 'Invalid or expired code. Please try again.';
+        ? t('wa.link.unavailable')
+        : raw || t('wa.link.invalidCode');
       setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
+  const whatsappLink = (
+    <a
+      href={`https://wa.me/${WHATSAPP_NUMBER}?text=associate`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-green-600 font-medium hover:underline"
+    >
+      {WHATSAPP_DISPLAY}
+    </a>
+  );
+
   if (step === 'success') {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-ink-100 p-6">
         <div className="text-center">
           <div className="text-4xl mb-3">✅</div>
-          <h3 className="text-lg font-semibold text-ink-900 mb-2">Account Linked</h3>
+          <h3 className="text-lg font-semibold text-ink-900 mb-2">{t('wa.link.success.title')}</h3>
           <p className="text-sm text-ink-500">{message}</p>
         </div>
       </div>
@@ -101,10 +117,8 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
       <div className="flex items-center gap-3 mb-4">
         <span className="text-2xl">🔗</span>
         <div>
-          <h3 className="font-semibold text-ink-900">Link WhatsApp</h3>
-          <p className="text-xs text-ink-500">
-            Link your WhatsApp number to transfer listings you created via WhatsApp
-          </p>
+          <h3 className="font-semibold text-ink-900">{t('wa.link.title')}</h3>
+          <p className="text-xs text-ink-500">{t('wa.link.desc')}</p>
         </div>
       </div>
 
@@ -112,71 +126,50 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-medium text-ink-500 mb-1">
-              WhatsApp Number
+              {t('wa.link.phoneLabel')}
             </label>
             <input
               className="w-full px-4 py-2.5 rounded-xl border border-ink-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-sm"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 255712345678"
+              placeholder={t('wa.link.phonePlaceholder')}
             />
-            <p className="text-xs text-ink-400 mt-1">
-              Include country code without + (e.g. 255 for Tanzania)
-            </p>
+            <p className="text-xs text-ink-400 mt-1">{t('wa.link.phoneHint')}</p>
           </div>
 
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             onClick={handleInitiate}
             disabled={loading || !phone.trim()}
             className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
           >
-            {loading ? 'Sending…' : 'Send Code'}
+            {loading ? t('wa.link.sending') : t('wa.link.sendCode')}
           </button>
 
           <p className="text-xs text-ink-400 text-center">
-            We&apos;ll try to send a code to your WhatsApp. If it doesn&apos;t arrive, send &quot;associate&quot; to{' '}
-            <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium hover:underline">
-              +255 790 720 329
-            </a>
+            {t('wa.link.codeHint')}{' '}{whatsappLink}
           </p>
 
           <button
             onClick={() => setStep('code')}
             className="w-full py-2 text-sm text-green-600 hover:text-green-700"
           >
-            I already have a code
+            {t('wa.link.haveCode')}
           </button>
         </div>
       )}
 
       {step === 'code' && (
         <div className="space-y-3">
-          {message && (
-            <p className="text-sm text-green-600 bg-green-50 rounded-xl px-4 py-2">
-              {message} If you didn&apos;t receive it, send &quot;associate&quot; to{' '}
-              <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
-                +255 790 720 329
-              </a>
-            </p>
-          )}
-
-          {!message && (
-            <p className="text-sm text-ink-600 bg-ink-50 rounded-xl px-4 py-2">
-              We sent a code to <span className="font-medium">{phone}</span>. If it didn&apos;t arrive, send &quot;associate&quot; to{' '}
-              <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium hover:underline">
-                +255 790 720 329
-              </a>
-            </p>
-          )}
+          <p className="text-sm text-ink-600 bg-ink-50 rounded-xl px-4 py-2">
+            {t('wa.link.codeSent').replace('{phone}', phone)}{' '}{whatsappLink}
+          </p>
 
           <div>
             <label className="block text-xs font-medium text-ink-500 mb-1">
-              5-Digit Code
+              {t('wa.link.codeLabel')}
             </label>
             <input
               className="w-full px-4 py-2.5 rounded-xl border border-ink-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-center text-2xl tracking-widest font-mono"
@@ -184,28 +177,26 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
               maxLength={5}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-              placeholder="00000"
+              placeholder={t('wa.link.codePlaceholder')}
               autoFocus
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             onClick={handleConfirm}
             disabled={loading || code.length !== 5}
             className="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
           >
-            {loading ? 'Verifying…' : 'Link Account'}
+            {loading ? t('wa.link.verifying') : t('wa.link.verify')}
           </button>
 
           <button
             onClick={() => { setStep('input'); setError(null); setCode(''); }}
             className="w-full py-2 text-sm text-ink-500 hover:text-ink-700"
           >
-            ← Change number
+            {t('wa.link.changeNumber')}
           </button>
         </div>
       )}

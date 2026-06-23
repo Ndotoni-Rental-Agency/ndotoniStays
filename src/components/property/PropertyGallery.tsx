@@ -134,9 +134,9 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             preload="metadata"
             onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <div className="bg-black/60 backdrop-blur-sm rounded-full p-3">
-              <PlayIcon className="h-6 w-6 text-white" />
+          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <PlayIcon className="h-8 w-8 text-white" />
             </div>
           </div>
         </div>
@@ -293,13 +293,12 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                           if (i === currentIndex) e.currentTarget.play().catch(() => {});
                         }}
                       />
-                      {i !== currentIndex && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="bg-black/60 backdrop-blur-sm rounded-full p-3">
-                            <PlayIcon className="h-6 w-6 text-white" />
-                          </div>
+                      {/* Always show play button on video slides */}
+                      <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                        <div className="bg-black/50 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                          <PlayIcon className="h-8 w-8 text-white" />
                         </div>
-                      )}
+                      </div>
                     </div>
                   ) : (
                     <Image

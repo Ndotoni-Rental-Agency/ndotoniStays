@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getCdnUrl } from '@/lib/utils';
-import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { PlayIcon } from '@heroicons/react/24/solid';
 
 type MediaItem = {
@@ -25,11 +25,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchDelta, setTouchDelta] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lightboxVideoRef = useRef<HTMLVideoElement>(null);
 
   // Combine images and videos into a unified media array
   const mediaItems: MediaItem[] = [
@@ -41,24 +37,11 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   const mediaCount = displayMedia.length;
 
   const goTo = useCallback((index: number) => {
-    setIsTransitioning(true);
-    setIsPlaying(false);
     setCurrentIndex((index + mediaCount) % mediaCount);
-    setTimeout(() => setIsTransitioning(false), 300);
   }, [mediaCount]);
 
   const goNext = useCallback(() => goTo(currentIndex + 1), [currentIndex, goTo]);
   const goPrev = useCallback(() => goTo(currentIndex - 1), [currentIndex, goTo]);
-
-  // Reset video state when index changes
-  useEffect(() => {
-    setIsPlaying(false);
-    setIsMuted(true);
-    if (lightboxVideoRef.current) {
-      lightboxVideoRef.current.pause();
-      lightboxVideoRef.current.currentTime = 0;
-    }
-  }, [currentIndex]);
 
   // Keyboard navigation in lightbox
   useEffect(() => {
@@ -137,25 +120,6 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       el.removeEventListener('touchend', onTouchEnd);
     };
   }, [currentIndex, mediaCount, goPrev, goNext]);
-
-  const togglePlayPause = (ref: React.RefObject<HTMLVideoElement | null>) => {
-    if (ref.current) {
-      if (ref.current.paused) {
-        ref.current.play();
-        setIsPlaying(true);
-      } else {
-        ref.current.pause();
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const toggleMute = (ref: React.RefObject<HTMLVideoElement | null>) => {
-    if (ref.current) {
-      ref.current.muted = !ref.current.muted;
-      setIsMuted(ref.current.muted);
-    }
-  };
 
   /** Renders a single media cell */
   function renderMedia(media: MediaItem, index: number, sizes: string, priority = false) {
@@ -388,154 +352,75 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         </div>
       </div>
 
-      {/* ═══════════════ LIGHTBOX: Full-screen gallery ═══════════════ */}
+      {/* ═══════════════ LIGHTBOX: Airbnb-style scrollable gallery ═══════════════ */}
       {lightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-white sm:bg-black flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-ink-100 sm:border-none bg-white sm:bg-transparent">
-            <button
-              onClick={() => setLightboxOpen(false)}
-              className="p-2 -ml-2 rounded-full hover:bg-ink-100 sm:hover:bg-white/10 transition-colors"
-              aria-label="Close"
-            >
-              <XMarkIcon className="h-5 w-5 text-ink-900 sm:text-white" />
-            </button>
-            <span className="text-sm font-medium text-ink-700 sm:text-white">
-              {currentIndex + 1} / {mediaCount}
-            </span>
-            <div className="w-9" /> {/* Spacer for centering */}
-          </div>
-
-          {/* Main content area */}
-          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-            {/* Nav arrows */}
-            {mediaCount > 1 && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+          {/* Sticky header */}
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-ink-100">
+            <div className="max-w-3xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
               <button
-                onClick={goPrev}
-                className="absolute left-3 sm:left-6 z-10 p-2 rounded-full bg-white sm:bg-white/10 shadow-lg sm:shadow-none hover:bg-ink-50 sm:hover:bg-white/20 transition-colors"
-                aria-label="Previous"
+                onClick={() => setLightboxOpen(false)}
+                className="flex items-center gap-2 text-sm font-medium text-ink-900 hover:text-ink-600 transition-colors -ml-1 px-2 py-1.5 rounded-lg hover:bg-ink-50"
+                aria-label="Close"
               >
-                <ChevronLeftIcon className="h-5 w-5 text-ink-700 sm:text-white" />
+                <ChevronLeftIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Back</span>
               </button>
-            )}
-
-            {/* Media */}
-            <div className={`relative w-full h-full max-w-5xl mx-auto px-4 sm:px-16 transition-opacity duration-200 ${isTransitioning ? 'opacity-60' : 'opacity-100'}`}>
-              {displayMedia[currentIndex].type === 'video' ? (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <video
-                    ref={lightboxVideoRef}
-                    src={getCdnUrl(displayMedia[currentIndex].url)}
-                    className="max-w-full max-h-full rounded-lg sm:rounded-xl cursor-pointer"
-                    loop
-                    playsInline
-                    muted={isMuted}
-                    preload="metadata"
-                    onClick={() => togglePlayPause(lightboxVideoRef)}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                  />
-                  {/* Play overlay */}
-                  {!isPlaying && (
-                    <div
-                      className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                      onClick={() => togglePlayPause(lightboxVideoRef)}
-                    >
-                      <div className="bg-black/60 backdrop-blur-sm rounded-full p-5">
-                        <PlayIcon className="w-10 h-10 text-white" />
-                      </div>
-                    </div>
-                  )}
-                  {/* Controls */}
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md rounded-full px-5 py-2.5 flex items-center gap-5">
-                    <button
-                      onClick={() => togglePlayPause(lightboxVideoRef)}
-                      className="text-white hover:text-white/70 transition-colors"
-                      aria-label={isPlaying ? 'Pause' : 'Play'}
-                    >
-                      {isPlaying ? (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
-                      ) : (
-                        <PlayIcon className="w-5 h-5" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => toggleMute(lightboxVideoRef)}
-                      className="text-white hover:text-white/70 transition-colors"
-                      aria-label={isMuted ? 'Unmute' : 'Mute'}
-                    >
-                      {isMuted ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <Image
-                  src={getCdnUrl(displayMedia[currentIndex].url)}
-                  alt={`${title} ${currentIndex + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="(min-width: 1280px) 1024px, 100vw"
-                  priority
-                />
-              )}
+              <span className="text-sm text-ink-500">
+                {mediaCount} {mediaCount === 1 ? 'photo' : 'photos'}
+              </span>
+              <button
+                onClick={() => setLightboxOpen(false)}
+                className="p-1.5 rounded-full hover:bg-ink-100 transition-colors"
+                aria-label="Close"
+              >
+                <XMarkIcon className="h-5 w-5 text-ink-600" />
+              </button>
             </div>
-
-            {mediaCount > 1 && (
-              <button
-                onClick={goNext}
-                className="absolute right-3 sm:right-6 z-10 p-2 rounded-full bg-white sm:bg-white/10 shadow-lg sm:shadow-none hover:bg-ink-50 sm:hover:bg-white/20 transition-colors"
-                aria-label="Next"
-              >
-                <ChevronRightIcon className="h-5 w-5 text-ink-700 sm:text-white" />
-              </button>
-            )}
           </div>
 
-          {/* Bottom thumbnail strip */}
-          {mediaCount > 1 && (
-            <div className="hidden sm:flex justify-center gap-2 px-4 py-4 bg-black/80">
-              {displayMedia.map((media, i) => (
-                <button
-                  key={i}
-                  onClick={() => goTo(i)}
-                  className={`relative flex-shrink-0 w-16 h-11 rounded-md overflow-hidden transition-all duration-200 ${
-                    i === currentIndex
-                      ? 'ring-2 ring-white ring-offset-2 ring-offset-black opacity-100'
-                      : 'opacity-40 hover:opacity-80'
-                  }`}
-                >
-                  {media.type === 'video' ? (
-                    <div className="relative w-full h-full">
-                      <video
-                        src={getCdnUrl(media.url)}
-                        className="w-full h-full object-cover"
-                        muted
-                        playsInline
-                        preload="metadata"
-                        onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <PlayIcon className="h-3.5 w-3.5 text-white" />
-                      </div>
-                    </div>
-                  ) : (
+          {/* Scrollable photo list */}
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+            {displayMedia.map((media, i) => (
+              <div key={i} className="relative">
+                {/* Photo number label */}
+                <div className="text-xs text-ink-400 mb-2 font-medium">
+                  {i + 1} / {mediaCount}
+                  {media.type === 'video' && (
+                    <span className="ml-2 inline-flex items-center gap-1 text-ink-500">
+                      <PlayIcon className="h-3 w-3" /> Video
+                    </span>
+                  )}
+                </div>
+
+                {media.type === 'video' ? (
+                  <div className="relative w-full rounded-xl overflow-hidden bg-ink-900 aspect-video">
+                    <video
+                      src={getCdnUrl(media.url)}
+                      className="w-full h-full object-contain"
+                      controls
+                      playsInline
+                      preload="metadata"
+                      onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+                    />
+                  </div>
+                ) : (
+                  <div className="relative w-full rounded-xl overflow-hidden bg-ink-50 aspect-[4/3]">
                     <Image
                       src={getCdnUrl(media.url)}
-                      alt=""
+                      alt={`${title} ${i + 1}`}
                       fill
-                      className="object-cover"
-                      sizes="64px"
-                      loading="lazy"
+                      className="object-contain"
+                      sizes="(min-width: 768px) 768px, 100vw"
+                      quality={90}
+                      loading={i < 3 ? undefined : 'lazy'}
+                      priority={i < 2}
                     />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </>

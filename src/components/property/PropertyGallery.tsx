@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getCdnUrl } from '@/lib/utils';
 import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { CameraIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { PlayIcon } from '@heroicons/react/24/solid';
 
 type MediaItem = {
   type: 'image' | 'video';
@@ -17,7 +17,6 @@ interface Props {
   title: string;
 }
 
-// Blur placeholder for images
 const BLUR_PLACEHOLDER =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PC9zdmc+';
 
@@ -30,7 +29,6 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const lightboxVideoRef = useRef<HTMLVideoElement>(null);
 
   // Combine images and videos into a unified media array
@@ -46,27 +44,23 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
     setIsTransitioning(true);
     setIsPlaying(false);
     setCurrentIndex((index + mediaCount) % mediaCount);
-    setTimeout(() => setIsTransitioning(false), 400);
+    setTimeout(() => setIsTransitioning(false), 300);
   }, [mediaCount]);
 
   const goNext = useCallback(() => goTo(currentIndex + 1), [currentIndex, goTo]);
   const goPrev = useCallback(() => goTo(currentIndex - 1), [currentIndex, goTo]);
 
-  // Reset video state when media changes
+  // Reset video state when index changes
   useEffect(() => {
     setIsPlaying(false);
     setIsMuted(true);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
     if (lightboxVideoRef.current) {
       lightboxVideoRef.current.pause();
       lightboxVideoRef.current.currentTime = 0;
     }
   }, [currentIndex]);
 
-  // Keyboard navigation
+  // Keyboard navigation in lightbox
   useEffect(() => {
     if (!lightboxOpen) return;
     function handleKey(e: KeyboardEvent) {
@@ -78,7 +72,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxOpen, goNext, goPrev]);
 
-  // Touch swipe handling
+  // Mobile touch swipe
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchDeltaRef = useRef(0);
   const isHorizontalRef = useRef(false);
@@ -112,7 +106,6 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       }
 
       e.preventDefault();
-
       const clamped =
         (currentIndex === 0 && deltaX > 0) ? deltaX * 0.3 :
         (currentIndex === mediaCount - 1 && deltaX < 0) ? deltaX * 0.3 :
@@ -164,39 +157,24 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
     }
   };
 
-  /** Renders a media item (image or video) for the gallery grid — videos only autoplay if they're the first item */
-  function renderMediaThumb(media: MediaItem, index: number, sizes: string, priority = false) {
+  /** Renders a single media cell */
+  function renderMedia(media: MediaItem, index: number, sizes: string, priority = false) {
     if (media.type === 'video') {
       return (
         <div className="absolute inset-0 bg-ink-900">
-          {index === 0 ? (
-            <video
-              ref={videoRef}
-              src={getCdnUrl(media.url)}
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-            />
-          ) : (
-            <>
-              <video
-                src={getCdnUrl(media.url)}
-                className="absolute inset-0 w-full h-full object-cover"
-                muted
-                playsInline
-                preload="metadata"
-                onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <div className="bg-white/90 rounded-full p-2 shadow-md">
-                  <PlayIcon className="h-6 w-6 text-ink-800" />
-                </div>
-              </div>
-            </>
-          )}
+          <video
+            src={getCdnUrl(media.url)}
+            className="absolute inset-0 w-full h-full object-cover"
+            muted
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <div className="bg-black/60 backdrop-blur-sm rounded-full p-3">
+              <PlayIcon className="h-6 w-6 text-white" />
+            </div>
+          </div>
         </div>
       );
     }
@@ -205,7 +183,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         src={getCdnUrl(media.url)}
         alt={`${title} ${index + 1}`}
         fill
-        className="object-cover transition-transform duration-500 group-hover/thumb:scale-[1.02]"
+        className="object-cover"
         priority={priority}
         sizes={sizes}
         quality={85}
@@ -217,87 +195,103 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
 
   return (
     <>
-      {/* Desktop: Mosaic for 5+ media */}
-      {mediaCount >= 5 ? (
-        <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden h-[420px] relative group">
-          <div
-            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden group/thumb"
+      {/* ═══════════════ DESKTOP: Airbnb-style bento grid ═══════════════ */}
+      <div className="hidden sm:block">
+        {mediaCount >= 5 ? (
+          // 5-image grid: large hero left, 2×2 right
+          <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden h-[400px] relative group cursor-pointer"
             onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
           >
-            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 640px, (min-width: 640px) 50vw, 100vw', true)}
-          </div>
-
-          {displayMedia.slice(1, 5).map((media, i) => (
-            <div
-              key={i}
-              className="relative cursor-pointer overflow-hidden group/thumb"
-              onClick={() => { setCurrentIndex(i + 1); setLightboxOpen(true); }}
-            >
-              {renderMediaThumb(media, i + 1, '(min-width: 1280px) 320px, (min-width: 640px) 25vw, 50vw')}
-              {i === 3 && mediaCount > 5 && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center hover:bg-black/40 transition-colors">
-                  <div className="text-center">
-                    <CameraIcon className="h-6 w-6 text-white mx-auto mb-1" />
-                    <span className="text-white font-semibold text-sm">
-                      +{mediaCount - 5} more
-                    </span>
-                  </div>
-                </div>
-              )}
+            {/* Hero (left half) */}
+            <div className="relative overflow-hidden hover:brightness-90 transition-all duration-200">
+              {renderMedia(displayMedia[0], 0, '(min-width: 1280px) 640px, 50vw', true)}
             </div>
-          ))}
 
-          <button
-            onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
-            className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm text-ink-800 text-xs font-semibold px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5"
-          >
-            <CameraIcon className="h-4 w-4" />
-            Show all {mediaCount} media
-          </button>
-        </div>
-      ) : mediaCount >= 3 ? (
-        <div className="hidden sm:grid grid-cols-3 gap-2 rounded-2xl overflow-hidden h-[380px] relative group">
-          <div
-            className="col-span-2 relative cursor-pointer overflow-hidden group/thumb"
-            onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
-          >
-            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 850px, (min-width: 640px) 66vw, 100vw', true)}
+            {/* Right side: 2×2 grid */}
+            <div className="grid grid-cols-2 grid-rows-2 gap-2">
+              {displayMedia.slice(1, 5).map((media, i) => (
+                <div
+                  key={i}
+                  className="relative overflow-hidden hover:brightness-90 transition-all duration-200"
+                  onClick={(e) => { e.stopPropagation(); setCurrentIndex(i + 1); setLightboxOpen(true); }}
+                >
+                  {renderMedia(media, i + 1, '(min-width: 1280px) 320px, 25vw')}
+                </div>
+              ))}
+            </div>
+
+            {/* Show all photos button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); setCurrentIndex(0); setLightboxOpen(true); }}
+              className="absolute bottom-4 right-4 bg-white text-ink-900 text-sm font-medium px-4 py-2 rounded-lg border border-ink-900 hover:bg-ink-50 transition-colors shadow-sm flex items-center gap-2"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+              Show all photos
+            </button>
           </div>
-          <div className="flex flex-col gap-2">
-            {displayMedia.slice(1, 3).map((media, i) => (
+        ) : mediaCount >= 3 ? (
+          // 3-4 images: hero left (2/3), stacked right (1/3)
+          <div className="grid grid-cols-3 gap-2 rounded-xl overflow-hidden h-[400px] relative group cursor-pointer"
+            onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
+          >
+            <div className="col-span-2 relative overflow-hidden hover:brightness-90 transition-all duration-200">
+              {renderMedia(displayMedia[0], 0, '(min-width: 1280px) 850px, 66vw', true)}
+            </div>
+            <div className="flex flex-col gap-2">
+              {displayMedia.slice(1, 3).map((media, i) => (
+                <div
+                  key={i}
+                  className="relative flex-1 overflow-hidden hover:brightness-90 transition-all duration-200"
+                  onClick={(e) => { e.stopPropagation(); setCurrentIndex(i + 1); setLightboxOpen(true); }}
+                >
+                  {renderMedia(media, i + 1, '(min-width: 1280px) 420px, 33vw')}
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={(e) => { e.stopPropagation(); setCurrentIndex(0); setLightboxOpen(true); }}
+              className="absolute bottom-4 right-4 bg-white text-ink-900 text-sm font-medium px-4 py-2 rounded-lg border border-ink-900 hover:bg-ink-50 transition-colors shadow-sm flex items-center gap-2"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+              </svg>
+              Show all photos
+            </button>
+          </div>
+        ) : mediaCount === 2 ? (
+          // 2 images: side by side
+          <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden h-[400px] relative group cursor-pointer"
+            onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
+          >
+            {displayMedia.slice(0, 2).map((media, i) => (
               <div
                 key={i}
-                className="relative flex-1 cursor-pointer overflow-hidden group/thumb"
-                onClick={() => { setCurrentIndex(i + 1); setLightboxOpen(true); }}
+                className="relative overflow-hidden hover:brightness-90 transition-all duration-200"
+                onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); setLightboxOpen(true); }}
               >
-                {renderMediaThumb(media, i + 1, '(min-width: 1280px) 420px, (min-width: 640px) 33vw, 50vw')}
+                {renderMedia(media, i, '50vw', i === 0)}
               </div>
             ))}
           </div>
-
-          <button
-            onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
-            className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm text-ink-800 text-xs font-semibold px-4 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5"
-          >
-            <CameraIcon className="h-4 w-4" />
-            Show all {mediaCount} media
-          </button>
-        </div>
-      ) : (
-        <div className="hidden sm:grid grid-cols-1 gap-2 rounded-2xl overflow-hidden h-[380px] relative group">
-          <div
-            className="relative cursor-pointer overflow-hidden group/thumb"
+        ) : (
+          // Single image
+          <div className="rounded-xl overflow-hidden h-[400px] relative group cursor-pointer"
             onClick={() => setLightboxOpen(true)}
           >
-            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 1280px, 100vw', true)}
+            <div className="relative w-full h-full hover:brightness-90 transition-all duration-200">
+              {renderMedia(displayMedia[0], 0, '100vw', true)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Mobile: Full-bleed swipeable carousel — only render adjacent slides */}
+      {/* ═══════════════ MOBILE: Edge-to-edge swipeable carousel ═══════════════ */}
       <div
         ref={containerRef}
-        className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
+        className="sm:hidden relative overflow-hidden aspect-[4/3] select-none bg-ink-100"
         style={{ overscrollBehavior: 'none' }}
       >
         <div className="absolute inset-0 overflow-hidden">
@@ -309,7 +303,6 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             }}
           >
             {displayMedia.map((media, i) => {
-              // Only render media within 1 slide of current to avoid loading all videos at once
               const isNearby = Math.abs(i - currentIndex) <= 1;
               return (
                 <div
@@ -318,7 +311,6 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
                 >
                   {!isNearby ? (
-                    // Placeholder for distant slides
                     <div className="w-full h-full bg-ink-100" />
                   ) : media.type === 'video' ? (
                     <div className="absolute inset-0 bg-ink-900">
@@ -328,24 +320,19 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                         muted
                         loop
                         playsInline
-                        preload={i === currentIndex ? 'metadata' : 'metadata'}
+                        preload="metadata"
                         autoPlay={i === currentIndex}
                         onLoadedMetadata={(e) => {
-                          // Seek to 1s so there's a visible frame even when not playing
-                          if (i !== currentIndex) {
-                            e.currentTarget.currentTime = 1;
-                          }
+                          if (i !== currentIndex) e.currentTarget.currentTime = 1;
                         }}
                         onLoadedData={(e) => {
-                          if (i === currentIndex) {
-                            e.currentTarget.play().catch(() => {});
-                          }
+                          if (i === currentIndex) e.currentTarget.play().catch(() => {});
                         }}
                       />
                       {i !== currentIndex && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <div className="bg-white/90 rounded-full p-2 shadow-md">
-                            <PlayIcon className="h-6 w-6 text-ink-800" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="bg-black/60 backdrop-blur-sm rounded-full p-3">
+                            <PlayIcon className="h-6 w-6 text-white" />
                           </div>
                         </div>
                       )}
@@ -369,112 +356,77 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
           </div>
         </div>
 
+        {/* Gradient fade at bottom for dots */}
         {mediaCount > 1 && (
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
         )}
 
+        {/* Pagination dots */}
         {mediaCount > 1 && (
-          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1">
-            {displayMedia.slice(0, Math.min(mediaCount, 7)).map((_, i) => (
+          <div className="absolute bottom-3 inset-x-0 flex justify-center gap-1.5">
+            {displayMedia.slice(0, Math.min(mediaCount, 5)).map((_, i) => (
               <span
                 key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                className={`h-[6px] rounded-full transition-all duration-300 ${
                   i === currentIndex
-                    ? 'w-5 bg-white'
-                    : 'w-1.5 bg-white/50'
+                    ? 'w-6 bg-white'
+                    : 'w-[6px] bg-white/50'
                 }`}
               />
             ))}
-            {mediaCount > 7 && (
-              <span className="text-[10px] text-white/70 ml-1 self-center">+{mediaCount - 7}</span>
+            {mediaCount > 5 && (
+              <span className="text-[10px] text-white/80 ml-1 self-center font-medium">
+                +{mediaCount - 5}
+              </span>
             )}
           </div>
         )}
 
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1">
-          <CameraIcon className="h-3 w-3" />
-          {currentIndex + 1}/{mediaCount}
+        {/* Counter badge */}
+        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
+          {currentIndex + 1} / {mediaCount}
         </div>
       </div>
 
-      {/* Desktop thumbnail filmstrip — lightweight video thumbnails */}
-      {mediaCount > 5 && (
-        <div className="hidden sm:flex gap-1.5 mt-3 overflow-x-auto pb-1 scrollbar-thin">
-          {displayMedia.map((media, i) => (
-            <button
-              key={i}
-              onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
-              className={`relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden transition-all duration-200 ${
-                i === currentIndex
-                  ? 'ring-2 ring-brand-500 ring-offset-1 scale-105'
-                  : 'opacity-60 hover:opacity-100 hover:scale-105'
-              }`}
-            >
-              {media.type === 'video' ? (
-                <div className="relative w-full h-full">
-                  <video
-                    src={getCdnUrl(media.url)}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                    preload="metadata"
-                    onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <PlayIcon className="h-4 w-4 text-white" />
-                  </div>
-                </div>
-              ) : (
-                <Image
-                  src={getCdnUrl(media.url)}
-                  alt={`${title} thumb ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="64px"
-                  loading="lazy"
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Immersive Lightbox */}
+      {/* ═══════════════ LIGHTBOX: Full-screen gallery ═══════════════ */}
       {lightboxOpen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-4 py-3 text-white">
-            <span className="text-sm font-medium">
-              {currentIndex + 1} / {mediaCount}
-            </span>
+        <div className="fixed inset-0 z-50 bg-white sm:bg-black flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-ink-100 sm:border-none bg-white sm:bg-transparent">
             <button
               onClick={() => setLightboxOpen(false)}
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-              aria-label="Close gallery"
+              className="p-2 -ml-2 rounded-full hover:bg-ink-100 sm:hover:bg-white/10 transition-colors"
+              aria-label="Close"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-5 w-5 text-ink-900 sm:text-white" />
             </button>
+            <span className="text-sm font-medium text-ink-700 sm:text-white">
+              {currentIndex + 1} / {mediaCount}
+            </span>
+            <div className="w-9" /> {/* Spacer for centering */}
           </div>
 
-          {/* Main media area */}
-          <div className="flex-1 relative flex items-center justify-center px-12">
+          {/* Main content area */}
+          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+            {/* Nav arrows */}
             {mediaCount > 1 && (
               <button
                 onClick={goPrev}
-                className="absolute left-2 sm:left-6 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+                className="absolute left-3 sm:left-6 z-10 p-2 rounded-full bg-white sm:bg-white/10 shadow-lg sm:shadow-none hover:bg-ink-50 sm:hover:bg-white/20 transition-colors"
                 aria-label="Previous"
               >
-                <ChevronLeftIcon className="h-6 w-6 text-white" />
+                <ChevronLeftIcon className="h-5 w-5 text-ink-700 sm:text-white" />
               </button>
             )}
 
-            <div className={`relative w-full h-full transition-opacity duration-300 ${isTransitioning ? 'opacity-80' : 'opacity-100'}`}>
+            {/* Media */}
+            <div className={`relative w-full h-full max-w-5xl mx-auto px-4 sm:px-16 transition-opacity duration-200 ${isTransitioning ? 'opacity-60' : 'opacity-100'}`}>
               {displayMedia[currentIndex].type === 'video' ? (
                 <div className="relative w-full h-full flex items-center justify-center">
                   <video
                     ref={lightboxVideoRef}
                     src={getCdnUrl(displayMedia[currentIndex].url)}
-                    className="max-w-full max-h-full rounded-lg cursor-pointer"
+                    className="max-w-full max-h-full rounded-lg sm:rounded-xl cursor-pointer"
                     loop
                     playsInline
                     muted={isMuted}
@@ -489,16 +441,16 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                       className="absolute inset-0 flex items-center justify-center cursor-pointer"
                       onClick={() => togglePlayPause(lightboxVideoRef)}
                     >
-                      <div className="bg-white/90 rounded-full p-4 shadow-lg">
-                        <PlayIcon className="w-12 h-12 text-brand-600" />
+                      <div className="bg-black/60 backdrop-blur-sm rounded-full p-5">
+                        <PlayIcon className="w-10 h-10 text-white" />
                       </div>
                     </div>
                   )}
-                  {/* Video controls bar */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-4">
+                  {/* Controls */}
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md rounded-full px-5 py-2.5 flex items-center gap-5">
                     <button
                       onClick={() => togglePlayPause(lightboxVideoRef)}
-                      className="text-white hover:text-gray-300 transition-colors"
+                      className="text-white hover:text-white/70 transition-colors"
                       aria-label={isPlaying ? 'Pause' : 'Play'}
                     >
                       {isPlaying ? (
@@ -509,7 +461,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     </button>
                     <button
                       onClick={() => toggleMute(lightboxVideoRef)}
-                      className="text-white hover:text-gray-300 transition-colors"
+                      className="text-white hover:text-white/70 transition-colors"
                       aria-label={isMuted ? 'Unmute' : 'Mute'}
                     >
                       {isMuted ? (
@@ -526,7 +478,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   alt={`${title} ${currentIndex + 1}`}
                   fill
                   className="object-contain"
-                  sizes="100vw"
+                  sizes="(min-width: 1280px) 1024px, 100vw"
                   priority
                 />
               )}
@@ -535,24 +487,24 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             {mediaCount > 1 && (
               <button
                 onClick={goNext}
-                className="absolute right-2 sm:right-6 z-10 p-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-colors"
+                className="absolute right-3 sm:right-6 z-10 p-2 rounded-full bg-white sm:bg-white/10 shadow-lg sm:shadow-none hover:bg-ink-50 sm:hover:bg-white/20 transition-colors"
                 aria-label="Next"
               >
-                <ChevronRightIcon className="h-6 w-6 text-white" />
+                <ChevronRightIcon className="h-5 w-5 text-ink-700 sm:text-white" />
               </button>
             )}
           </div>
 
           {/* Bottom thumbnail strip */}
           {mediaCount > 1 && (
-            <div className="flex justify-center gap-1.5 px-4 py-3 overflow-x-auto">
+            <div className="hidden sm:flex justify-center gap-2 px-4 py-4 bg-black/80">
               {displayMedia.map((media, i) => (
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  className={`relative flex-shrink-0 w-14 h-10 rounded-md overflow-hidden transition-all duration-200 ${
+                  className={`relative flex-shrink-0 w-16 h-11 rounded-md overflow-hidden transition-all duration-200 ${
                     i === currentIndex
-                      ? 'ring-2 ring-white scale-110'
+                      ? 'ring-2 ring-white ring-offset-2 ring-offset-black opacity-100'
                       : 'opacity-40 hover:opacity-80'
                   }`}
                 >
@@ -567,7 +519,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                         onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <PlayIcon className="h-3 w-3 text-white" />
+                        <PlayIcon className="h-3.5 w-3.5 text-white" />
                       </div>
                     </div>
                   ) : (
@@ -576,7 +528,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                       alt=""
                       fill
                       className="object-cover"
-                      sizes="56px"
+                      sizes="64px"
                       loading="lazy"
                     />
                   )}

@@ -7,6 +7,12 @@ import { searchShortTermProperties } from '@/graphql/queries';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { SearchFilters } from './SearchFilters';
 
+// All active regions to query when no specific region is selected
+const ALL_REGIONS = [
+  'Dar es Salaam', 'Arusha', 'Dodoma', 'Mwanza', 'Zanzibar',
+  'Mbeya', 'Morogoro', 'Tanga', 'Kilimanjaro', 'Iringa',
+];
+
 interface ShortTermProperty {
   propertyId: string;
   title: string;
@@ -32,7 +38,7 @@ export function SearchContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const region = searchParams.get('region') || 'Dar es Salaam';
+  const regionParam = searchParams.get('region');
   const checkIn = searchParams.get('checkIn') || getDefaultCheckIn();
   const checkOut = searchParams.get('checkOut') || getDefaultCheckOut();
   const guests = parseInt(searchParams.get('guests') || '1');
@@ -49,31 +55,55 @@ export function SearchContent() {
 
   useEffect(() => {
     fetchProperties();
-  }, [region, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
+  }, [regionParam, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
 
   async function fetchProperties() {
     setLoading(true);
     setError(null);
     try {
-      const data = await GraphQLClient.executePublic<{
-        searchShortTermProperties: { properties: ShortTermProperty[]; nextToken: string | null };
-      }>(searchShortTermProperties, {
-        input: {
-          region,
-          checkInDate: checkIn,
-          checkOutDate: checkOut,
-          numberOfGuests: guests,
-          ...(propertyType && { propertyType }),
-          ...(stayCategory && { stayCategory }),
-          ...(validMinPrice && { minPrice: validMinPrice }),
-          ...(validMaxPrice && { maxPrice: validMaxPrice }),
-          ...(instantBookOnly && { instantBookOnly: true }),
-          ...(bedrooms && { bedrooms }),
-          limit: 20,
-        },
-      });
+      const baseInput = {
+        checkInDate: checkIn,
+        checkOutDate: checkOut,
+        numberOfGuests: guests,
+        ...(propertyType && { propertyType }),
+        ...(stayCategory && { stayCategory }),
+        ...(validMinPrice && { minPrice: validMinPrice }),
+        ...(validMaxPrice && { maxPrice: validMaxPrice }),
+        ...(instantBookOnly && { instantBookOnly: true }),
+        ...(bedrooms && { bedrooms }),
+        limit: 20,
+      };
 
-      let results = data.searchShortTermProperties?.properties || [];
+      let results: ShortTermProperty[];
+
+      if (regionParam) {
+        // Single region query
+        const data = await GraphQLClient.executePublic<{
+          searchShortTermProperties: { properties: ShortTermProperty[]; nextToken: string | null };
+        }>(searchShortTermProperties, { input: { ...baseInput, region: regionParam } });
+
+        results = data.searchShortTermProperties?.properties || [];
+      } else {
+        // No region specified — query all regions in parallel
+        const queries = ALL_REGIONS.map((region) =>
+          GraphQLClient.executePublic<{
+            searchShortTermProperties: { properties: ShortTermProperty[]; nextToken: string | null };
+          }>(searchShortTermProperties, { input: { ...baseInput, region } })
+            .then((d) => d.searchShortTermProperties?.properties || [])
+            .catch(() => [] as ShortTermProperty[])
+        );
+
+        const allResults = await Promise.all(queries);
+        // Flatten, deduplicate by propertyId, and shuffle
+        const seen = new Set<string>();
+        results = allResults.flat().filter((p) => {
+          if (seen.has(p.propertyId)) return false;
+          seen.add(p.propertyId);
+          return true;
+        });
+        // Shuffle for variety
+        results.sort(() => Math.random() - 0.5);
+      }
 
       setProperties(results);
     } catch (err: any) {
@@ -84,11 +114,13 @@ export function SearchContent() {
     }
   }
 
+  const displayRegion = regionParam || 'Tanzania';
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       {/* Filters */}
       <SearchFilters
-        region={region}
+        region={regionParam || ''}
         checkIn={checkIn}
         checkOut={checkOut}
         guests={guests}
@@ -100,7 +132,7 @@ export function SearchContent() {
       {/* Results header */}
       <div className="mt-6 mb-4">
         <h1 className="text-xl font-semibold text-ink-900">
-          {loading ? 'Searching...' : `${properties.length} places in ${region}`}
+          {loading ? 'Searching...' : `${properties.length} places in ${displayRegion}`}
         </h1>
       </div>
 

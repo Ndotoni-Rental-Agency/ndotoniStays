@@ -71,7 +71,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
 
   const handleApply = () => {
     const params = new URLSearchParams();
-    params.set('region', localRegion);
+    if (localRegion) params.set('region', localRegion);
     params.set('checkIn', localCheckIn);
     params.set('checkOut', localCheckOut);
     params.set('guests', localGuests.toString());
@@ -101,6 +101,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
             onChange={(e) => setLocalRegion(e.target.value)}
             className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
           >
+            <option value="">All Regions</option>
             {REGIONS.map((r) => (
               <option key={r} value={r}>{r}</option>
             ))}

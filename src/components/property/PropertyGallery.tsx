@@ -168,12 +168,12 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   function renderMediaThumb(media: MediaItem, index: number, sizes: string, priority = false) {
     if (media.type === 'video') {
       return (
-        <div className="relative w-full h-full bg-ink-900">
+        <div className="absolute inset-0 bg-ink-900">
           {index === 0 ? (
             <video
               ref={videoRef}
               src={getCdnUrl(media.url)}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               autoPlay
               muted
               loop
@@ -184,7 +184,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             <>
               <video
                 src={getCdnUrl(media.url)}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
                 muted
                 playsInline
                 preload="metadata"
@@ -321,10 +321,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     // Placeholder for distant slides
                     <div className="w-full h-full bg-ink-100" />
                   ) : media.type === 'video' ? (
-                    <div className="relative w-full h-full bg-ink-900">
+                    <div className="absolute inset-0 bg-ink-900">
                       <video
                         src={getCdnUrl(media.url)}
-                        className="w-full h-full object-cover pointer-events-none"
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                         muted
                         loop
                         playsInline

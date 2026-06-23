@@ -139,7 +139,10 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
           </button>
 
           <p className="text-xs text-ink-400 text-center">
-            We&apos;ll try to send a code to your WhatsApp. If it doesn&apos;t arrive, send &quot;associate&quot; to our WhatsApp number.
+            We&apos;ll try to send a code to your WhatsApp. If it doesn&apos;t arrive, send &quot;associate&quot; to{' '}
+            <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-600 font-medium hover:underline">
+              +255 790 720 329
+            </a>
           </p>
 
           <button
@@ -154,7 +157,12 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
       {step === 'code' && (
         <div className="space-y-3">
           {message && (
-            <p className="text-sm text-green-600 bg-green-50 rounded-xl px-4 py-2">{message}</p>
+            <p className="text-sm text-green-600 bg-green-50 rounded-xl px-4 py-2">
+              {message} If you didn&apos;t receive it, send &quot;associate&quot; to{' '}
+              <a href="https://wa.me/255790720329?text=associate" target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
+                +255 790 720 329
+              </a>
+            </p>
           )}
 
           {!message && (

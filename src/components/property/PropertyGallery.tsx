@@ -205,9 +205,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         src={getCdnUrl(media.url)}
         alt={`${title} ${index + 1}`}
         fill
-        className="object-cover hover:scale-105 transition-transform duration-500"
+        className="object-cover transition-transform duration-500 group-hover/thumb:scale-[1.02]"
         priority={priority}
         sizes={sizes}
+        quality={85}
         placeholder="blur"
         blurDataURL={BLUR_PLACEHOLDER}
       />
@@ -220,19 +221,19 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       {mediaCount >= 5 ? (
         <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden h-[420px] relative group">
           <div
-            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden"
+            className="col-span-2 row-span-2 relative cursor-pointer overflow-hidden group/thumb"
             onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
           >
-            {renderMediaThumb(displayMedia[0], 0, '(min-width: 640px) 50vw', true)}
+            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 640px, (min-width: 640px) 50vw, 100vw', true)}
           </div>
 
           {displayMedia.slice(1, 5).map((media, i) => (
             <div
               key={i}
-              className="relative cursor-pointer overflow-hidden"
+              className="relative cursor-pointer overflow-hidden group/thumb"
               onClick={() => { setCurrentIndex(i + 1); setLightboxOpen(true); }}
             >
-              {renderMediaThumb(media, i + 1, '(min-width: 640px) 25vw')}
+              {renderMediaThumb(media, i + 1, '(min-width: 1280px) 320px, (min-width: 640px) 25vw, 50vw')}
               {i === 3 && mediaCount > 5 && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center hover:bg-black/40 transition-colors">
                   <div className="text-center">
@@ -257,19 +258,19 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       ) : mediaCount >= 3 ? (
         <div className="hidden sm:grid grid-cols-3 gap-2 rounded-2xl overflow-hidden h-[380px] relative group">
           <div
-            className="col-span-2 relative cursor-pointer overflow-hidden"
+            className="col-span-2 relative cursor-pointer overflow-hidden group/thumb"
             onClick={() => { setCurrentIndex(0); setLightboxOpen(true); }}
           >
-            {renderMediaThumb(displayMedia[0], 0, '66vw', true)}
+            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 850px, (min-width: 640px) 66vw, 100vw', true)}
           </div>
           <div className="flex flex-col gap-2">
             {displayMedia.slice(1, 3).map((media, i) => (
               <div
                 key={i}
-                className="relative flex-1 cursor-pointer overflow-hidden"
+                className="relative flex-1 cursor-pointer overflow-hidden group/thumb"
                 onClick={() => { setCurrentIndex(i + 1); setLightboxOpen(true); }}
               >
-                {renderMediaThumb(media, i + 1, '33vw')}
+                {renderMediaThumb(media, i + 1, '(min-width: 1280px) 420px, (min-width: 640px) 33vw, 50vw')}
               </div>
             ))}
           </div>
@@ -285,10 +286,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
       ) : (
         <div className="hidden sm:grid grid-cols-1 gap-2 rounded-2xl overflow-hidden h-[380px] relative group">
           <div
-            className="relative cursor-pointer overflow-hidden"
+            className="relative cursor-pointer overflow-hidden group/thumb"
             onClick={() => setLightboxOpen(true)}
           >
-            {renderMediaThumb(displayMedia[0], 0, '100vw', true)}
+            {renderMediaThumb(displayMedia[0], 0, '(min-width: 1280px) 1280px, 100vw', true)}
           </div>
         </div>
       )}

@@ -3,6 +3,10 @@ import Image from 'next/image';
 import { StarIcon, BoltIcon } from '@heroicons/react/24/solid';
 import { formatPrice, getCdnUrl } from '@/lib/utils';
 
+// Tiny 1x1 SVG shimmer placeholder encoded as base64
+const BLUR_PLACEHOLDER =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PC9zdmc+';
+
 interface ShortTermProperty {
   propertyId: string;
   title: string;
@@ -39,13 +43,16 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
   return (
     <Link href={href} className="card group block">
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[4/3] overflow-hidden bg-ink-100">
         <Image
           src={imageUrl}
           alt={property.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          placeholder="blur"
+          blurDataURL={BLUR_PLACEHOLDER}
+          loading="lazy"
         />
         {property.instantBookEnabled && (
           <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-brand-600 text-white text-xs font-medium px-2.5 py-1 rounded-full">

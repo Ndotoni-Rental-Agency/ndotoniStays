@@ -17,6 +17,10 @@ interface Props {
   title: string;
 }
 
+// Blur placeholder for images
+const BLUR_PLACEHOLDER =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PC9zdmc+';
+
 export function PropertyGallery({ images, videos = [], title }: Props) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -160,24 +164,39 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
     }
   };
 
-  /** Renders a media item (image or video) for the gallery grid */
+  /** Renders a media item (image or video) for the gallery grid — videos only autoplay if they're the first item */
   function renderMediaThumb(media: MediaItem, index: number, sizes: string, priority = false) {
     if (media.type === 'video') {
       return (
-        <div className="relative w-full h-full">
-          <video
-            src={getCdnUrl(media.url)}
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            onLoadedData={(e) => {
-              const v = e.currentTarget;
-              v.play().catch(() => {});
-            }}
-          />
+        <div className="relative w-full h-full bg-ink-100">
+          {/* Only load the first video; others show a static poster frame */}
+          {index === 0 ? (
+            <video
+              ref={videoRef}
+              src={getCdnUrl(media.url)}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            <>
+              <video
+                src={getCdnUrl(media.url)}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+                preload="none"
+                poster=""
+                onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <PlayIcon className="h-10 w-10 text-white/90" />
+              </div>
+            </>
+          )}
         </div>
       );
     }
@@ -189,6 +208,8 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         className="object-cover hover:scale-105 transition-transform duration-500"
         priority={priority}
         sizes={sizes}
+        placeholder="blur"
+        blurDataURL={BLUR_PLACEHOLDER}
       />
     );
   }
@@ -272,7 +293,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         </div>
       )}
 
-      {/* Mobile: Full-bleed swipeable carousel */}
+      {/* Mobile: Full-bleed swipeable carousel — only render adjacent slides */}
       <div
         ref={containerRef}
         className="sm:hidden relative overflow-hidden aspect-[3/2] select-none"
@@ -286,41 +307,56 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
               transition: touchStart !== null ? 'none' : 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
             }}
           >
-            {displayMedia.map((media, i) => (
-              <div
-                key={i}
-                className="relative min-w-full h-full flex-shrink-0"
-                onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
-              >
-                {media.type === 'video' ? (
-                  <div className="relative w-full h-full">
-                    <video
+            {displayMedia.map((media, i) => {
+              // Only render media within 1 slide of current to avoid loading all videos at once
+              const isNearby = Math.abs(i - currentIndex) <= 1;
+              return (
+                <div
+                  key={i}
+                  className="relative min-w-full h-full flex-shrink-0"
+                  onClick={() => { setCurrentIndex(i); setLightboxOpen(true); }}
+                >
+                  {!isNearby ? (
+                    // Placeholder for distant slides
+                    <div className="w-full h-full bg-ink-100" />
+                  ) : media.type === 'video' ? (
+                    <div className="relative w-full h-full bg-ink-100">
+                      <video
+                        src={getCdnUrl(media.url)}
+                        className="w-full h-full object-cover pointer-events-none"
+                        muted
+                        loop
+                        playsInline
+                        preload={i === currentIndex ? 'metadata' : 'none'}
+                        autoPlay={i === currentIndex}
+                        onLoadedData={(e) => {
+                          if (i === currentIndex) {
+                            e.currentTarget.play().catch(() => {});
+                          }
+                        }}
+                      />
+                      {i !== currentIndex && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <PlayIcon className="h-10 w-10 text-white/90" />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Image
                       src={getCdnUrl(media.url)}
-                      className="w-full h-full object-cover pointer-events-none"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      onLoadedData={(e) => {
-                        const v = e.currentTarget;
-                        v.play().catch(() => {});
-                      }}
+                      alt={`${title} ${i + 1}`}
+                      fill
+                      className="object-cover pointer-events-none"
+                      priority={i === 0}
+                      sizes="100vw"
+                      draggable={false}
+                      placeholder="blur"
+                      blurDataURL={BLUR_PLACEHOLDER}
                     />
-                  </div>
-                ) : (
-                  <Image
-                    src={getCdnUrl(media.url)}
-                    alt={`${title} ${i + 1}`}
-                    fill
-                    className="object-cover pointer-events-none"
-                    priority={i === 0}
-                    sizes="100vw"
-                    draggable={false}
-                  />
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -352,7 +388,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         </div>
       </div>
 
-      {/* Desktop thumbnail filmstrip */}
+      {/* Desktop thumbnail filmstrip — use poster images, not video elements */}
       {mediaCount > 5 && (
         <div className="hidden sm:flex gap-1.5 mt-3 overflow-x-auto pb-1 scrollbar-thin">
           {displayMedia.map((media, i) => (
@@ -366,14 +402,8 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
               }`}
             >
               {media.type === 'video' ? (
-                <div className="relative w-full h-full">
-                  <video
-                    src={getCdnUrl(media.url)}
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                    onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <div className="relative w-full h-full bg-ink-200">
+                  <div className="absolute inset-0 flex items-center justify-center bg-ink-300">
                     <PlayIcon className="h-4 w-4 text-white" />
                   </div>
                 </div>
@@ -384,6 +414,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   fill
                   className="object-cover"
                   sizes="64px"
+                  loading="lazy"
                 />
               )}
             </button>
@@ -427,11 +458,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     ref={lightboxVideoRef}
                     src={getCdnUrl(displayMedia[currentIndex].url)}
                     className="max-w-full max-h-full rounded-lg cursor-pointer"
-                    autoPlay
                     loop
                     playsInline
                     muted={isMuted}
-                    preload="auto"
+                    preload="metadata"
                     onClick={() => togglePlayPause(lightboxVideoRef)}
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
@@ -480,6 +510,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   fill
                   className="object-contain"
                   sizes="100vw"
+                  priority
                 />
               )}
             </div>
@@ -495,7 +526,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             )}
           </div>
 
-          {/* Bottom thumbnail strip */}
+          {/* Bottom thumbnail strip — static placeholders for videos instead of loading video elements */}
           {mediaCount > 1 && (
             <div className="flex justify-center gap-1.5 px-4 py-3 overflow-x-auto">
               {displayMedia.map((media, i) => (
@@ -509,14 +540,8 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   }`}
                 >
                   {media.type === 'video' ? (
-                    <div className="relative w-full h-full">
-                      <video
-                        src={getCdnUrl(media.url)}
-                        className="w-full h-full object-cover"
-                        preload="metadata"
-                        onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="relative w-full h-full bg-ink-700">
+                      <div className="absolute inset-0 flex items-center justify-center">
                         <PlayIcon className="h-3 w-3 text-white" />
                       </div>
                     </div>
@@ -527,6 +552,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                       fill
                       className="object-cover"
                       sizes="56px"
+                      loading="lazy"
                     />
                   )}
                 </button>

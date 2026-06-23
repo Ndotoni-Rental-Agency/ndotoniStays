@@ -168,8 +168,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   function renderMediaThumb(media: MediaItem, index: number, sizes: string, priority = false) {
     if (media.type === 'video') {
       return (
-        <div className="relative w-full h-full bg-ink-100">
-          {/* Only load the first video; others show a static poster frame */}
+        <div className="relative w-full h-full bg-ink-900">
           {index === 0 ? (
             <video
               ref={videoRef}
@@ -188,12 +187,13 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                 className="w-full h-full object-cover"
                 muted
                 playsInline
-                preload="none"
-                poster=""
+                preload="metadata"
                 onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
               />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <PlayIcon className="h-10 w-10 text-white/90" />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <div className="bg-white/90 rounded-full p-2 shadow-md">
+                  <PlayIcon className="h-6 w-6 text-ink-800" />
+                </div>
               </div>
             </>
           )}
@@ -321,15 +321,21 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                     // Placeholder for distant slides
                     <div className="w-full h-full bg-ink-100" />
                   ) : media.type === 'video' ? (
-                    <div className="relative w-full h-full bg-ink-100">
+                    <div className="relative w-full h-full bg-ink-900">
                       <video
                         src={getCdnUrl(media.url)}
                         className="w-full h-full object-cover pointer-events-none"
                         muted
                         loop
                         playsInline
-                        preload={i === currentIndex ? 'metadata' : 'none'}
+                        preload={i === currentIndex ? 'metadata' : 'metadata'}
                         autoPlay={i === currentIndex}
+                        onLoadedMetadata={(e) => {
+                          // Seek to 1s so there's a visible frame even when not playing
+                          if (i !== currentIndex) {
+                            e.currentTarget.currentTime = 1;
+                          }
+                        }}
                         onLoadedData={(e) => {
                           if (i === currentIndex) {
                             e.currentTarget.play().catch(() => {});
@@ -337,8 +343,10 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                         }}
                       />
                       {i !== currentIndex && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <PlayIcon className="h-10 w-10 text-white/90" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <div className="bg-white/90 rounded-full p-2 shadow-md">
+                            <PlayIcon className="h-6 w-6 text-ink-800" />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -389,7 +397,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
         </div>
       </div>
 
-      {/* Desktop thumbnail filmstrip — use poster images, not video elements */}
+      {/* Desktop thumbnail filmstrip — lightweight video thumbnails */}
       {mediaCount > 5 && (
         <div className="hidden sm:flex gap-1.5 mt-3 overflow-x-auto pb-1 scrollbar-thin">
           {displayMedia.map((media, i) => (
@@ -403,8 +411,16 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
               }`}
             >
               {media.type === 'video' ? (
-                <div className="relative w-full h-full bg-ink-200">
-                  <div className="absolute inset-0 flex items-center justify-center bg-ink-300">
+                <div className="relative w-full h-full">
+                  <video
+                    src={getCdnUrl(media.url)}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                     <PlayIcon className="h-4 w-4 text-white" />
                   </div>
                 </div>
@@ -527,7 +543,7 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
             )}
           </div>
 
-          {/* Bottom thumbnail strip — static placeholders for videos instead of loading video elements */}
+          {/* Bottom thumbnail strip */}
           {mediaCount > 1 && (
             <div className="flex justify-center gap-1.5 px-4 py-3 overflow-x-auto">
               {displayMedia.map((media, i) => (
@@ -541,8 +557,16 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
                   }`}
                 >
                   {media.type === 'video' ? (
-                    <div className="relative w-full h-full bg-ink-700">
-                      <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative w-full h-full">
+                      <video
+                        src={getCdnUrl(media.url)}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                        onLoadedMetadata={(e) => { e.currentTarget.currentTime = 1; }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <PlayIcon className="h-3 w-3 text-white" />
                       </div>
                     </div>

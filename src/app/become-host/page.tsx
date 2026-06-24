@@ -112,7 +112,7 @@ export default function ListYourPlacePage() {
   function canAdvance(): boolean {
     if (step === 1) return !!form.propertyType && form.stayCategories.length > 0;
     if (step === 2) return !!form.region && !!form.district;
-    if (step === 3) return !!form.title && !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
+    if (step === 3) return !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
     return true;
   }
 

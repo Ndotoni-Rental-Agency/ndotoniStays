@@ -8,6 +8,7 @@ import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
+import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 
 interface ShortTermProperty {
   propertyId: string;
@@ -17,6 +18,7 @@ interface ShortTermProperty {
   description: string;
   propertyType: string;
   address: { street: string; city: string; region: string; district: string; country: string } | null;
+  coordinates: { latitude: number; longitude: number } | null;
   region: string;
   district: string;
   images: string[];
@@ -129,6 +131,11 @@ export default function PropertyDetailPage() {
           <PropertyReviews
             propertyId={property.propertyId}
             ratingSummary={property.ratingSummary}
+          />
+          <PropertyLocationMap
+            lat={property.coordinates?.latitude || 0}
+            lng={property.coordinates?.longitude || 0}
+            title={property.title}
           />
         </div>
 

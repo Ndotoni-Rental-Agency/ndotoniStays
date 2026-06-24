@@ -53,7 +53,7 @@ export default function LeafletMapView({ lat, lng, radius = 600 }: Props) {
     Promise.all([import('leaflet'), import('react-leaflet')]).then(([leaflet, reactLeaflet]) => {
       if (cancelled) return;
       const L = leaflet;
-      delete (L.Icon.Default.prototype as Record<string, unknown>)._getIconUrl;
+      delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
       setMapModules({
         MapContainer: reactLeaflet.MapContainer,
         TileLayer: reactLeaflet.TileLayer,

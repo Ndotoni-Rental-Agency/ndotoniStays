@@ -15,6 +15,9 @@ export interface GenerateTitleInput {
   district: string;
   region: string;
   maxGuests?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  stayCategories?: string[];
   currency?: string;
   nightlyRate?: string;
   userContext?: string;

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { getWards } from '@/graphql/queries';
 import LocationMapPicker from '@/components/location/LocationMapPicker';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
@@ -13,10 +15,18 @@ function toTitleCase(str: string): string {
     .join(' ');
 }
 
+interface Ward {
+  id: string;
+  name: string;
+}
+
 export function StepLocation({ form, setForm }: StepProps) {
   const { t } = useLanguage();
   const [locations, setLocations] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [loadingWards, setLoadingWards] = useState(false);
+  const [wardSearchMode, setWardSearchMode] = useState<'select' | 'custom'>('select');
 
   useEffect(() => {
     fetchLocations()
@@ -24,6 +34,31 @@ export function StepLocation({ form, setForm }: StepProps) {
       .catch((err) => console.error('Failed to load locations:', err))
       .finally(() => setLoading(false));
   }, []);
+
+  // Fetch wards when district changes
+  useEffect(() => {
+    if (!form.district) {
+      setWards([]);
+      return;
+    }
+
+    setLoadingWards(true);
+    // The districtId in the GraphQL is typically the district name slugified
+    const districtId = form.district.toLowerCase().replace(/\s+/g, '-');
+    GraphQLClient.executePublic<{ getWards: Ward[] }>(getWards, { districtId })
+      .then((data) => {
+        const fetched = data.getWards || [];
+        setWards(fetched.sort((a, b) => a.name.localeCompare(b.name)));
+        // If no wards found, switch to custom input
+        if (fetched.length === 0) setWardSearchMode('custom');
+        else setWardSearchMode('select');
+      })
+      .catch(() => {
+        setWards([]);
+        setWardSearchMode('custom');
+      })
+      .finally(() => setLoadingWards(false));
+  }, [form.district]);
 
   const regions = useMemo(() => {
     if (!locations) return [];
@@ -36,11 +71,15 @@ export function StepLocation({ form, setForm }: StepProps) {
   }, [locations, form.region]);
 
   function handleRegionChange(region: string) {
-    setForm((prev) => ({ ...prev, region, district: '', ward: '', street: '' }));
+    setForm((prev) => ({ ...prev, region, district: '', ward: '', street: '', lat: 0, lng: 0 }));
   }
 
   function handleDistrictChange(district: string) {
-    setForm((prev) => ({ ...prev, district, ward: '', street: '' }));
+    setForm((prev) => ({ ...prev, district, ward: '', street: '', lat: 0, lng: 0 }));
+  }
+
+  function handleWardChange(ward: string) {
+    setForm((prev) => ({ ...prev, ward }));
   }
 
   if (loading) {
@@ -108,18 +147,48 @@ export function StepLocation({ form, setForm }: StepProps) {
             </select>
           </div>
 
-          {/* Ward */}
+          {/* Ward — dropdown from GraphQL or custom text input */}
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              {t('create.location.ward')}
-            </label>
-            <input
-              type="text"
-              value={form.ward}
-              onChange={(e) => setForm((prev) => ({ ...prev, ward: e.target.value }))}
-              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-              placeholder={t('create.location.wardPlaceholder')}
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-medium text-ink-700">
+                {t('create.location.ward')}
+              </label>
+              {wards.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setWardSearchMode(wardSearchMode === 'select' ? 'custom' : 'select')}
+                  className="text-xs text-brand-600 hover:text-brand-700"
+                >
+                  {wardSearchMode === 'select' ? t('create.location.typeManually') : t('create.location.selectFromList')}
+                </button>
+              )}
+            </div>
+
+            {loadingWards ? (
+              <div className="h-11 bg-ink-100 rounded-xl animate-pulse" />
+            ) : wardSearchMode === 'select' && wards.length > 0 ? (
+              <select
+                value={form.ward}
+                onChange={(e) => handleWardChange(e.target.value)}
+                disabled={!form.district}
+                className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-base"
+              >
+                <option value="">{t('create.location.selectWard')}</option>
+                {wards.map((w) => (
+                  <option key={w.id} value={w.name}>
+                    {toTitleCase(w.name)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={form.ward}
+                onChange={(e) => handleWardChange(e.target.value)}
+                className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
+                placeholder={t('create.location.wardPlaceholder')}
+              />
+            )}
           </div>
 
           {/* Street address */}
@@ -138,6 +207,7 @@ export function StepLocation({ form, setForm }: StepProps) {
         </div>
       </div>
 
+      {/* Map for pinning exact location */}
       {form.region && form.district && (
         <div className="border-t border-ink-100 pt-8">
           <h3 className="text-base sm:text-lg font-semibold text-ink-900 mb-1">{t('create.location.pinTitle')}</h3>
@@ -153,6 +223,11 @@ export function StepLocation({ form, setForm }: StepProps) {
               setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }))
             }
           />
+          {form.lat !== 0 && form.lng !== 0 && (
+            <p className="text-xs text-ink-400 mt-2">
+              📍 {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -12,9 +12,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { propertyType, district, region, maxGuests, currency, nightlyRate, userContext, language } = await request.json();
+    const { propertyType, district, region, maxGuests, bedrooms, bathrooms, stayCategories, currency, nightlyRate, userContext, language } = await request.json();
 
     const contextLine = userContext ? `\nAdditional context from the host: "${userContext}"\nUse this to make the title more specific and relevant.\n` : '';
+
+    const categoryLine = stayCategories?.length
+      ? `- Categories: ${stayCategories.join(', ')}`
+      : '';
 
     const languageInstruction = language === 'sw'
       ? `\nIMPORTANT: Write the title in SWAHILI (Kiswahili). Use natural Swahili that Tanzanian travelers would find appealing. You may mix in common English words that are widely used in Tanzania (e.g., "Beach", "Pool", "View") if they sound natural.\n`
@@ -27,6 +31,9 @@ Property details:
 - Type: ${propertyType || 'Hotel'}
 - Location: ${district || region || 'Dar es Salaam'}
 - Max guests: ${maxGuests || 2}
+- Bedrooms: ${bedrooms || 1}
+- Bathrooms: ${bathrooms || 1}
+${categoryLine}
 ${nightlyRate ? `- Nightly rate: ${currency || 'TZS'} ${nightlyRate}` : ''}
 ${contextLine}
 TITLE WRITING RULES:

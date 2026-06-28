@@ -194,6 +194,7 @@ export enum PropertyStatus {
   AVAILABLE = "AVAILABLE",
   DELETED = "DELETED",
   DRAFT = "DRAFT",
+  INACTIVE = "INACTIVE",
   MAINTENANCE = "MAINTENANCE",
   RENTED = "RENTED",
 }

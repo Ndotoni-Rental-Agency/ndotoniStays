@@ -1815,6 +1815,7 @@ export type PropertyStatus =
   | 'AVAILABLE'
   | 'DELETED'
   | 'DRAFT'
+  | 'INACTIVE'
   | 'MAINTENANCE'
   | 'RENTED';
 

@@ -8,7 +8,7 @@ interface Props {
     propertyType: string;
     region: string;
     district: string;
-    host: { firstName: string; lastName: string } | null;
+    host: { firstName: string; lastName: string; profileImage?: string | null } | null;
     amenities: string[];
     maxGuests: number | null;
     bedrooms?: number | null;
@@ -75,9 +75,17 @@ export function PropertyInfo({ property }: Props) {
 
       {/* Hosted by */}
       <div className="flex items-center gap-3 p-4 bg-ink-50 rounded-xl">
-        <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-semibold">
-          {hostName.charAt(0)}
-        </div>
+        {property.host?.profileImage ? (
+          <img
+            src={property.host.profileImage}
+            alt={hostName}
+            className="h-10 w-10 rounded-full object-cover"
+          />
+        ) : (
+          <div className="h-10 w-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-semibold">
+            {hostName.charAt(0)}
+          </div>
+        )}
         <div>
           <p className="text-sm font-medium text-ink-900">Hosted by {hostName}</p>
           {property.instantBookEnabled && (

@@ -13,7 +13,7 @@ import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 interface ShortTermProperty {
   propertyId: string;
   hostId: string;
-  host: { userId: string; firstName: string; lastName: string; profileImage: string; phoneNumber: string } | null;
+  host: { userId: string; firstName: string; lastName: string; profileImage: string | null; phoneNumber: string } | null;
   title: string;
   description: string;
   propertyType: string;
@@ -71,6 +71,7 @@ export default function PropertyDetailPage() {
         getShortTermProperty,
         { propertyId: id }
       );
+      console.log('[PropertyDetail] host data:', data.getShortTermProperty?.host ?? '⚠️ host is null');
       setProperty(data.getShortTermProperty);
     } catch (err) {
       console.error('Error fetching property:', err);

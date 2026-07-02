@@ -142,6 +142,7 @@ export type PropertyUser = {
   __typename: "PropertyUser",
   firstName: string,
   lastName: string,
+  profileImage?: string | null,
   whatsappNumber?: string | null,
 };
 

@@ -32,9 +32,17 @@ interface Props {
   };
 }
 
+function capitalize(name: string): string {
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export function PropertyInfo({ property }: Props) {
   const hostName = property.host
-    ? `${property.host.firstName} ${property.host.lastName}`
+    ? capitalize(`${property.host.firstName} ${property.host.lastName}`)
     : 'Host';
 
   return (

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth, UserProfile } from '@/contexts/AuthContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
 import { UpdateUserInput } from '@/API';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { PhoneInput } from '@/components/ui/PhoneInput';
-import { UserCircleIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { GraphQLClient } from '@/lib/graphql-client';
+import { getMediaUploadUrl } from '@/graphql/mutations';
+import { UserCircleIcon, PencilIcon, CheckIcon, XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 
 interface ProfileFormData {
   firstName: string;
@@ -231,11 +233,22 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="bg-white rounded-2xl border border-ink-100 p-6 mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xl font-semibold">
-                {(user?.firstName ?? '?').charAt(0)}{(user?.lastName ?? '').charAt(0)}
-              </span>
-            </div>
+            <ProfileImageUpload
+              profileImage={user?.profileImage}
+              firstName={user?.firstName}
+              lastName={user?.lastName}
+              onImageUploaded={async (url) => {
+                try {
+                  const result = await updateProfile({ profileImage: url });
+                  if (result.success) {
+                    showSuccess('Profile photo updated');
+                    await refreshUser();
+                  }
+                } catch (err) {
+                  showError(err instanceof Error ? err.message : 'Failed to update photo');
+                }
+              }}
+            />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-ink-900 truncate">
                 {user?.firstName} {user?.lastName}
@@ -589,6 +602,104 @@ function FieldGroup({
     <div className={className}>
       <label className="block text-sm font-medium text-ink-600 mb-1.5">{label}</label>
       {children}
+    </div>
+  );
+}
+
+function ProfileImageUpload({
+  profileImage,
+  firstName,
+  lastName,
+  onImageUploaded,
+}: {
+  profileImage?: string;
+  firstName?: string;
+  lastName?: string;
+  onImageUploaded: (url: string) => Promise<void>;
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const initials = `${(firstName ?? '?').charAt(0)}${(lastName ?? '').charAt(0)}`;
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return; // 5MB max
+    }
+
+    try {
+      setUploading(true);
+
+      // Get presigned upload URL
+      const data = await GraphQLClient.executeAuthenticated<{
+        getMediaUploadUrl: { uploadUrl: string; fileUrl: string };
+      }>(getMediaUploadUrl, {
+        fileName: `profile-${Date.now()}.${file.name.split('.').pop()}`,
+        contentType: file.type,
+      });
+
+      const { uploadUrl, fileUrl } = data.getMediaUploadUrl;
+
+      // Upload to S3
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      // Update profile with the new image URL
+      await onImageUploaded(fileUrl);
+    } catch (err) {
+      console.error('Profile image upload error:', err);
+    } finally {
+      setUploading(false);
+      // Reset input so same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  return (
+    <div className="relative flex-shrink-0">
+      {profileImage ? (
+        <img
+          src={profileImage}
+          alt="Profile"
+          className="w-16 h-16 rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-16 h-16 bg-brand-600 rounded-full flex items-center justify-center">
+          <span className="text-white text-xl font-semibold">{initials}</span>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="absolute -bottom-1 -right-1 w-7 h-7 bg-white border border-ink-200 rounded-full flex items-center justify-center shadow-sm hover:bg-ink-50 transition-colors disabled:opacity-50"
+        title="Change profile photo"
+      >
+        {uploading ? (
+          <div className="w-3.5 h-3.5 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <CameraIcon className="w-3.5 h-3.5 text-ink-600" />
+        )}
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
     </div>
   );
 }

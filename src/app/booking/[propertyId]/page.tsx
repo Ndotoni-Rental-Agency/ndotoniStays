@@ -11,6 +11,7 @@ import { formatPrice, calculateNights, getCdnUrl } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { BoltIcon, SparklesIcon } from '@heroicons/react/24/solid';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
 
@@ -48,7 +49,6 @@ export default function BookingPage() {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authChoice, setAuthChoice] = useState<'none' | 'guest' | 'signin'>('none');
-  const [countryCode, setCountryCode] = useState('255'); // Default Tanzania
 
   // Pre-fill from user if authenticated
   useEffect(() => {
@@ -135,14 +135,7 @@ export default function BookingPage() {
   const payNowAmount = paymentOption === 'full' ? total : depositAmount;
   const balanceDue = paymentOption === 'deposit' ? total - depositAmount : 0;
 
-  // Phone number formatting — international support
-  function handleGuestPhoneInput(value: string) {
-    // Strip non-digits, limit to 15 chars
-    const cleaned = value.replace(/\D/g, '').slice(0, 12);
-    setGuestPhone(cleaned);
-  }
-
-  const fullGuestPhone = guestPhone ? `${countryCode}${guestPhone.replace(/^0+/, '')}` : '';
+  const fullGuestPhone = guestPhone ? guestPhone.replace(/[^0-9]/g, '') : '';
   const isValidGuestPhone = fullGuestPhone.length >= 10 && fullGuestPhone.length <= 15;
 
   // ═══════════════════════════════════════════════
@@ -583,35 +576,11 @@ export default function BookingPage() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-ink-500 mb-1">Phone number / WhatsApp <span className="text-ink-400 font-normal">(optional)</span></label>
-                <div className="flex gap-2">
-                  <select
-                    value={countryCode}
-                    onChange={(e) => setCountryCode(e.target.value)}
-                    className="input w-24 text-sm"
-                  >
-                    <option value="255">🇹🇿 +255</option>
-                    <option value="254">🇰🇪 +254</option>
-                    <option value="256">🇺🇬 +256</option>
-                    <option value="250">🇷🇼 +250</option>
-                    <option value="243">🇨🇩 +243</option>
-                    <option value="258">🇲🇿 +258</option>
-                    <option value="265">🇲🇼 +265</option>
-                    <option value="260">🇿🇲 +260</option>
-                    <option value="27">🇿🇦 +27</option>
-                    <option value="234">🇳🇬 +234</option>
-                    <option value="44">🇬🇧 +44</option>
-                    <option value="1">🇺🇸 +1</option>
-                    <option value="971">🇦🇪 +971</option>
-                    <option value="91">🇮🇳 +91</option>
-                  </select>
-                  <input
-                    type="tel"
-                    value={guestPhone}
-                    onChange={(e) => handleGuestPhoneInput(e.target.value)}
-                    placeholder="712 345 678"
-                    className="input flex-1"
-                  />
-                </div>
+                <PhoneInput
+                  value={guestPhone}
+                  onChange={setGuestPhone}
+                  placeholder="712 345 678"
+                />
                 {guestPhone && !isValidGuestPhone && (
                   <p className="text-xs text-red-500 mt-1">Enter a valid phone number</p>
                 )}

@@ -250,8 +250,8 @@ export const adminUpdatePropertyStatus = /* GraphQL */ `mutation AdminUpdateProp
   APITypes.AdminUpdatePropertyStatusMutationVariables,
   APITypes.AdminUpdatePropertyStatusMutation
 >;
-export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId: ID!, $hostNotes: String) {
-  approveBooking(bookingId: $bookingId, hostNotes: $hostNotes) {
+export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId: ID!, $hostNotes: String, $token: String) {
+  approveBooking(bookingId: $bookingId, hostNotes: $hostNotes, token: $token) {
     bookingId
     bookingType
     cancellationReason
@@ -1063,8 +1063,8 @@ export const deactivateShortTermProperty = /* GraphQL */ `mutation DeactivateSho
   APITypes.DeactivateShortTermPropertyMutationVariables,
   APITypes.DeactivateShortTermPropertyMutation
 >;
-export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId: ID!, $reason: String!) {
-  declineBooking(bookingId: $bookingId, reason: $reason) {
+export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId: ID!, $reason: String!, $token: String) {
+  declineBooking(bookingId: $bookingId, reason: $reason, token: $token) {
     bookingId
     bookingType
     cancellationReason

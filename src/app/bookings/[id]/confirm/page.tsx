@@ -5,18 +5,15 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getBooking } from '@/graphql/queries';
 import { approveBooking, declineBooking } from '@/graphql/mutations';
-import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights } from '@/lib/utils';
-import { CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { AuthModal } from '@/components/auth/AuthModal';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
-type PageState = 'loading' | 'review' | 'confirming' | 'confirmed' | 'declined' | 'error' | 'auth_required';
+type PageState = 'loading' | 'review' | 'confirming' | 'confirmed' | 'declined' | 'error';
 
 export default function ConfirmBookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const bookingId = params?.id as string;
   const token = searchParams?.get('token') || '';
@@ -24,19 +21,13 @@ export default function ConfirmBookingPage() {
   const [state, setState] = useState<PageState>('loading');
   const [booking, setBooking] = useState<any>(null);
   const [error, setError] = useState('');
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Fetch booking details
+  // Fetch booking details (public — no auth required)
   useEffect(() => {
     if (!bookingId) return;
     async function fetchBooking() {
       try {
-        // Try authenticated first, fall back to public
-        const executeGql = isAuthenticated
-          ? GraphQLClient.executeAuthenticated.bind(GraphQLClient)
-          : GraphQLClient.executePublic.bind(GraphQLClient);
-
-        const data = await executeGql<{ getBooking: any }>(getBooking, { bookingId });
+        const data = await GraphQLClient.executePublic<{ getBooking: any }>(getBooking, { bookingId });
         const b = data.getBooking;
 
         if (!b) {
@@ -55,32 +46,26 @@ export default function ConfirmBookingPage() {
           setState('review');
         }
       } catch (err: any) {
-        // If unauthorized, prompt sign in
-        if (err?.message?.includes('Unauthorized') || err?.message?.includes('Authentication')) {
-          setState('auth_required');
-        } else {
-          setError(err?.errors?.[0]?.message || err?.message || 'Failed to load booking');
-          setState('error');
-        }
+        setError(err?.errors?.[0]?.message || err?.message || 'Failed to load booking');
+        setState('error');
       }
     }
 
-    if (!authLoading) {
-      fetchBooking();
-    }
-  }, [bookingId, isAuthenticated, authLoading]);
+    fetchBooking();
+  }, [bookingId]);
 
   async function handleConfirm() {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
+    if (!token) {
+      setError('Missing action token. Please use the link from your notification.');
       return;
     }
 
     setState('confirming');
     try {
-      await GraphQLClient.executeAuthenticated(approveBooking, {
+      await GraphQLClient.executePublic(approveBooking, {
         bookingId,
         hostNotes: '',
+        token,
       });
       setState('confirmed');
     } catch (err: any) {
@@ -90,16 +75,17 @@ export default function ConfirmBookingPage() {
   }
 
   async function handleDecline() {
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
+    if (!token) {
+      setError('Missing action token. Please use the link from your notification.');
       return;
     }
 
     setState('confirming');
     try {
-      await GraphQLClient.executeAuthenticated(declineBooking, {
+      await GraphQLClient.executePublic(declineBooking, {
         bookingId,
         reason: 'Dates not available',
+        token,
       });
       setState('declined');
     } catch (err: any) {
@@ -108,35 +94,12 @@ export default function ConfirmBookingPage() {
     }
   }
 
-  function handleAuthSuccess() {
-    setShowAuthModal(false);
-    // Reload page to retry with auth
-    window.location.reload();
-  }
-
   // Loading
-  if (state === 'loading' || authLoading) {
+  if (state === 'loading') {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 animate-pulse">
         <div className="h-8 w-56 bg-ink-100 rounded mb-4" />
         <div className="h-48 bg-ink-100 rounded-2xl" />
-      </div>
-    );
-  }
-
-  // Auth required
-  if (state === 'auth_required') {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <ClockIcon className="h-12 w-12 text-ink-400 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-ink-900 mb-2">Sign in required</h1>
-        <p className="text-ink-500 text-sm mb-6">
-          Please sign in as the property host to confirm or decline this booking.
-        </p>
-        <button onClick={() => setShowAuthModal(true)} className="btn-primary">
-          Sign In
-        </button>
-        <AuthModal isOpen={showAuthModal} onClose={handleAuthSuccess} />
       </div>
     );
   }
@@ -255,8 +218,6 @@ export default function ConfirmBookingPage() {
           {state === 'confirming' ? 'Processing...' : 'Confirm'}
         </button>
       </div>
-
-      <AuthModal isOpen={showAuthModal} onClose={handleAuthSuccess} />
     </div>
   );
 }

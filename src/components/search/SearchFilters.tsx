@@ -33,7 +33,9 @@ interface Props {
 
 export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, maxPrice, bedrooms }: Props) {
   const router = useRouter();
-  const [localRegion, setLocalRegion] = useState(region);
+  // Match region case-insensitively against known REGIONS list
+  const matchedRegion = REGIONS.find((r) => r.toLowerCase() === region.toLowerCase()) || region;
+  const [localRegion, setLocalRegion] = useState(matchedRegion);
   const [localCheckIn, setLocalCheckIn] = useState(checkIn);
   const [localCheckOut, setLocalCheckOut] = useState(checkOut);
   const [localGuests, setLocalGuests] = useState(guests);

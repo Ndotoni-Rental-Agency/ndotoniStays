@@ -114,7 +114,9 @@ export function SearchContent() {
     }
   }
 
-  const displayRegion = regionParam || 'Tanzania';
+  const displayRegion = regionParam
+    ? regionParam.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+    : 'Tanzania';
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">

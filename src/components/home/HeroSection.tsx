@@ -141,11 +141,14 @@ export function HeroSection() {
                     type="text"
                     value={searchQuery}
                     onFocus={() => setShowLocationDropdown(true)}
-                    placeholder="Where?"
-                    className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer hover:bg-ink-100 transition-colors"
+                    placeholder={t('hero.search.where')}
+                    className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 pt-5 pb-2 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer hover:bg-ink-100 transition-colors"
                     aria-label="Location"
                     readOnly
                   />
+                  <span className="absolute left-10 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+                    {t('hero.search.locationLabel')}
+                  </span>
                 </div>
 
                 {/* Location search modal */}
@@ -205,7 +208,8 @@ export function HeroSection() {
                   if (checkOut && val >= checkOut) setCheckOut('');
                 }}
                 min={minCheckIn}
-                placeholder="Check-in"
+                label={t('hero.search.checkInLabel')}
+                placeholder={t('hero.search.checkIn')}
                 rangeStart={checkIn}
                 rangeEnd={checkOut}
               />
@@ -216,7 +220,8 @@ export function HeroSection() {
                 onChange={setCheckOut}
                 minExclusive={checkIn || undefined}
                 min={minCheckIn}
-                placeholder="Check-out"
+                label={t('hero.search.checkOutLabel')}
+                placeholder={t('hero.search.checkOut')}
                 rangeStart={checkIn}
                 rangeEnd={checkOut}
               />
@@ -227,7 +232,7 @@ export function HeroSection() {
                 <select
                   value={guests}
                   onChange={(e) => setGuests(Number(e.target.value))}
-                  className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 py-3.5 text-sm text-ink-900 font-medium focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer"
+                  className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 pt-5 pb-2 text-sm text-ink-900 font-medium focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer"
                   aria-label="Number of guests"
                 >
                   {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
@@ -236,6 +241,9 @@ export function HeroSection() {
                     </option>
                   ))}
                 </select>
+                <span className="absolute left-10 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+                  {t('hero.search.guestsLabel')}
+                </span>
               </div>
 
               {/* Search Button */}

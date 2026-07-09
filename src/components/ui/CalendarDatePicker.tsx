@@ -135,23 +135,25 @@ export default function CalendarDatePicker({
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
-      {label && (
-        <label className="block text-xs font-medium text-ink-500 mb-1">{label}</label>
-      )}
-
       {/* Trigger button */}
       <button
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          'w-full px-4 py-3 border border-ink-200 rounded-xl bg-white',
+          'w-full px-4 border border-ink-200 rounded-xl bg-white relative',
           'hover:border-brand-500 transition-all',
           'flex items-center justify-between text-sm',
           disabled && 'opacity-50 cursor-not-allowed',
+          label ? 'pt-5 pb-2' : 'py-3',
           value ? 'text-ink-900' : 'text-ink-400'
         )}
       >
+        {label && (
+          <span className="absolute left-4 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+            {label}
+          </span>
+        )}
         <span>{formatDisplayDate(value)}</span>
         <svg className="w-5 h-5 text-ink-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

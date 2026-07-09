@@ -40,12 +40,21 @@ export function Header() {
             <div className="hidden md:flex items-center gap-5">
               <LanguageToggle />
 
-              <Link
-                href="/become-host"
-                className="text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
-              >
-                {t('nav.becomeHost')}
-              </Link>
+              {isAuthenticated && (user?.userType === 'LANDLORD' || user?.hasProperties) ? (
+                <Link
+                  href="/host"
+                  className="text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
+                >
+                  {t('nav.myProperties')}
+                </Link>
+              ) : (
+                <Link
+                  href="/become-host"
+                  className="text-sm font-medium text-ink-600 hover:text-ink-900 transition-colors"
+                >
+                  {t('nav.becomeHost')}
+                </Link>
+              )}
 
               {isAuthenticated ? (
                 <div className="relative">
@@ -73,6 +82,11 @@ export function Header() {
                         <Link href="/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           {t('nav.myBookings')}
                         </Link>
+                        {(user?.userType === 'LANDLORD' || user?.hasProperties) && (
+                          <Link href="/host/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
+                            {t('nav.hostBookings')}
+                          </Link>
+                        )}
                         <Link href="/host" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           {t('nav.myProperties')}
                         </Link>
@@ -116,13 +130,23 @@ export function Header() {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-ink-100">
               <div className="flex flex-col gap-2">
-                <Link
-                  href="/become-host"
-                  className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('nav.becomeHost')}
-                </Link>
+                {isAuthenticated && (user?.userType === 'LANDLORD' || user?.hasProperties) ? (
+                  <Link
+                    href="/host"
+                    className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('nav.myProperties')}
+                  </Link>
+                ) : (
+                  <Link
+                    href="/become-host"
+                    className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('nav.becomeHost')}
+                  </Link>
+                )}
 
                 <div className="px-3 py-2.5">
                   <LanguageToggle />
@@ -143,13 +167,6 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t('nav.myBookings')}
-                    </Link>
-                    <Link
-                      href="/host"
-                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {t('nav.myProperties')}
                     </Link>
                     <button
                       onClick={() => { signOut(); setMobileMenuOpen(false); }}

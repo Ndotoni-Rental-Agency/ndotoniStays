@@ -29,7 +29,7 @@ const STEPS = [
 ];
 
 export default function ListYourPlacePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, refreshUser } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -175,6 +175,8 @@ export default function ListYourPlacePage() {
 
       const propertyId = data.createShortTermPropertyDraft?.propertyId;
       if (propertyId) {
+        // Refresh user profile to pick up role/hasProperties changes
+        await refreshUser();
         setCreatedPropertyId(propertyId);
         setShowSuccess(true);
         setTimeout(() => {

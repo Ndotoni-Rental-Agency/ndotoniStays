@@ -13,6 +13,7 @@ export interface UserProfile {
   phoneNumber?: string;
   profileImage?: string;
   userType?: string;
+  hasProperties?: boolean;
   whatsappNumber?: string;
   dateOfBirth?: string;
   gender?: string;

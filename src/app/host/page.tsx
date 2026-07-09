@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyShortTermProperties } from '@/graphql/queries';
-import { deactivateShortTermProperty } from '@/graphql/mutations';
+import { deactivateShortTermProperty, updateUser } from '@/graphql/mutations';
+import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   PlusIcon,
@@ -40,6 +41,7 @@ const STATUS_BADGES: Record<string, { labelKey: string; classes: string }> = {
 };
 
 export default function HostPropertiesPage() {
+  const { user, refreshUser } = useAuth();
   const { t } = useLanguage();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +57,18 @@ export default function HostPropertiesPage() {
       const data = await GraphQLClient.executeAuthenticated<{
         listMyShortTermProperties: { properties: Property[] };
       }>(listMyShortTermProperties, { limit: 50 });
-      setProperties(data.listMyShortTermProperties?.properties || []);
+      const fetched = data.listMyShortTermProperties?.properties || [];
+      setProperties(fetched);
+
+      // Self-heal: if user has properties but hasProperties flag is not set, update it
+      if (fetched.length > 0 && !user?.hasProperties) {
+        try {
+          await GraphQLClient.executeAuthenticated(updateUser, { input: { hasProperties: true } });
+          await refreshUser();
+        } catch (err) {
+          console.warn('Failed to sync hasProperties flag:', err);
+        }
+      }
     } catch (err) {
       console.error('Failed to load properties:', err);
     } finally {

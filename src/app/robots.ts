@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/host/', '/profile/', '/edit/', '/bookings/', '/pay/'],
       },
     ],
-    sitemap: 'https://ndotonistays.com/sitemap.xml',
+    sitemap: 'https://www.ndotonistays.com/sitemap.xml',
   };
 }

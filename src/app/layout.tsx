@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ndotonistays.com'),
+  metadataBase: new URL('https://www.ndotonistays.com'),
   title: 'ndotoni Stays – Short-Term Rentals in Tanzania',
   description:
     'Book nightly stays, party venues, photoshoot locations, and event spaces across Tanzania. Instant booking, flexible cancellation.',

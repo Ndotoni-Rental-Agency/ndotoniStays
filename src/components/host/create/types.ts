@@ -6,6 +6,7 @@ export interface CreatePropertyFormData {
   district: string;
   ward: string;
   street: string;
+  googleMapsLink: string;
   nightlyRate: string;
   currency: string;
   maxGuests: string;

@@ -204,6 +204,26 @@ export function StepLocation({ form, setForm }: StepProps) {
               placeholder={t('create.location.streetPlaceholder')}
             />
           </div>
+
+          {/* Google Maps link */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-medium text-ink-700">
+                Google Maps link
+              </label>
+              <span className="text-xs text-ink-400">optional</span>
+            </div>
+            <input
+              type="url"
+              value={form.googleMapsLink}
+              onChange={(e) => setForm((prev) => ({ ...prev, googleMapsLink: e.target.value }))}
+              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
+              placeholder="e.g. https://maps.app.goo.gl/..."
+            />
+            <p className="text-xs text-ink-400 mt-1">
+              Paste a Google Maps link to pinpoint your property&apos;s exact location.
+            </p>
+          </div>
         </div>
       </div>
 

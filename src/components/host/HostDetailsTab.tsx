@@ -1,10 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
 import { PropertyFormData } from './types';
 import { AIService } from '@/lib/ai/AIService';
+
+async function reverseGeocodeFromUrl(url: string): Promise<{ region?: string; district?: string } | null> {
+  if (!url || !url.startsWith('http')) return null;
+  try {
+    const response = await fetch(url, { method: 'GET', redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const finalUrl = response.url;
+
+    // Try to get place name from q= param and geocode it
+    const placeMatch = finalUrl?.match(/[?&]q=([^&]+)/);
+    let lat: number | null = null;
+    let lng: number | null = null;
+
+    // Check for @lat,lng in URL
+    const atMatch = finalUrl?.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (atMatch) { lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]); }
+
+    // If no coords in URL but has a place name, geocode it
+    if ((lat === null || lat < -90 || lat > 90) && placeMatch) {
+      const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+      if (!/^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(placeName)) {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}&limit=1`);
+        const geoData = await geoRes.json();
+        if (geoData?.[0]) { lat = parseFloat(geoData[0].lat); lng = parseFloat(geoData[0].lon); }
+      }
+    }
+
+    if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+    // Reverse geocode
+    const revRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=16`);
+    const revData = await revRes.json();
+    const address = revData?.address;
+    if (!address) return null;
+
+    const clean = (s: string) => s.replace(/\s*(region|city|municipal|district|urban|rural)$/i, '').toLowerCase().trim();
+    const rawRegion = address.state || '';
+    const rawDistrict = address.state_district || address.city_district || address.county || address.city || '';
+
+    return { region: clean(rawRegion) || undefined, district: clean(rawDistrict) || undefined };
+  } catch { return null; }
+}
 
 interface Props {
   form: PropertyFormData;
@@ -21,6 +62,22 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [priceSuggestion, setPriceSuggestion] = useState<{ suggestedPrice: number; currency: string; reasoning: string; range: { min: number; max: number } } | null>(null);
   const [priceContext, setPriceContext] = useState('');
+  const lastResolvedUrl = useRef(form.googleMapsUrl || '');
+
+  // Auto-resolve Google Maps link to fill region/district
+  useEffect(() => {
+    const link = form.googleMapsUrl?.trim();
+    if (!link || !link.startsWith('http') || link === lastResolvedUrl.current) return;
+
+    const timer = setTimeout(() => {
+      lastResolvedUrl.current = link;
+      reverseGeocodeFromUrl(link).then((result) => {
+        if (result?.region) onUpdate('region', result.region);
+        if (result?.district) onUpdate('district', result.district);
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [form.googleMapsUrl]);
 
   // Custom amenities are any in form.amenities that aren't in the preset list
   const customAmenities = form.amenities.filter((a) => !AMENITIES.includes(a));
@@ -211,6 +268,26 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
       {/* Location */}
       <section>
         <h2 className="text-base sm:text-lg font-semibold text-ink-900 mb-3 sm:mb-4">Location</h2>
+
+        {/* Google Maps link — primary */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-ink-700 mb-1.5">Google Maps link</label>
+          <input
+            type="url"
+            value={form.googleMapsUrl}
+            onChange={(e) => onUpdate('googleMapsUrl', e.target.value)}
+            placeholder="e.g. https://maps.app.goo.gl/..."
+            className="input text-base"
+          />
+          <p className="text-xs text-ink-400 mt-1">Paste to auto-fill region and district</p>
+        </div>
+
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-ink-100" />
+          <span className="text-xs text-ink-400">or select manually</span>
+          <div className="h-px flex-1 bg-ink-100" />
+        </div>
+
         <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Region</label>

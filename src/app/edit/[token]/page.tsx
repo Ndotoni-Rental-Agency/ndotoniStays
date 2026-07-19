@@ -6,7 +6,8 @@ import { HostDetailsTab } from '@/components/host/HostDetailsTab';
 import { HostSettingsTab } from '@/components/host/HostSettingsTab';
 import { HostCheckInTab } from '@/components/host/HostCheckInTab';
 import { MediaGrid } from '@/components/media/MediaGrid';
-import { PropertyFormData, PropertyData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { ShortTermProperty } from '@/API';
 import {
   HomeModernIcon,
   PhotoIcon,
@@ -32,8 +33,8 @@ export default function TokenEditPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [properties, setProperties] = useState<PropertyData[]>([]);
-  const [editingProperty, setEditingProperty] = useState<PropertyData | null>(null);
+  const [properties, setProperties] = useState<ShortTermProperty[]>([]);
+  const [editingProperty, setEditingProperty] = useState<ShortTermProperty | null>(null);
   const [expiresAt, setExpiresAt] = useState<number>(0);
 
   useEffect(() => {
@@ -140,7 +141,7 @@ function PropertyEditorFull({
   expiryText,
   onBack,
 }: {
-  property: PropertyData;
+  property: ShortTermProperty;
   token: string;
   expiryText: string;
   onBack?: () => void;
@@ -160,6 +161,7 @@ function PropertyEditorFull({
     district: property.district || property.address?.district || '',
     street: property.address?.street || '',
     city: property.address?.city || '',
+    googleMapsUrl: property.googleMapsUrl || '',
     nightlyRate: property.nightlyRate?.toString() || '',
     currency: property.currency || 'TZS',
     cleaningFee: property.cleaningFee?.toString() || '',

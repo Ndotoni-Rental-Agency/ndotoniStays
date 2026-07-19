@@ -21,7 +21,8 @@ import { HostPhotos } from '@/components/host/HostPhotos';
 import { HostDetailsTab } from '@/components/host/HostDetailsTab';
 import { HostSettingsTab } from '@/components/host/HostSettingsTab';
 import { HostCheckInTab } from '@/components/host/HostCheckInTab';
-import { PropertyFormData, PropertyData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { ShortTermProperty } from '@/API';
 import toast from 'react-hot-toast';
 
 type Tab = 'details' | 'photos' | 'calendar' | 'checkin' | 'settings';
@@ -68,6 +69,7 @@ export default function EditPropertyPage() {
     district: '',
     street: '',
     city: '',
+    googleMapsUrl: '',
     nightlyRate: '',
     currency: 'TZS',
     cleaningFee: '',
@@ -101,7 +103,7 @@ export default function EditPropertyPage() {
     try {
       setLoading(true);
       const data = await GraphQLClient.executeAuthenticated<{
-        getShortTermProperty: PropertyData;
+        getShortTermProperty: ShortTermProperty;
       }>(getShortTermProperty, { propertyId });
 
       const p = data.getShortTermProperty;
@@ -123,6 +125,7 @@ export default function EditPropertyPage() {
         district: p.district || p.address?.district || '',
         street: p.address?.street || '',
         city: p.address?.city || '',
+        googleMapsUrl: p.googleMapsUrl || '',
         nightlyRate: p.nightlyRate?.toString() || '',
         currency: p.currency || 'TZS',
         cleaningFee: p.cleaningFee?.toString() || '',

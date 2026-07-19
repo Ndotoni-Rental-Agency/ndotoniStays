@@ -70,6 +70,7 @@ export function HostBookings({ propertyIds }: Props) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>('ALL');
+  const [timeFilter, setTimeFilter] = useState<'upcoming' | 'past'>('upcoming');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
@@ -192,10 +193,33 @@ export function HostBookings({ propertyIds }: Props) {
   }
 
   const pendingCount = bookings.filter((b) => b.status === 'PENDING').length;
+  const today = new Date().toISOString().split('T')[0];
+  const filteredBookings = bookings.filter((b) => {
+    if (timeFilter === 'upcoming') return b.checkOutDate >= today;
+    return b.checkOutDate < today;
+  });
 
   return (
     <div className="space-y-5 pb-24 sm:pb-0">
-      {/* Filter tabs */}
+      {/* Time toggle */}
+      <div className="flex gap-2">
+        {(['upcoming', 'past'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTimeFilter(t)}
+            className={cn(
+              'px-4 py-2 rounded-full text-sm font-medium transition-colors',
+              timeFilter === t
+                ? 'bg-ink-900 text-white'
+                : 'bg-ink-100 text-ink-600 hover:bg-ink-200'
+            )}
+          >
+            {t === 'upcoming' ? 'Upcoming' : 'Past'}
+          </button>
+        ))}
+      </div>
+
+      {/* Status filter tabs */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar">
         {(['PENDING', 'CONFIRMED', 'ALL'] as StatusFilter[]).map((f) => (
           <button
@@ -232,25 +256,24 @@ export function HostBookings({ propertyIds }: Props) {
             </div>
           ))}
         </div>
-      ) : bookings.length === 0 ? (
+      ) : filteredBookings.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-ink-400 text-sm">
-            {filter === 'PENDING'
-              ? 'No pending booking requests'
-              : filter === 'CONFIRMED'
-                ? 'No confirmed bookings'
-                : 'No bookings yet'}
+            {timeFilter === 'upcoming'
+              ? (filter === 'PENDING' ? 'No pending upcoming requests' : 'No upcoming bookings')
+              : 'No past bookings'}
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {bookings.map((booking) => {
+          {filteredBookings.map((booking) => {
             const statusCfg = STATUS_CONFIG[booking.status] || STATUS_CONFIG.PENDING;
             const guestName = booking.guestName
               || (booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim() : null)
               || 'Guest';
             const guestContact = booking.guestPhone || booking.guest?.whatsappNumber || null;
             const isProcessing = actionLoading === booking.bookingId;
+            const isPast = booking.checkInDate < today;
 
             return (
               <div
@@ -296,8 +319,8 @@ export function HostBookings({ propertyIds }: Props) {
                   </p>
                 )}
 
-                {/* Actions for pending bookings */}
-                {booking.status === 'PENDING' && (
+                {/* Actions for pending bookings (only upcoming) */}
+                {booking.status === 'PENDING' && !isPast && (
                   <div className="pt-2 border-t border-ink-100">
                     {declineTarget === booking.bookingId ? (
                       <div className="space-y-2">

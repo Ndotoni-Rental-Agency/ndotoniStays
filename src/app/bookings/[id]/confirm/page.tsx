@@ -159,13 +159,14 @@ export default function ConfirmBookingPage() {
   const serviceFee = booking?.pricing?.serviceFee || 0;
   const hostPayout = subtotal + cleaningFee;
   const currency = booking?.pricing?.currency || 'TZS';
+  const propertyTitle = booking?.property?.title || booking?.propertySnapshot?.title || 'Property';
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
       <h1 className="text-2xl font-bold text-ink-900 mb-6">New Booking Request</h1>
 
       <div className="rounded-2xl border border-ink-100 p-5 mb-6">
-        <h3 className="font-semibold text-ink-900 mb-3">{booking?.property?.title || 'Property'}</h3>
+        <h3 className="font-semibold text-ink-900 mb-3">{propertyTitle}</h3>
         <div className="space-y-2 text-sm text-ink-600">
           <div className="flex justify-between">
             <span>👤 Guest</span>

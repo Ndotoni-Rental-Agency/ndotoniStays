@@ -25,6 +25,7 @@ interface ResolvedLocation {
   lng: number;
   region?: string;
   district?: string;
+  ward?: string;
 }
 
 /**
@@ -40,26 +41,33 @@ async function resolveGoogleMapsCoords(url: string): Promise<ResolvedLocation | 
     let lat: number | null = null;
     let lng: number | null = null;
 
-    // Try extracting from the final URL
+    // 1. Try extracting coordinates from the resolved URL
     const atMatch = finalUrl?.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (atMatch) {
       lat = parseFloat(atMatch[1]);
       lng = parseFloat(atMatch[2]);
     }
 
-    // Fall back to page body
+    // Also check for ?q=lat,lng
     if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      const body = await response.text();
-      const centerMatch = body.match(/center=(-?\d+\.\d+)%2C(-?\d+\.\d+)/);
-      if (centerMatch) {
-        lat = parseFloat(centerMatch[1]);
-        lng = parseFloat(centerMatch[2]);
+      const qMatch = finalUrl?.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (qMatch) {
+        lat = parseFloat(qMatch[1]);
+        lng = parseFloat(qMatch[2]);
       }
-      if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-        const bodyAtMatch = body.match(/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/);
-        if (bodyAtMatch) {
-          lat = parseFloat(bodyAtMatch[1]);
-          lng = parseFloat(bodyAtMatch[2]);
+    }
+
+    // 2. If the URL has q= with a place name (not coords), geocode it via Nominatim
+    if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      const placeMatch = finalUrl?.match(/[?&]q=([^&]+)/);
+      if (placeMatch) {
+        const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+        if (!/^-?\d+\.?\d*\s*,\s*-?\d+\.?\d*$/.test(placeName)) {
+          const geocoded = await geocodePlace(placeName);
+          if (geocoded) {
+            lat = geocoded.lat;
+            lng = geocoded.lng;
+          }
         }
       }
     }
@@ -76,22 +84,48 @@ async function resolveGoogleMapsCoords(url: string): Promise<ResolvedLocation | 
 }
 
 /**
- * Reverse geocode coordinates using Nominatim to get region and district.
+ * Geocode a place name using Nominatim.
  */
-async function reverseGeocode(lat: number, lng: number): Promise<{ region?: string; district?: string }> {
+async function geocodePlace(placeName: string): Promise<{ lat: number; lng: number } | null> {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=10`
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(placeName)}&limit=1`
+    );
+    const data = await res.json();
+    if (data?.[0]) {
+      const lat = parseFloat(data[0].lat);
+      const lng = parseFloat(data[0].lon);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+/**
+ * Reverse geocode coordinates using Nominatim to get region and district.
+ */
+async function reverseGeocode(lat: number, lng: number): Promise<{ region?: string; district?: string; ward?: string }> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=16`
     );
     const data = await res.json();
     const address = data?.address;
     if (!address) return {};
 
-    // Nominatim returns Tanzania regions as "state" and districts as "county" or "city"
-    const region = address.state?.toLowerCase();
-    const district = (address.county || address.city || address.town || address.suburb)?.toLowerCase();
+    // Tanzania structure: state = region, state_district = district, village/suburb = ward
+    const region = (address.state || '')
+      .replace(/\s*region$/i, '')
+      .toLowerCase()
+      .trim() || undefined;
+    const district = (address.state_district || address.county || address.city || '')
+      .toLowerCase()
+      .trim() || undefined;
+    const ward = (address.village || address.suburb || address.neighbourhood || '')
+      .toLowerCase()
+      .trim() || undefined;
 
-    return { region: region || undefined, district: district || undefined };
+    return { region, district, ward };
   } catch {
     return {};
   }
@@ -123,9 +157,10 @@ export function StepLocation({ form, setForm }: StepProps) {
           ...prev,
           lat: result.lat,
           lng: result.lng,
-          // Always autofill region/district from the Google Maps link
+          // Always autofill region/district/ward from the Google Maps link
           ...(result.region ? { region: result.region } : {}),
           ...(result.district ? { district: result.district } : {}),
+          ...(result.ward ? { ward: result.ward } : {}),
         }));
       }
     }).finally(() => setResolvingLink(false));

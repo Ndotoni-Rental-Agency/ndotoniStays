@@ -20,42 +20,81 @@ interface Ward {
   name: string;
 }
 
+interface ResolvedLocation {
+  lat: number;
+  lng: number;
+  region?: string;
+  district?: string;
+}
+
 /**
  * Resolve a Google Maps URL to coordinates by fetching the page and extracting from body.
+ * Then reverse-geocodes to get region/district for Tanzania.
  */
-async function resolveGoogleMapsCoords(url: string): Promise<{ lat: number; lng: number } | null> {
+async function resolveGoogleMapsCoords(url: string): Promise<ResolvedLocation | null> {
   if (!url || !url.startsWith('http')) return null;
   try {
     const response = await fetch(url, { method: 'GET', redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
     const finalUrl = response.url;
 
+    let lat: number | null = null;
+    let lng: number | null = null;
+
     // Try extracting from the final URL
     const atMatch = finalUrl?.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (atMatch) {
-      const lat = parseFloat(atMatch[1]);
-      const lng = parseFloat(atMatch[2]);
-      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+      lat = parseFloat(atMatch[1]);
+      lng = parseFloat(atMatch[2]);
     }
 
     // Fall back to page body
-    const body = await response.text();
-    const centerMatch = body.match(/center=(-?\d+\.\d+)%2C(-?\d+\.\d+)/);
-    if (centerMatch) {
-      const lat = parseFloat(centerMatch[1]);
-      const lng = parseFloat(centerMatch[2]);
-      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+    if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      const body = await response.text();
+      const centerMatch = body.match(/center=(-?\d+\.\d+)%2C(-?\d+\.\d+)/);
+      if (centerMatch) {
+        lat = parseFloat(centerMatch[1]);
+        lng = parseFloat(centerMatch[2]);
+      }
+      if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        const bodyAtMatch = body.match(/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/);
+        if (bodyAtMatch) {
+          lat = parseFloat(bodyAtMatch[1]);
+          lng = parseFloat(bodyAtMatch[2]);
+        }
+      }
     }
 
-    const bodyAtMatch = body.match(/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/);
-    if (bodyAtMatch) {
-      const lat = parseFloat(bodyAtMatch[1]);
-      const lng = parseFloat(bodyAtMatch[2]);
-      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
-    }
+    if (lat === null || lng === null || lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+
+    // Reverse geocode to get region/district
+    const location = await reverseGeocode(lat, lng);
+    return { lat, lng, ...location };
   } catch (err) {
     console.warn('[StepLocation] Failed to resolve Google Maps link:', err);
   }
   return null;
+}
+
+/**
+ * Reverse geocode coordinates using Nominatim to get region and district.
+ */
+async function reverseGeocode(lat: number, lng: number): Promise<{ region?: string; district?: string }> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=10`
+    );
+    const data = await res.json();
+    const address = data?.address;
+    if (!address) return {};
+
+    // Nominatim returns Tanzania regions as "state" and districts as "county" or "city"
+    const region = address.state?.toLowerCase();
+    const district = (address.county || address.city || address.town || address.suburb)?.toLowerCase();
+
+    return { region: region || undefined, district: district || undefined };
+  } catch {
+    return {};
+  }
 }
 
 export function StepLocation({ form, setForm }: StepProps) {
@@ -77,10 +116,17 @@ export function StepLocation({ form, setForm }: StepProps) {
     }
 
     setResolvingLink(true);
-    resolveGoogleMapsCoords(link).then((coords) => {
-      if (coords) {
-        setMapsCoords(coords);
-        setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }));
+    resolveGoogleMapsCoords(link).then((result) => {
+      if (result) {
+        setMapsCoords({ lat: result.lat, lng: result.lng });
+        setForm((prev) => ({
+          ...prev,
+          lat: result.lat,
+          lng: result.lng,
+          // Auto-fill region/district if not already set
+          ...(result.region && !prev.region ? { region: result.region } : {}),
+          ...(result.district && !prev.district ? { district: result.district } : {}),
+        }));
       }
     }).finally(() => setResolvingLink(false));
   }, [form.googleMapsLink]);

@@ -1,13 +1,3 @@
-scalar AWSDateTime
-scalar AWSDate
-scalar AWSJSON
-scalar AWSEmail
-scalar AWSPhone
-scalar AWSURL
-scalar AWSTime
-scalar AWSTimestamp
-scalar AWSIPAddress
-
 schema {
   query: Query
   mutation: Mutation
@@ -47,6 +37,13 @@ type Admin @aws_api_key @aws_cognito_user_pools {
   lastName: String
   nationalIdLast4: String
   occupation: String
+  payoutBankAccountName: String
+  payoutBankAccountNumber: String
+  payoutBankBranch: String
+  payoutBankName: String
+  payoutMethod: PayoutMethod
+  payoutMpesaName: String
+  payoutMpesaPhone: String
   permissions: [String!]
   phoneNumber: String
   profileImage: String
@@ -155,46 +152,46 @@ type AuthResponse @aws_api_key @aws_cognito_user_pools {
   refreshToken: String!
 }
 
-type BlockedDateRange @aws_cognito_user_pools {
+type BlockedDateRange @aws_api_key @aws_cognito_user_pools {
   endDate: AWSDate!
   reason: String
   startDate: AWSDate!
 }
 
-type BlockedDatesResponse @aws_cognito_user_pools {
+type BlockedDatesResponse @aws_api_key @aws_cognito_user_pools {
   blockedRanges: [BlockedDateRange!]!
   propertyId: ID!
 }
 
-type Booking @aws_cognito_user_pools @aws_api_key {
-  bookingId: ID! @aws_cognito_user_pools @aws_iam
-  bookingType: BookingType! @aws_cognito_user_pools @aws_iam
-  cancellationReason: String @aws_cognito_user_pools @aws_iam
-  cancelledAt: AWSDateTime @aws_cognito_user_pools @aws_iam
-  checkInDate: AWSDate! @aws_cognito_user_pools @aws_iam
-  checkOutDate: AWSDate! @aws_cognito_user_pools @aws_iam
-  completedAt: AWSDateTime @aws_cognito_user_pools @aws_iam
-  confirmedAt: AWSDateTime @aws_cognito_user_pools @aws_iam
-  createdAt: AWSDateTime! @aws_cognito_user_pools @aws_iam
-  guest: PropertyUser @aws_cognito_user_pools @aws_iam
-  guestId: ID! @aws_cognito_user_pools @aws_iam
-  guestName: String @aws_cognito_user_pools @aws_iam
-  guestEmail: String @aws_cognito_user_pools @aws_iam
-  guestPhone: String @aws_cognito_user_pools @aws_iam
-  hostNotes: String @aws_cognito_user_pools @aws_iam
-  numberOfAdults: Int! @aws_cognito_user_pools @aws_iam
-  numberOfChildren: Int! @aws_cognito_user_pools @aws_iam
-  numberOfGuests: Int! @aws_cognito_user_pools @aws_iam
-  numberOfInfants: Int! @aws_cognito_user_pools @aws_iam
-  numberOfNights: Int! @aws_cognito_user_pools @aws_iam
-  paymentIntentId: String @aws_cognito_user_pools @aws_iam
-  paymentStatus: PaymentStatus! @aws_cognito_user_pools @aws_iam
-  pricing: BookingPricing! @aws_cognito_user_pools @aws_iam
-  property: ShortTermProperty @aws_cognito_user_pools @aws_iam
-  propertyId: ID! @aws_cognito_user_pools @aws_iam
-  specialRequests: String @aws_cognito_user_pools @aws_iam
-  status: BookingStatus! @aws_cognito_user_pools @aws_iam
-  updatedAt: AWSDateTime! @aws_cognito_user_pools @aws_iam
+type Booking @aws_api_key @aws_cognito_user_pools {
+  bookingId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
+  bookingType: BookingType! @aws_api_key @aws_cognito_user_pools @aws_iam
+  cancellationReason: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  cancelledAt: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
+  checkInDate: AWSDate! @aws_api_key @aws_cognito_user_pools @aws_iam
+  checkOutDate: AWSDate! @aws_api_key @aws_cognito_user_pools @aws_iam
+  completedAt: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
+  confirmedAt: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
+  createdAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
+  guest: PropertyUser @aws_api_key @aws_cognito_user_pools @aws_iam
+  guestEmail: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  guestId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
+  guestName: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  guestPhone: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  hostNotes: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfAdults: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfChildren: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfGuests: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfInfants: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfNights: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  paymentIntentId: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  paymentStatus: PaymentStatus! @aws_api_key @aws_cognito_user_pools @aws_iam
+  pricing: BookingPricing! @aws_api_key @aws_cognito_user_pools @aws_iam
+  property: ShortTermProperty @aws_api_key @aws_cognito_user_pools @aws_iam
+  propertyId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
+  specialRequests: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  status: BookingStatus! @aws_api_key @aws_cognito_user_pools @aws_iam
+  updatedAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
 type BookingListResponse @aws_cognito_user_pools {
@@ -204,16 +201,16 @@ type BookingListResponse @aws_cognito_user_pools {
 }
 
 type BookingPricing @aws_api_key @aws_cognito_user_pools {
-  cleaningFee: Float! @aws_cognito_user_pools @aws_iam
-  currency: String! @aws_cognito_user_pools @aws_iam
-  nightlyRate: Float! @aws_cognito_user_pools @aws_iam
-  numberOfNights: Int! @aws_cognito_user_pools @aws_iam
-  refundAmount: Float @aws_cognito_user_pools @aws_iam
-  refundPercentage: Float @aws_cognito_user_pools @aws_iam
-  serviceFee: Float! @aws_cognito_user_pools @aws_iam
-  subtotal: Float! @aws_cognito_user_pools @aws_iam
-  taxes: Float! @aws_cognito_user_pools @aws_iam
-  total: Float! @aws_cognito_user_pools @aws_iam
+  cleaningFee: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  currency: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+  nightlyRate: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  numberOfNights: Int! @aws_api_key @aws_cognito_user_pools @aws_iam
+  refundAmount: Float @aws_api_key @aws_cognito_user_pools @aws_iam
+  refundPercentage: Float @aws_api_key @aws_cognito_user_pools @aws_iam
+  serviceFee: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  subtotal: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  taxes: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  total: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
 type BusyBlock @aws_cognito_user_pools {
@@ -280,6 +277,27 @@ type ChatMessage @aws_api_key @aws_cognito_user_pools {
   timestamp: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
+type ChatUser @aws_api_key @aws_cognito_user_pools {
+  businessName: String
+  firstName: String!
+  lastName: String!
+  profileImage: String
+  userId: ID!
+  userType: UserType!
+}
+
+type CheckInInstructions @aws_api_key @aws_cognito_user_pools {
+  accessCode: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  additionalNotes: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  contactName: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  contactPhone: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  directions: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  houseRules: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
+  parkingInfo: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  wifiName: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  wifiPassword: String @aws_api_key @aws_cognito_user_pools @aws_iam
+}
+
 type CombinedPropertyListResponse @aws_cognito_user_pools {
   longTermProperties: [Property!]!
   nextToken: String
@@ -329,6 +347,7 @@ type ContactInquiryStats @aws_cognito_user_pools(cognito_groups : ["ADMINS"]) {
 }
 
 type Conversation @aws_api_key @aws_cognito_user_pools {
+  conversationType: String
   createdAt: AWSDateTime!
   id: String!
   lastMessage: String!
@@ -345,7 +364,7 @@ type Coordinates @aws_api_key @aws_cognito_user_pools {
   longitude: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
-type CreateBookingResponse @aws_cognito_user_pools {
+type CreateBookingResponse @aws_api_key @aws_cognito_user_pools {
   booking: Booking!
   message: String!
   paymentStatus: PaymentStatus!
@@ -370,6 +389,11 @@ type CreateShortTermPropertyResponse @aws_api_key @aws_cognito_user_pools {
 type DeleteResponse @aws_api_key @aws_cognito_user_pools {
   message: String!
   success: Boolean!
+}
+
+type DirectChatInitializationResponse @aws_api_key @aws_cognito_user_pools {
+  conversationId: ID!
+  targetUserInfo: ChatUser!
 }
 
 type District @aws_api_key @aws_cognito_user_pools {
@@ -427,7 +451,7 @@ type InitialAppState @aws_api_key @aws_cognito_user_pools {
   categorizedProperties: CategorizedPropertiesResponse!
 }
 
-type InitiatePaymentResponse @aws_cognito_user_pools @aws_api_key {
+type InitiatePaymentResponse @aws_api_key @aws_cognito_user_pools {
   amount: Float!
   currency: String!
   message: String!
@@ -462,6 +486,13 @@ type Landlord @aws_api_key @aws_cognito_user_pools {
   lastName: String
   nationalIdLast4: String
   occupation: String
+  payoutBankAccountName: String
+  payoutBankAccountNumber: String
+  payoutBankBranch: String
+  payoutBankName: String
+  payoutMethod: PayoutMethod
+  payoutMpesaName: String
+  payoutMpesaPhone: String
   phoneNumber: String
   profileImage: String
   pushNotifications: Boolean
@@ -642,14 +673,14 @@ type Mutation {
   adminDeleteProperty(propertyId: ID!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   adminUpdateApplicationStatus(applicationId: ID!, notes: String, status: ApplicationStatus!): Application! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   adminUpdatePropertyStatus(notes: String, propertyId: ID!, status: PropertyStatus!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
-  approveBooking(bookingId: ID!, hostNotes: String): Booking! @aws_cognito_user_pools
+  approveBooking(bookingId: ID!, hostNotes: String, token: String): Booking! @aws_api_key @aws_cognito_user_pools
   approveProperty(notes: String, propertyId: ID!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   assignPropertyAgent(agentId: ID!, propertyId: ID!): SuccessResponse! @aws_cognito_user_pools
   associateMediaWithProperty(media: PropertyMediaInput!, propertyId: ID!): Property! @aws_cognito_user_pools
   blockDates(input: BlockDatesInput!): SuccessResponse! @aws_cognito_user_pools
   cancelBooking(bookingId: ID!, reason: String): CancelBookingResponse! @aws_cognito_user_pools
   confirmWhatsAppAssociation(code: String!, whatsappNumber: String!): AssociateWhatsAppResponse! @aws_cognito_user_pools
-  createBooking(input: CreateBookingInput!): CreateBookingResponse! @aws_cognito_user_pools @aws_api_key
+  createBooking(input: CreateBookingInput!): CreateBookingResponse! @aws_api_key @aws_cognito_user_pools
   createHousingRequest(bedrooms: Int, contactName: String, currency: String, description: String!, district: String, maxBudget: Float, minBudget: Float, moveInDate: String, phone: String!, propertyType: String, region: String, source: HousingRequestSource!, street: String, ward: String): HousingRequest! @aws_api_key @aws_cognito_user_pools
   createLocation(input: CreateLocationInput!): LocationCreateResponse! @aws_cognito_user_pools
   createProperty(input: CreatePropertyInput!): CreatePropertyResponse! @aws_cognito_user_pools
@@ -657,8 +688,9 @@ type Mutation {
   createReview(input: CreateReviewInput!): Review! @aws_cognito_user_pools
   createShortTermProperty(input: CreateShortTermPropertyInput!): ShortTermProperty! @aws_cognito_user_pools
   createShortTermPropertyDraft(input: CreateShortTermPropertyDraftInput!): CreateShortTermPropertyResponse! @aws_api_key @aws_cognito_user_pools
+  createStripePaymentIntent(bookingId: ID!, currency: String): StripePaymentIntentResponse! @aws_api_key @aws_cognito_user_pools
   deactivateShortTermProperty(propertyId: ID!): SuccessResponse! @aws_cognito_user_pools
-  declineBooking(bookingId: ID!, reason: String!): Booking! @aws_cognito_user_pools
+  declineBooking(bookingId: ID!, reason: String!, token: String): Booking! @aws_api_key @aws_cognito_user_pools
   deleteConversation(conversationId: String!): DeleteResponse! @aws_cognito_user_pools
   deleteMediaItem(fileUrl: String!): MediaItem @aws_cognito_user_pools
   deleteMessage(messageId: String!): DeleteResponse! @aws_cognito_user_pools
@@ -671,8 +703,9 @@ type Mutation {
   getMediaUploadUrl(contentType: String!, fileName: String!): MediaUploadResponse! @aws_api_key @aws_cognito_user_pools
   importLocationsFromCSV(csvData: String!): LocationImportResponse! @aws_cognito_user_pools
   importPropertiesFromCSV(csvData: String!): PropertyImportResult! @aws_cognito_user_pools
+  initializeDirectChat(targetUserId: ID!): DirectChatInitializationResponse! @aws_cognito_user_pools
   initializePropertyChat(propertyId: ID!): ChatInitializationResponse! @aws_cognito_user_pools
-  initiatePayment(input: InitiatePaymentInput!): InitiatePaymentResponse! @aws_cognito_user_pools @aws_api_key
+  initiatePayment(input: InitiatePaymentInput!): InitiatePaymentResponse! @aws_api_key @aws_cognito_user_pools
   initiateWhatsAppAssociation(whatsappNumber: String!): AssociateWhatsAppResponse! @aws_cognito_user_pools
   markAsRead(conversationId: String!): Conversation! @aws_cognito_user_pools
   markLandlordContacted(createdAt: String!, landlordId: ID!, requestId: ID!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
@@ -682,7 +715,9 @@ type Mutation {
   publishProperty(propertyId: ID!): SuccessResponse! @aws_cognito_user_pools
   publishPropertyUpdateEvent(input: PropertyUpdateEventInput!): PropertyUpdateEvent @aws_iam
   publishShortTermProperty(propertyId: ID!): ShortTermProperty! @aws_cognito_user_pools
+  refundBooking(amountCents: Int, bookingId: ID!, reason: String): RefundResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   regenerateLocationJson: LocationJsonResponse! @aws_cognito_user_pools
+  registerPushToken(token: String!): SuccessResponse! @aws_cognito_user_pools
   rejectProperty(propertyId: ID!, reason: String!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   removeBusyBlock(blockId: ID!, blockStartUtc: String!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   removePropertyAgent(propertyId: ID!): SuccessResponse! @aws_cognito_user_pools
@@ -691,6 +726,7 @@ type Mutation {
   respondToReview(input: RespondToReviewInput!): Review! @aws_cognito_user_pools
   reviewLandlordApplication(applicationId: ID!, notes: String, status: LandlordApplicationStatus!): LandlordApplication! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   scheduleMeeting(attendeeIds: [String!]!, description: String, endUtc: String!, link: String, startUtc: String!, title: String!): TeamMeeting! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
+  sendCheckInInstructions(input: SendCheckInInstructionsInput!): SendCheckInInstructionsResponse! @aws_cognito_user_pools
   sendMessage(input: SendMessageInput!): ChatMessage! @aws_cognito_user_pools
   sendWhatsAppMessage(message: String!, phone: String!): SuccessResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   signIn(email: String!, password: String!): AuthResponse! @aws_api_key @aws_cognito_user_pools
@@ -747,6 +783,7 @@ type Property @aws_api_key @aws_cognito_user_pools {
   availability: PropertyAvailability @aws_api_key @aws_cognito_user_pools @aws_iam
   createdAt: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
   description: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  googleMapsUrl: String @aws_api_key @aws_cognito_user_pools @aws_iam
   landlord: PropertyUser @aws_api_key @aws_cognito_user_pools @aws_iam
   media: PropertyMedia @aws_api_key @aws_cognito_user_pools @aws_iam
   pricing: PropertyPricing @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -756,6 +793,7 @@ type Property @aws_api_key @aws_cognito_user_pools {
   status: PropertyStatus! @aws_api_key @aws_cognito_user_pools @aws_iam
   title: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   updatedAt: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
+  verified: Boolean! @aws_api_key @aws_cognito_user_pools @aws_iam
   version: Int @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
@@ -784,6 +822,7 @@ type PropertyCard @aws_api_key @aws_cognito_user_pools {
   region: String!
   thumbnail: String
   title: String!
+  verified: Boolean!
 }
 
 type PropertyCardsResponse @aws_api_key @aws_cognito_user_pools {
@@ -911,7 +950,7 @@ type Query {
   getApplicationDocumentUploadUrl(applicationId: ID!, fileName: String!, fileType: String!): MediaUploadResponse! @aws_cognito_user_pools
   getApplicationStats(landlordId: ID!): ApplicationStats! @aws_cognito_user_pools
   getBlockedDates(endDate: AWSDate, propertyId: ID!, startDate: AWSDate): BlockedDatesResponse! @aws_api_key @aws_cognito_user_pools
-  getBooking(bookingId: ID!): Booking @aws_cognito_user_pools @aws_api_key
+  getBooking(bookingId: ID!): Booking @aws_api_key @aws_cognito_user_pools
   getBookingPayments(bookingId: ID!): [Payment!]! @aws_cognito_user_pools
   getCategorizedProperties(limitPerCategory: Int): CategorizedPropertiesResponse! @aws_api_key @aws_cognito_user_pools
   getContactInquiry(inquiryId: ID!): ContactInquiry @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
@@ -929,7 +968,7 @@ type Query {
   getMediaLibrary: MediaItem @aws_cognito_user_pools
   getMyBusyBlocks: [BusyBlock!]! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   getMyLandlordApplication: LandlordApplication @aws_cognito_user_pools
-  getPayment(paymentId: ID!): Payment @aws_cognito_user_pools @aws_api_key
+  getPayment(paymentId: ID!): Payment @aws_api_key @aws_cognito_user_pools
   getPropertiesByCategory(category: PropertyCategory!, limit: Int, nextToken: String): CategoryPropertyResponse! @aws_api_key @aws_cognito_user_pools
   getPropertiesByLocation(bathrooms: Int, bedrooms: Int, district: String, limit: Int, maxPrice: Float, minPrice: Float, moveInDate: AWSDate, nextToken: String, propertyType: PropertyType, region: String!, sortBy: PropertySortOption): PropertyCardsResponse! @aws_api_key @aws_cognito_user_pools
   getProperty(propertyId: ID!): Property @aws_api_key @aws_cognito_user_pools
@@ -952,7 +991,7 @@ type Query {
   listAgentProperties(limit: Int, nextToken: String): PropertyListResponse! @aws_cognito_user_pools
   listAllApplications(limit: Int, nextToken: String, status: ApplicationStatus): ApplicationListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   listAllLandlordApplications(limit: Int, nextToken: String, status: LandlordApplicationStatus): LandlordApplicationListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
-  listAllProperties(limit: Int, nextToken: String, propertyType: String, status: PropertyStatus): CombinedPropertyListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
+  listAllProperties(limit: Int, nextToken: String, propertyType: String, search: String, status: PropertyStatus): CombinedPropertyListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   listAllUsers(limit: Int, nextToken: String, userType: UserType): UserListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   listContactInquiries(limit: Int, nextToken: String, status: InquiryStatus): ContactInquiryListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   listHousingRequests(limit: Int, nextToken: String, status: HousingRequestStatus): HousingRequestListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
@@ -967,6 +1006,7 @@ type Query {
   listReferralSubmissions(limit: Int, nextToken: String, status: String): ReferralSubmissionListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   listWhatsAppConversations(limit: Int): [WhatsAppConversationRow!]! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   queryPaymentStatus(paymentId: ID!): Payment! @aws_cognito_user_pools
+  searchChatUsers(district: String, limit: Int, query: String!, region: String, source: String): [ChatUser!]! @aws_cognito_user_pools
   searchLandlordProfiles(district: String, limit: Int, nextToken: String, propertyType: String, region: String): LandlordProfileListResponse! @aws_cognito_user_pools(cognito_groups : ["ADMINS"])
   searchShortTermProperties(input: ShortTermSearchInput!): ShortTermPropertyListResponse! @aws_api_key @aws_cognito_user_pools
 }
@@ -995,6 +1035,13 @@ type ReferralSubmissionListResponse @aws_cognito_user_pools {
   submissions: [ReferralSubmission!]!
 }
 
+type RefundResponse @aws_cognito_user_pools {
+  amount: Float!
+  currency: String!
+  refundId: String!
+  success: Boolean!
+}
+
 type Region @aws_api_key @aws_cognito_user_pools {
   id: ID!
   name: String!
@@ -1008,20 +1055,20 @@ type RelatedPropertiesResponse @aws_api_key @aws_cognito_user_pools {
 
 type Review @aws_api_key @aws_cognito_user_pools {
   accuracy: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
-  bookingId: ID! @aws_cognito_user_pools @aws_iam
+  bookingId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
   cleanliness: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
   comment: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   communication: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
   createdAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
   guest: PropertyUser @aws_api_key @aws_cognito_user_pools @aws_iam
-  guestId: ID! @aws_cognito_user_pools @aws_iam
+  guestId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
   hostResponse: String @aws_api_key @aws_cognito_user_pools @aws_iam
   hostResponseDate: AWSDateTime @aws_api_key @aws_cognito_user_pools @aws_iam
   location: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
   overallRating: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
   photos: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
   propertyId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
-  reviewId: ID! @aws_cognito_user_pools @aws_iam
+  reviewId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
   updatedAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
   value: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
   verifiedStay: Boolean! @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1031,6 +1078,12 @@ type ReviewListResponse @aws_api_key @aws_cognito_user_pools {
   count: Int!
   nextToken: String
   reviews: [Review!]!
+}
+
+type SendCheckInInstructionsResponse @aws_cognito_user_pools {
+  message: String!
+  sentVia: [String!]!
+  success: Boolean!
 }
 
 type ShortTermAddress @aws_api_key @aws_cognito_user_pools {
@@ -1051,8 +1104,10 @@ type ShortTermProperty @aws_api_key @aws_cognito_user_pools {
   allowsSmoking: Boolean @aws_api_key @aws_cognito_user_pools @aws_iam
   amenities: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
   averageRating: Float @aws_api_key @aws_cognito_user_pools @aws_iam
+  bathrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
+  bedrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
   cancellationPolicy: CancellationPolicy @aws_api_key @aws_cognito_user_pools @aws_iam
-  checkInInstructions: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  checkInInstructions: CheckInInstructions @aws_api_key @aws_cognito_user_pools @aws_iam
   checkInTime: String @aws_api_key @aws_cognito_user_pools @aws_iam
   checkOutTime: String @aws_api_key @aws_cognito_user_pools @aws_iam
   cleaningFee: Float @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1061,6 +1116,7 @@ type ShortTermProperty @aws_api_key @aws_cognito_user_pools {
   currency: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   description: String @aws_api_key @aws_cognito_user_pools @aws_iam
   district: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+  googleMapsUrl: String @aws_api_key @aws_cognito_user_pools @aws_iam
   host: PropertyUser @aws_api_key @aws_cognito_user_pools @aws_iam
   hostId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
   houseRules: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1080,10 +1136,12 @@ type ShortTermProperty @aws_api_key @aws_cognito_user_pools {
   region: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   serviceFeePercentage: Float @aws_api_key @aws_cognito_user_pools @aws_iam
   status: PropertyStatus! @aws_api_key @aws_cognito_user_pools @aws_iam
+  stayCategories: [StayCategory!] @aws_api_key @aws_cognito_user_pools @aws_iam
   taxPercentage: Float @aws_api_key @aws_cognito_user_pools @aws_iam
   thumbnail: String @aws_api_key @aws_cognito_user_pools @aws_iam
   title: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   updatedAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
+  videos: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
 type ShortTermPropertyCard @aws_api_key @aws_cognito_user_pools {
@@ -1096,6 +1154,7 @@ type ShortTermPropertyCard @aws_api_key @aws_cognito_user_pools {
   propertyId: ID!
   propertyType: ShortTermPropertyType!
   region: String!
+  stayCategories: [StayCategory!]
   thumbnail: String!
   title: String!
   totalReviews: Int
@@ -1110,6 +1169,13 @@ type Street @aws_api_key @aws_cognito_user_pools {
   id: ID!
   name: String!
   wardId: ID!
+}
+
+type StripePaymentIntentResponse @aws_api_key @aws_cognito_user_pools {
+  amount: Float!
+  clientSecret: String!
+  currency: String!
+  paymentIntentId: String!
 }
 
 type Subscription {
@@ -1173,6 +1239,13 @@ type Tenant @aws_api_key @aws_cognito_user_pools {
   lastName: String
   nationalIdLast4: String
   occupation: String
+  payoutBankAccountName: String
+  payoutBankAccountNumber: String
+  payoutBankBranch: String
+  payoutBankName: String
+  payoutMethod: PayoutMethod
+  payoutMpesaName: String
+  payoutMpesaPhone: String
   phoneNumber: String
   profileImage: String
   pushNotifications: Boolean
@@ -1394,6 +1467,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum PayoutMethod {
+  BANK
+  MPESA
+}
+
 enum PropertyCategory {
   FAVORITES
   LOWEST_PRICE
@@ -1449,6 +1527,8 @@ enum ShortTermPropertyType {
   HOSTEL
   HOTEL
   HOUSE
+  LODGE
+  OTHER
   RESORT
   ROOM
   STUDIO
@@ -1467,6 +1547,23 @@ enum SmokingStatus {
   NON_SMOKER
   OCCASIONAL
   SMOKER
+}
+
+enum StayCategory {
+  BEACH
+  CITY_LIFE
+  FILMING
+  GETAWAY
+  GROUP_TRIP
+  MEETING
+  NATURE
+  NIGHTLY_STAY
+  PARTY
+  PHOTOSHOOT
+  RETREAT
+  ROMANTIC
+  SAFARI
+  WEDDING
 }
 
 enum UserType {
@@ -1512,6 +1609,18 @@ input BusyBlockRecurrenceInput {
   type: String!
 }
 
+input CheckInInstructionsInput {
+  accessCode: String
+  additionalNotes: String
+  contactName: String
+  contactPhone: String
+  directions: String
+  houseRules: [String!]
+  parkingInfo: String
+  wifiName: String
+  wifiPassword: String
+}
+
 input CognitoUserPool {
   userPoolId: String!
 }
@@ -1524,6 +1633,9 @@ input CoordinatesInput {
 input CreateBookingInput {
   checkInDate: AWSDate!
   checkOutDate: AWSDate!
+  guestEmail: String
+  guestName: String
+  guestPhone: String
   numberOfAdults: Int!
   numberOfChildren: Int!
   numberOfGuests: Int!
@@ -1531,9 +1643,6 @@ input CreateBookingInput {
   paymentMethodId: String!
   propertyId: ID!
   specialRequests: String
-  guestName: String
-  guestEmail: String
-  guestPhone: String
 }
 
 input CreateLocationInput {
@@ -1594,10 +1703,12 @@ input CreateShortTermPropertyDraftInput {
   cleaningFee: Float
   currency: String!
   district: String!
+  googleMapsLink: String
   guestEmail: String
   guestPhoneNumber: String
   guestWhatsappNumber: String
   images: [String!]
+  instantBookEnabled: Boolean
   latitude: Float
   longitude: Float
   maxGuests: Int
@@ -1605,6 +1716,7 @@ input CreateShortTermPropertyDraftInput {
   nightlyRate: Float!
   propertyType: ShortTermPropertyType!
   region: String!
+  stayCategories: [StayCategory!]
   title: String!
   videos: [String!]
 }
@@ -1618,7 +1730,7 @@ input CreateShortTermPropertyInput {
   allowsSmoking: Boolean!
   amenities: [String!]!
   cancellationPolicy: CancellationPolicy!
-  checkInInstructions: String
+  checkInInstructions: CheckInInstructionsInput
   checkInTime: String!
   checkOutTime: String!
   cleaningFee: Float
@@ -1639,9 +1751,11 @@ input CreateShortTermPropertyInput {
   propertyType: ShortTermPropertyType!
   region: String!
   serviceFeePercentage: Float!
+  stayCategories: [StayCategory!]
   taxPercentage: Float!
   thumbnail: String!
   title: String!
+  videos: [String!]
 }
 
 input EmergencyContactInput {
@@ -1740,6 +1854,19 @@ input RespondToReviewInput {
   reviewId: ID!
 }
 
+input SendCheckInInstructionsInput {
+  bookingId: ID!
+  customAccessCode: String
+  customAdditionalNotes: String
+  customContactName: String
+  customContactPhone: String
+  customDirections: String
+  customHouseRules: [String!]
+  customParkingInfo: String
+  customWifiName: String
+  customWifiPassword: String
+}
+
 input SendMessageInput {
   content: String!
   conversationId: String!
@@ -1756,6 +1883,7 @@ input ShortTermAddressInput {
 
 input ShortTermSearchInput {
   amenities: [String!]
+  bedrooms: Int
   checkInDate: AWSDate!
   checkOutDate: AWSDate!
   district: String
@@ -1772,6 +1900,7 @@ input ShortTermSearchInput {
   propertyType: ShortTermPropertyType
   region: String!
   sortBy: ShortTermSortOption
+  stayCategory: StayCategory
 }
 
 input SignUpInput {
@@ -1817,12 +1946,14 @@ input UpdatePropertyInput {
   amenities: [String!]
   availability: PropertyAvailabilityInput
   description: String
+  googleMapsUrl: String
   media: PropertyMediaInput
   pricing: PropertyPricingInput
   propertyType: PropertyType
   specifications: PropertySpecificationsInput
   status: PropertyStatus
   title: String
+  verified: Boolean
 }
 
 input UpdateShortTermPropertyInput {
@@ -1833,8 +1964,10 @@ input UpdateShortTermPropertyInput {
   allowsPets: Boolean
   allowsSmoking: Boolean
   amenities: [String!]
+  bathrooms: Int
+  bedrooms: Int
   cancellationPolicy: CancellationPolicy
-  checkInInstructions: String
+  checkInInstructions: CheckInInstructionsInput
   checkInTime: String
   checkOutTime: String
   cleaningFee: Float
@@ -1842,6 +1975,7 @@ input UpdateShortTermPropertyInput {
   currency: String
   description: String
   district: String
+  googleMapsUrl: String
   houseRules: [String!]
   images: [String!]
   instantBookEnabled: Boolean
@@ -1856,9 +1990,11 @@ input UpdateShortTermPropertyInput {
   region: String
   serviceFeePercentage: Float
   status: PropertyStatus
+  stayCategories: [StayCategory!]
   taxPercentage: Float
   thumbnail: String
   title: String
+  videos: [String!]
 }
 
 input UpdateUserInput {
@@ -1874,6 +2010,13 @@ input UpdateUserInput {
   lastName: String
   nationalId: String
   occupation: String
+  payoutBankAccountName: String
+  payoutBankAccountNumber: String
+  payoutBankBranch: String
+  payoutBankName: String
+  payoutMethod: PayoutMethod
+  payoutMpesaName: String
+  payoutMpesaPhone: String
   phoneNumber: String
   preferences: AWSJSON
   profileImage: String

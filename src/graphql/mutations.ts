@@ -167,6 +167,7 @@ export const adminUpdateApplicationStatus = /* GraphQL */ `mutation AdminUpdateA
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -181,9 +182,11 @@ export const adminUpdateApplicationStatus = /* GraphQL */ `mutation AdminUpdateA
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -216,6 +219,7 @@ export const adminUpdateApplicationStatus = /* GraphQL */ `mutation AdminUpdateA
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -264,10 +268,14 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
     guest {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
+    guestEmail
     guestId
+    guestName
+    guestPhone
     hostNotes
     numberOfAdults
     numberOfChildren
@@ -306,17 +314,20 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -330,9 +341,11 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -368,10 +381,12 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     propertyId
@@ -428,6 +443,7 @@ export const associateMediaWithProperty = /* GraphQL */ `mutation AssociateMedia
     agent {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -442,9 +458,11 @@ export const associateMediaWithProperty = /* GraphQL */ `mutation AssociateMedia
     }
     createdAt
     description
+    googleMapsUrl
     landlord {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -477,6 +495,7 @@ export const associateMediaWithProperty = /* GraphQL */ `mutation AssociateMedia
     status
     title
     updatedAt
+    verified
     version
     __typename
   }
@@ -511,10 +530,14 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
       guest {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
+      guestEmail
       guestId
+      guestName
+      guestPhone
       hostNotes
       numberOfAdults
       numberOfChildren
@@ -553,18 +576,21 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
         allowsSmoking
         amenities
         averageRating
+        bathrooms
+        bedrooms
         cancellationPolicy
         checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+          accessCode
+          additionalNotes
+          contactName
+          contactPhone
+          directions
+          houseRules
+          parkingInfo
+          wifiName
+          wifiPassword
+          __typename
+        }
         checkInTime
         checkOutTime
         cleaningFee
@@ -577,9 +603,11 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
         currency
         description
         district
+        googleMapsUrl
         host {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -615,10 +643,12 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
         region
         serviceFeePercentage
         status
+        stayCategories
         taxPercentage
         thumbnail
         title
         updatedAt
+        videos
         __typename
       }
       propertyId
@@ -663,12 +693,13 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
       guest {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
+      guestEmail
       guestId
       guestName
-      guestEmail
       guestPhone
       hostNotes
       numberOfAdults
@@ -708,18 +739,21 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         allowsSmoking
         amenities
         averageRating
+        bathrooms
+        bedrooms
         cancellationPolicy
         checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+          accessCode
+          additionalNotes
+          contactName
+          contactPhone
+          directions
+          houseRules
+          parkingInfo
+          wifiName
+          wifiPassword
+          __typename
+        }
         checkInTime
         checkOutTime
         cleaningFee
@@ -732,9 +766,11 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         currency
         description
         district
+        googleMapsUrl
         host {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -770,10 +806,12 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         region
         serviceFeePercentage
         status
+        stayCategories
         taxPercentage
         thumbnail
         title
         updatedAt
+        videos
         __typename
       }
       propertyId
@@ -924,6 +962,7 @@ export const createReview = /* GraphQL */ `mutation CreateReview($input: CreateR
     guest {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -963,18 +1002,21 @@ export const createShortTermProperty = /* GraphQL */ `mutation CreateShortTermPr
     allowsSmoking
     amenities
     averageRating
+    bathrooms
+    bedrooms
     cancellationPolicy
     checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+      accessCode
+      additionalNotes
+      contactName
+      contactPhone
+      directions
+      houseRules
+      parkingInfo
+      wifiName
+      wifiPassword
+      __typename
+    }
     checkInTime
     checkOutTime
     cleaningFee
@@ -987,9 +1029,11 @@ export const createShortTermProperty = /* GraphQL */ `mutation CreateShortTermPr
     currency
     description
     district
+    googleMapsUrl
     host {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1025,10 +1069,12 @@ export const createShortTermProperty = /* GraphQL */ `mutation CreateShortTermPr
     region
     serviceFeePercentage
     status
+    stayCategories
     taxPercentage
     thumbnail
     title
     updatedAt
+    videos
     __typename
   }
 }
@@ -1051,6 +1097,19 @@ export const createShortTermPropertyDraft = /* GraphQL */ `mutation CreateShortT
 ` as GeneratedMutation<
   APITypes.CreateShortTermPropertyDraftMutationVariables,
   APITypes.CreateShortTermPropertyDraftMutation
+>;
+export const createStripePaymentIntent = /* GraphQL */ `mutation CreateStripePaymentIntent($bookingId: ID!, $currency: String) {
+  createStripePaymentIntent(bookingId: $bookingId, currency: $currency) {
+    amount
+    clientSecret
+    currency
+    paymentIntentId
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateStripePaymentIntentMutationVariables,
+  APITypes.CreateStripePaymentIntentMutation
 >;
 export const deactivateShortTermProperty = /* GraphQL */ `mutation DeactivateShortTermProperty($propertyId: ID!) {
   deactivateShortTermProperty(propertyId: $propertyId) {
@@ -1077,10 +1136,14 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
     guest {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
+    guestEmail
     guestId
+    guestName
+    guestPhone
     hostNotes
     numberOfAdults
     numberOfChildren
@@ -1119,17 +1182,20 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -1143,9 +1209,11 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1181,10 +1249,12 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     propertyId
@@ -1347,6 +1417,25 @@ export const importPropertiesFromCSV = /* GraphQL */ `mutation ImportPropertiesF
   APITypes.ImportPropertiesFromCSVMutationVariables,
   APITypes.ImportPropertiesFromCSVMutation
 >;
+export const initializeDirectChat = /* GraphQL */ `mutation InitializeDirectChat($targetUserId: ID!) {
+  initializeDirectChat(targetUserId: $targetUserId) {
+    conversationId
+    targetUserInfo {
+      businessName
+      firstName
+      lastName
+      profileImage
+      userId
+      userType
+      __typename
+    }
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.InitializeDirectChatMutationVariables,
+  APITypes.InitializeDirectChatMutation
+>;
 export const initializePropertyChat = /* GraphQL */ `mutation InitializePropertyChat($propertyId: ID!) {
   initializePropertyChat(propertyId: $propertyId) {
     conversationId
@@ -1393,6 +1482,7 @@ export const initiateWhatsAppAssociation = /* GraphQL */ `mutation InitiateWhats
 >;
 export const markAsRead = /* GraphQL */ `mutation MarkAsRead($conversationId: String!) {
   markAsRead(conversationId: $conversationId) {
+    conversationType
     createdAt
     id
     lastMessage
@@ -1446,6 +1536,7 @@ export const markPropertyAsAvailable = /* GraphQL */ `mutation MarkPropertyAsAva
     agent {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1460,9 +1551,11 @@ export const markPropertyAsAvailable = /* GraphQL */ `mutation MarkPropertyAsAva
     }
     createdAt
     description
+    googleMapsUrl
     landlord {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1495,6 +1588,7 @@ export const markPropertyAsAvailable = /* GraphQL */ `mutation MarkPropertyAsAva
     status
     title
     updatedAt
+    verified
     version
     __typename
   }
@@ -1521,6 +1615,7 @@ export const markPropertyAsRented = /* GraphQL */ `mutation MarkPropertyAsRented
     agent {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1535,9 +1630,11 @@ export const markPropertyAsRented = /* GraphQL */ `mutation MarkPropertyAsRented
     }
     createdAt
     description
+    googleMapsUrl
     landlord {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1570,6 +1667,7 @@ export const markPropertyAsRented = /* GraphQL */ `mutation MarkPropertyAsRented
     status
     title
     updatedAt
+    verified
     version
     __typename
   }
@@ -1627,6 +1725,7 @@ export const publishPropertyUpdateEvent = /* GraphQL */ `mutation PublishPropert
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1641,9 +1740,11 @@ export const publishPropertyUpdateEvent = /* GraphQL */ `mutation PublishPropert
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1676,6 +1777,7 @@ export const publishPropertyUpdateEvent = /* GraphQL */ `mutation PublishPropert
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -1706,18 +1808,21 @@ export const publishShortTermProperty = /* GraphQL */ `mutation PublishShortTerm
     allowsSmoking
     amenities
     averageRating
+    bathrooms
+    bedrooms
     cancellationPolicy
     checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+      accessCode
+      additionalNotes
+      contactName
+      contactPhone
+      directions
+      houseRules
+      parkingInfo
+      wifiName
+      wifiPassword
+      __typename
+    }
     checkInTime
     checkOutTime
     cleaningFee
@@ -1730,9 +1835,11 @@ export const publishShortTermProperty = /* GraphQL */ `mutation PublishShortTerm
     currency
     description
     district
+    googleMapsUrl
     host {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1768,16 +1875,35 @@ export const publishShortTermProperty = /* GraphQL */ `mutation PublishShortTerm
     region
     serviceFeePercentage
     status
+    stayCategories
     taxPercentage
     thumbnail
     title
     updatedAt
+    videos
     __typename
   }
 }
 ` as GeneratedMutation<
   APITypes.PublishShortTermPropertyMutationVariables,
   APITypes.PublishShortTermPropertyMutation
+>;
+export const refundBooking = /* GraphQL */ `mutation RefundBooking($amountCents: Int, $bookingId: ID!, $reason: String) {
+  refundBooking(
+    amountCents: $amountCents
+    bookingId: $bookingId
+    reason: $reason
+  ) {
+    amount
+    currency
+    refundId
+    success
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.RefundBookingMutationVariables,
+  APITypes.RefundBookingMutation
 >;
 export const regenerateLocationJson = /* GraphQL */ `mutation RegenerateLocationJson {
   regenerateLocationJson {
@@ -1790,6 +1916,17 @@ export const regenerateLocationJson = /* GraphQL */ `mutation RegenerateLocation
 ` as GeneratedMutation<
   APITypes.RegenerateLocationJsonMutationVariables,
   APITypes.RegenerateLocationJsonMutation
+>;
+export const registerPushToken = /* GraphQL */ `mutation RegisterPushToken($token: String!) {
+  registerPushToken(token: $token) {
+    message
+    success
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.RegisterPushTokenMutationVariables,
+  APITypes.RegisterPushTokenMutation
 >;
 export const rejectProperty = /* GraphQL */ `mutation RejectProperty($propertyId: ID!, $reason: String!) {
   rejectProperty(propertyId: $propertyId, reason: $reason) {
@@ -1865,6 +2002,7 @@ export const respondToReview = /* GraphQL */ `mutation RespondToReview($input: R
     guest {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1955,6 +2093,18 @@ export const scheduleMeeting = /* GraphQL */ `mutation ScheduleMeeting(
 ` as GeneratedMutation<
   APITypes.ScheduleMeetingMutationVariables,
   APITypes.ScheduleMeetingMutation
+>;
+export const sendCheckInInstructions = /* GraphQL */ `mutation SendCheckInInstructions($input: SendCheckInInstructionsInput!) {
+  sendCheckInInstructions(input: $input) {
+    message
+    sentVia
+    success
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.SendCheckInInstructionsMutationVariables,
+  APITypes.SendCheckInInstructionsMutation
 >;
 export const sendMessage = /* GraphQL */ `mutation SendMessage($input: SendMessageInput!) {
   sendMessage(input: $input) {
@@ -2059,6 +2209,7 @@ export const submitApplication = /* GraphQL */ `mutation SubmitApplication($inpu
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2073,9 +2224,11 @@ export const submitApplication = /* GraphQL */ `mutation SubmitApplication($inpu
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2108,6 +2261,7 @@ export const submitApplication = /* GraphQL */ `mutation SubmitApplication($inpu
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -2297,6 +2451,7 @@ export const updateApplication = /* GraphQL */ `mutation UpdateApplication(
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2311,9 +2466,11 @@ export const updateApplication = /* GraphQL */ `mutation UpdateApplication(
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2346,6 +2503,7 @@ export const updateApplication = /* GraphQL */ `mutation UpdateApplication(
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -2417,6 +2575,7 @@ export const updateApplicationStatus = /* GraphQL */ `mutation UpdateApplication
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2431,9 +2590,11 @@ export const updateApplicationStatus = /* GraphQL */ `mutation UpdateApplication
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2466,6 +2627,7 @@ export const updateApplicationStatus = /* GraphQL */ `mutation UpdateApplication
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -2597,6 +2759,7 @@ export const updatePropertyStatus = /* GraphQL */ `mutation UpdatePropertyStatus
     agent {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -2611,9 +2774,11 @@ export const updatePropertyStatus = /* GraphQL */ `mutation UpdatePropertyStatus
     }
     createdAt
     description
+    googleMapsUrl
     landlord {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -2646,6 +2811,7 @@ export const updatePropertyStatus = /* GraphQL */ `mutation UpdatePropertyStatus
     status
     title
     updatedAt
+    verified
     version
     __typename
   }
@@ -2696,18 +2862,21 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     allowsSmoking
     amenities
     averageRating
+    bathrooms
+    bedrooms
     cancellationPolicy
     checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+      accessCode
+      additionalNotes
+      contactName
+      contactPhone
+      directions
+      houseRules
+      parkingInfo
+      wifiName
+      wifiPassword
+      __typename
+    }
     checkInTime
     checkOutTime
     cleaningFee
@@ -2720,16 +2889,17 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     currency
     description
     district
+    googleMapsUrl
     host {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
     hostId
     houseRules
     images
-    videos
     instantBookEnabled
     maxAdults
     maxChildren
@@ -2740,7 +2910,6 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     nightlyRate
     propertyId
     propertyType
-    stayCategories
     publishedAt
     ratingSummary {
       accuracy
@@ -2760,10 +2929,12 @@ export const updateShortTermProperty = /* GraphQL */ `mutation UpdateShortTermPr
     region
     serviceFeePercentage
     status
+    stayCategories
     taxPercentage
     thumbnail
     title
     updatedAt
+    videos
     __typename
   }
 }
@@ -2819,14 +2990,3 @@ export const verifyEmail = /* GraphQL */ `mutation VerifyEmail($code: String!, $
   APITypes.VerifyEmailMutationVariables,
   APITypes.VerifyEmailMutation
 >;
-
-export const createStripePaymentIntent = /* GraphQL */ `mutation CreateStripePaymentIntent($bookingId: ID!, $currency: String) {
-  createStripePaymentIntent(bookingId: $bookingId, currency: $currency) {
-    clientSecret
-    paymentIntentId
-    amount
-    currency
-    __typename
-  }
-}
-`;

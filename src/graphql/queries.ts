@@ -181,6 +181,7 @@ export const getApplication = /* GraphQL */ `query GetApplication($applicationId
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -195,9 +196,11 @@ export const getApplication = /* GraphQL */ `query GetApplication($applicationId
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -230,6 +233,7 @@ export const getApplication = /* GraphQL */ `query GetApplication($applicationId
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -318,12 +322,13 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
     guest {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
+    guestEmail
     guestId
     guestName
-    guestEmail
     guestPhone
     hostNotes
     numberOfAdults
@@ -363,17 +368,20 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -387,9 +395,11 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -425,10 +435,12 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     propertyId
@@ -485,6 +497,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -503,6 +516,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -521,6 +535,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -539,6 +554,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -557,6 +573,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -575,6 +592,7 @@ export const getCategorizedProperties = /* GraphQL */ `query GetCategorizedPrope
         region
         thumbnail
         title
+        verified
         __typename
       }
       __typename
@@ -703,6 +721,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -721,6 +740,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -739,6 +759,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -757,6 +778,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -775,6 +797,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -793,6 +816,7 @@ export const getInitialAppState = /* GraphQL */ `query GetInitialAppState($limit
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -823,6 +847,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -841,6 +866,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -859,6 +885,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -877,6 +904,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -895,6 +923,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -913,6 +942,7 @@ export const getInitialAppStateFast = /* GraphQL */ `query GetInitialAppStateFas
           region
           thumbnail
           title
+          verified
           __typename
         }
         __typename
@@ -1011,6 +1041,7 @@ export const getLandlordPropertiesInfo = /* GraphQL */ `query GetLandlordPropert
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1025,9 +1056,11 @@ export const getLandlordPropertiesInfo = /* GraphQL */ `query GetLandlordPropert
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1060,6 +1093,7 @@ export const getLandlordPropertiesInfo = /* GraphQL */ `query GetLandlordPropert
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -1114,13 +1148,13 @@ export const getMe = /* GraphQL */ `query GetMe {
       lastName
       nationalIdLast4
       occupation
-      payoutMethod
-      payoutMpesaPhone
-      payoutMpesaName
-      payoutBankName
       payoutBankAccountName
       payoutBankAccountNumber
       payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       permissions
       phoneNumber
       profileImage
@@ -1189,13 +1223,13 @@ export const getMe = /* GraphQL */ `query GetMe {
       lastName
       nationalIdLast4
       occupation
-      payoutMethod
-      payoutMpesaPhone
-      payoutMpesaName
-      payoutBankName
       payoutBankAccountName
       payoutBankAccountNumber
       payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -1229,13 +1263,13 @@ export const getMe = /* GraphQL */ `query GetMe {
       lastName
       nationalIdLast4
       occupation
-      payoutMethod
-      payoutMpesaPhone
-      payoutMpesaName
-      payoutBankName
       payoutBankAccountName
       payoutBankAccountNumber
       payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -1374,6 +1408,7 @@ export const getPropertiesByCategory = /* GraphQL */ `query GetPropertiesByCateg
       region
       thumbnail
       title
+      verified
       __typename
     }
     __typename
@@ -1421,6 +1456,7 @@ export const getPropertiesByLocation = /* GraphQL */ `query GetPropertiesByLocat
       region
       thumbnail
       title
+      verified
       __typename
     }
     __typename
@@ -1448,6 +1484,7 @@ export const getProperty = /* GraphQL */ `query GetProperty($propertyId: ID!) {
     agent {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1462,9 +1499,11 @@ export const getProperty = /* GraphQL */ `query GetProperty($propertyId: ID!) {
     }
     createdAt
     description
+    googleMapsUrl
     landlord {
       firstName
       lastName
+      profileImage
       whatsappNumber
       __typename
     }
@@ -1497,6 +1536,7 @@ export const getProperty = /* GraphQL */ `query GetProperty($propertyId: ID!) {
     status
     title
     updatedAt
+    verified
     version
     __typename
   }
@@ -1544,6 +1584,7 @@ export const getPropertyReviews = /* GraphQL */ `query GetPropertyReviews($limit
       guest {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -1624,6 +1665,7 @@ export const getRelatedProperties = /* GraphQL */ `query GetRelatedProperties(
       region
       thumbnail
       title
+      verified
       __typename
     }
     similarLocationProperties {
@@ -1636,6 +1678,7 @@ export const getRelatedProperties = /* GraphQL */ `query GetRelatedProperties(
       region
       thumbnail
       title
+      verified
       __typename
     }
     similarPriceProperties {
@@ -1648,6 +1691,7 @@ export const getRelatedProperties = /* GraphQL */ `query GetRelatedProperties(
       region
       thumbnail
       title
+      verified
       __typename
     }
     __typename
@@ -1675,18 +1719,21 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     allowsSmoking
     amenities
     averageRating
+    bathrooms
+    bedrooms
     cancellationPolicy
     checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+      accessCode
+      additionalNotes
+      contactName
+      contactPhone
+      directions
+      houseRules
+      parkingInfo
+      wifiName
+      wifiPassword
+      __typename
+    }
     checkInTime
     checkOutTime
     cleaningFee
@@ -1710,20 +1757,16 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     hostId
     houseRules
     images
-    videos
     instantBookEnabled
     maxAdults
     maxChildren
     maxGuests
-    bedrooms
-    bathrooms
     maxInfants
     maximumStay
     minimumStay
     nightlyRate
     propertyId
     propertyType
-    stayCategories
     publishedAt
     ratingSummary {
       accuracy
@@ -1743,10 +1786,12 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     region
     serviceFeePercentage
     status
+    stayCategories
     taxPercentage
     thumbnail
     title
     updatedAt
+    videos
     __typename
   }
 }
@@ -1863,6 +1908,13 @@ export const getUserByEmail = /* GraphQL */ `query GetUserByEmail($email: String
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       permissions
       phoneNumber
       profileImage
@@ -1931,6 +1983,13 @@ export const getUserByEmail = /* GraphQL */ `query GetUserByEmail($email: String
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -1964,6 +2023,13 @@ export const getUserByEmail = /* GraphQL */ `query GetUserByEmail($email: String
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -2003,6 +2069,13 @@ export const getUserById = /* GraphQL */ `query GetUserById($userId: ID!) {
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       permissions
       phoneNumber
       profileImage
@@ -2071,6 +2144,13 @@ export const getUserById = /* GraphQL */ `query GetUserById($userId: ID!) {
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -2104,6 +2184,13 @@ export const getUserById = /* GraphQL */ `query GetUserById($userId: ID!) {
       lastName
       nationalIdLast4
       occupation
+      payoutBankAccountName
+      payoutBankAccountNumber
+      payoutBankBranch
+      payoutBankName
+      payoutMethod
+      payoutMpesaName
+      payoutMpesaPhone
       phoneNumber
       profileImage
       pushNotifications
@@ -2123,6 +2210,7 @@ export const getUserById = /* GraphQL */ `query GetUserById($userId: ID!) {
 >;
 export const getUserConversations = /* GraphQL */ `query GetUserConversations {
   getUserConversations {
+    conversationType
     createdAt
     id
     lastMessage
@@ -2223,6 +2311,7 @@ export const listAgentProperties = /* GraphQL */ `query ListAgentProperties($lim
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2237,9 +2326,11 @@ export const listAgentProperties = /* GraphQL */ `query ListAgentProperties($lim
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2272,6 +2363,7 @@ export const listAgentProperties = /* GraphQL */ `query ListAgentProperties($lim
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -2335,6 +2427,7 @@ export const listAllApplications = /* GraphQL */ `query ListAllApplications(
         agent {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -2349,9 +2442,11 @@ export const listAllApplications = /* GraphQL */ `query ListAllApplications(
         }
         createdAt
         description
+        googleMapsUrl
         landlord {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -2384,6 +2479,7 @@ export const listAllApplications = /* GraphQL */ `query ListAllApplications(
         status
         title
         updatedAt
+        verified
         version
         __typename
       }
@@ -2449,12 +2545,14 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
   $limit: Int
   $nextToken: String
   $propertyType: String
+  $search: String
   $status: PropertyStatus
 ) {
   listAllProperties(
     limit: $limit
     nextToken: $nextToken
     propertyType: $propertyType
+    search: $search
     status: $status
   ) {
     longTermProperties {
@@ -2474,6 +2572,7 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2488,9 +2587,11 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2523,6 +2624,7 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -2544,17 +2646,20 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -2568,9 +2673,11 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2606,10 +2713,12 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     totalCount
@@ -2646,6 +2755,13 @@ export const listAllUsers = /* GraphQL */ `query ListAllUsers($limit: Int, $next
           lastName
           nationalIdLast4
           occupation
+          payoutBankAccountName
+          payoutBankAccountNumber
+          payoutBankBranch
+          payoutBankName
+          payoutMethod
+          payoutMpesaName
+          payoutMpesaPhone
           permissions
           phoneNumber
           profileImage
@@ -2714,6 +2830,13 @@ export const listAllUsers = /* GraphQL */ `query ListAllUsers($limit: Int, $next
           lastName
           nationalIdLast4
           occupation
+          payoutBankAccountName
+          payoutBankAccountNumber
+          payoutBankBranch
+          payoutBankName
+          payoutMethod
+          payoutMpesaName
+          payoutMpesaPhone
           phoneNumber
           profileImage
           pushNotifications
@@ -2747,6 +2870,13 @@ export const listAllUsers = /* GraphQL */ `query ListAllUsers($limit: Int, $next
           lastName
           nationalIdLast4
           occupation
+          payoutBankAccountName
+          payoutBankAccountNumber
+          payoutBankBranch
+          payoutBankName
+          payoutMethod
+          payoutMpesaName
+          payoutMpesaPhone
           phoneNumber
           profileImage
           pushNotifications
@@ -2861,6 +2991,7 @@ export const listLandlordProperties = /* GraphQL */ `query ListLandlordPropertie
       agent {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2875,9 +3006,11 @@ export const listLandlordProperties = /* GraphQL */ `query ListLandlordPropertie
       }
       createdAt
       description
+      googleMapsUrl
       landlord {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -2910,6 +3043,7 @@ export const listLandlordProperties = /* GraphQL */ `query ListLandlordPropertie
       status
       title
       updatedAt
+      verified
       version
       __typename
     }
@@ -3005,6 +3139,7 @@ export const listMyApplications = /* GraphQL */ `query ListMyApplications(
         agent {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3019,9 +3154,11 @@ export const listMyApplications = /* GraphQL */ `query ListMyApplications(
         }
         createdAt
         description
+        googleMapsUrl
         landlord {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3054,6 +3191,7 @@ export const listMyApplications = /* GraphQL */ `query ListMyApplications(
         status
         title
         updatedAt
+        verified
         version
         __typename
       }
@@ -3088,10 +3226,14 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
       guest {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
+      guestEmail
       guestId
+      guestName
+      guestPhone
       hostNotes
       numberOfAdults
       numberOfChildren
@@ -3130,18 +3272,21 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
         allowsSmoking
         amenities
         averageRating
+        bathrooms
+        bedrooms
         cancellationPolicy
         checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+          accessCode
+          additionalNotes
+          contactName
+          contactPhone
+          directions
+          houseRules
+          parkingInfo
+          wifiName
+          wifiPassword
+          __typename
+        }
         checkInTime
         checkOutTime
         cleaningFee
@@ -3154,9 +3299,11 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
         currency
         description
         district
+        googleMapsUrl
         host {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3192,10 +3339,12 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
         region
         serviceFeePercentage
         status
+        stayCategories
         taxPercentage
         thumbnail
         title
         updatedAt
+        videos
         __typename
       }
       propertyId
@@ -3233,17 +3382,20 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -3257,9 +3409,11 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -3270,8 +3424,6 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       maxAdults
       maxChildren
       maxGuests
-      bedrooms
-      bathrooms
       maxInfants
       maximumStay
       minimumStay
@@ -3297,10 +3449,12 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     __typename
@@ -3369,6 +3523,7 @@ export const listPropertyApplications = /* GraphQL */ `query ListPropertyApplica
         agent {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3383,9 +3538,11 @@ export const listPropertyApplications = /* GraphQL */ `query ListPropertyApplica
         }
         createdAt
         description
+        googleMapsUrl
         landlord {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3418,6 +3575,7 @@ export const listPropertyApplications = /* GraphQL */ `query ListPropertyApplica
         status
         title
         updatedAt
+        verified
         version
         __typename
       }
@@ -3466,10 +3624,14 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
       guest {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
+      guestEmail
       guestId
+      guestName
+      guestPhone
       hostNotes
       numberOfAdults
       numberOfChildren
@@ -3508,18 +3670,21 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
         allowsSmoking
         amenities
         averageRating
+        bathrooms
+        bedrooms
         cancellationPolicy
         checkInInstructions {
-        wifiName
-        wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
-      }
+          accessCode
+          additionalNotes
+          contactName
+          contactPhone
+          directions
+          houseRules
+          parkingInfo
+          wifiName
+          wifiPassword
+          __typename
+        }
         checkInTime
         checkOutTime
         cleaningFee
@@ -3532,9 +3697,11 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
         currency
         description
         district
+        googleMapsUrl
         host {
           firstName
           lastName
+          profileImage
           whatsappNumber
           __typename
         }
@@ -3570,10 +3737,12 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
         region
         serviceFeePercentage
         status
+        stayCategories
         taxPercentage
         thumbnail
         title
         updatedAt
+        videos
         __typename
       }
       propertyId
@@ -3702,6 +3871,33 @@ export const queryPaymentStatus = /* GraphQL */ `query QueryPaymentStatus($payme
   APITypes.QueryPaymentStatusQueryVariables,
   APITypes.QueryPaymentStatusQuery
 >;
+export const searchChatUsers = /* GraphQL */ `query SearchChatUsers(
+  $district: String
+  $limit: Int
+  $query: String!
+  $region: String
+  $source: String
+) {
+  searchChatUsers(
+    district: $district
+    limit: $limit
+    query: $query
+    region: $region
+    source: $source
+  ) {
+    businessName
+    firstName
+    lastName
+    profileImage
+    userId
+    userType
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.SearchChatUsersQueryVariables,
+  APITypes.SearchChatUsersQuery
+>;
 export const searchLandlordProfiles = /* GraphQL */ `query SearchLandlordProfiles(
   $district: String
   $limit: Int
@@ -3766,17 +3962,20 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       allowsSmoking
       amenities
       averageRating
+      bathrooms
+      bedrooms
       cancellationPolicy
       checkInInstructions {
+        accessCode
+        additionalNotes
+        contactName
+        contactPhone
+        directions
+        houseRules
+        parkingInfo
         wifiName
         wifiPassword
-        accessCode
-        directions
-        parkingInfo
-        contactPhone
-        contactName
-        additionalNotes
-        houseRules
+        __typename
       }
       checkInTime
       checkOutTime
@@ -3790,9 +3989,11 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       currency
       description
       district
+      googleMapsUrl
       host {
         firstName
         lastName
+        profileImage
         whatsappNumber
         __typename
       }
@@ -3803,15 +4004,12 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       maxAdults
       maxChildren
       maxGuests
-      bedrooms
-      bathrooms
       maxInfants
       maximumStay
       minimumStay
       nightlyRate
       propertyId
       propertyType
-      stayCategories
       publishedAt
       ratingSummary {
         accuracy
@@ -3831,10 +4029,12 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       region
       serviceFeePercentage
       status
+      stayCategories
       taxPercentage
       thumbnail
       title
       updatedAt
+      videos
       __typename
     }
     __typename

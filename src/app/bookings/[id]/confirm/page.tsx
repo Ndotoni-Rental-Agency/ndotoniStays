@@ -5,6 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getBooking } from '@/graphql/queries';
 import { approveBooking, declineBooking } from '@/graphql/mutations';
+import type { Booking } from '@/API';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
@@ -19,7 +20,7 @@ export default function ConfirmBookingPage() {
   const token = searchParams?.get('token') || '';
 
   const [state, setState] = useState<PageState>('loading');
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [error, setError] = useState('');
 
   // Fetch booking details (public — no auth required)
@@ -27,7 +28,7 @@ export default function ConfirmBookingPage() {
     if (!bookingId) return;
     async function fetchBooking() {
       try {
-        const data = await GraphQLClient.executePublic<{ getBooking: any }>(getBooking, { bookingId });
+        const data = await GraphQLClient.executePublic<{ getBooking: Booking }>(getBooking, { bookingId });
         const b = data.getBooking;
 
         if (!b) {
@@ -153,7 +154,10 @@ export default function ConfirmBookingPage() {
 
   // Review state — show booking details + confirm/decline buttons
   const nights = booking ? calculateNights(booking.checkInDate, booking.checkOutDate) : 0;
-  const total = booking?.pricing?.total || 0;
+  const subtotal = booking?.pricing?.subtotal || 0;
+  const cleaningFee = booking?.pricing?.cleaningFee || 0;
+  const serviceFee = booking?.pricing?.serviceFee || 0;
+  const hostPayout = subtotal + cleaningFee;
   const currency = booking?.pricing?.currency || 'TZS';
 
   return (
@@ -180,9 +184,15 @@ export default function ConfirmBookingPage() {
             <span>{booking?.numberOfGuests}</span>
           </div>
           <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
-            <span>💰 Total</span>
-            <span>{formatPrice(total, currency)}</span>
+            <span>💰 You receive</span>
+            <span>{formatPrice(hostPayout, currency)}</span>
           </div>
+          {serviceFee > 0 && (
+            <div className="flex justify-between text-xs text-ink-400 mt-1">
+              <span>Ndotoni service fee</span>
+              <span>{formatPrice(serviceFee, currency)}</span>
+            </div>
+          )}
         </div>
         {booking?.specialRequests && (
           <div className="mt-3 pt-3 border-t border-ink-100">

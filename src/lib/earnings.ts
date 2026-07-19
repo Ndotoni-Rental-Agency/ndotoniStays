@@ -18,6 +18,8 @@ export interface EarningsBooking {
   numberOfNights: number;
   pricing: {
     total: number;
+    subtotal: number;
+    cleaningFee?: number;
     currency: string;
   } | null;
 }
@@ -56,7 +58,8 @@ export function calculateEarnings(
 
     const isPaid = booking.paymentStatus === 'CAPTURED';
     const nights = booking.numberOfNights || 1;
-    const perNight = (booking.pricing.total || 0) / nights;
+    const hostPayout = (booking.pricing.subtotal || 0) + (booking.pricing.cleaningFee || 0);
+    const perNight = hostPayout / nights;
 
     // Expand booking into individual dates (check-in inclusive, check-out exclusive)
     const start = new Date(booking.checkInDate + 'T00:00:00');

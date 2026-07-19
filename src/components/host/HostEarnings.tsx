@@ -17,6 +17,8 @@ import {
 
 interface BookingPricing {
   total: number;
+  subtotal: number;
+  cleaningFee?: number;
   currency: string;
 }
 
@@ -124,7 +126,8 @@ export function HostEarnings({ propertyIds, currency = 'TZS' }: Props) {
       let monthEarnings = 0;
       for (const b of monthBookings) {
         const nights = b.numberOfNights || 1;
-        const perNight = (b.pricing?.total || 0) / nights;
+        const hostPayout = (b.pricing?.subtotal || 0) + (b.pricing?.cleaningFee || 0);
+        const perNight = hostPayout / nights;
         // Count only nights that fall in this month
         const start = new Date(b.checkInDate + 'T00:00:00');
         const end = new Date(b.checkOutDate + 'T00:00:00');

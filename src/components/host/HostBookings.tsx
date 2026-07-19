@@ -15,6 +15,9 @@ interface BookingGuest {
 
 interface BookingPricing {
   total: number;
+  subtotal: number;
+  cleaningFee?: number;
+  serviceFee?: number;
   currency: string;
   numberOfNights: number;
   nightlyRate: number;
@@ -273,7 +276,7 @@ export function HostBookings({ propertyIds }: Props) {
                     )}
                   </div>
                   <p className="text-sm font-semibold text-ink-900 whitespace-nowrap">
-                    {formatPrice(booking.pricing.total, booking.pricing.currency)}
+                    {formatPrice((booking.pricing.subtotal || 0) + (booking.pricing.cleaningFee || 0), booking.pricing.currency)}
                   </p>
                 </div>
 

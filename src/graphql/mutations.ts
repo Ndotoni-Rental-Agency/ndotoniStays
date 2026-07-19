@@ -390,6 +390,22 @@ export const approveBooking = /* GraphQL */ `mutation ApproveBooking($bookingId:
       __typename
     }
     propertyId
+    propertySnapshot {
+      address {
+        city
+        district
+        region
+        street
+        __typename
+      }
+      currency
+      images
+      nightlyRate
+      propertyType
+      thumbnail
+      title
+      __typename
+    }
     specialRequests
     status
     updatedAt
@@ -652,6 +668,22 @@ export const cancelBooking = /* GraphQL */ `mutation CancelBooking($bookingId: I
         __typename
       }
       propertyId
+      propertySnapshot {
+        address {
+          city
+          district
+          region
+          street
+          __typename
+        }
+        currency
+        images
+        nightlyRate
+        propertyType
+        thumbnail
+        title
+        __typename
+      }
       specialRequests
       status
       updatedAt
@@ -815,6 +847,22 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
         __typename
       }
       propertyId
+      propertySnapshot {
+        address {
+          city
+          district
+          region
+          street
+          __typename
+        }
+        currency
+        images
+        nightlyRate
+        propertyType
+        thumbnail
+        title
+        __typename
+      }
       specialRequests
       status
       updatedAt
@@ -1258,6 +1306,22 @@ export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId:
       __typename
     }
     propertyId
+    propertySnapshot {
+      address {
+        city
+        district
+        region
+        street
+        __typename
+      }
+      currency
+      images
+      nightlyRate
+      propertyType
+      thumbnail
+      title
+      __typename
+    }
     specialRequests
     status
     updatedAt

@@ -443,21 +443,23 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       videos
       __typename
     }
+    propertyId
     propertySnapshot {
-      title
-      thumbnail
-      propertyType
       address {
         city
         district
         region
         street
+        __typename
       }
-      nightlyRate
       currency
       images
+      nightlyRate
+      propertyType
+      thumbnail
+      title
+      __typename
     }
-    propertyId
     specialRequests
     status
     updatedAt
@@ -3361,21 +3363,23 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
         videos
         __typename
       }
+      propertyId
       propertySnapshot {
-        title
-        thumbnail
-        propertyType
         address {
           city
           district
           region
           street
+          __typename
         }
-        nightlyRate
         currency
         images
+        nightlyRate
+        propertyType
+        thumbnail
+        title
+        __typename
       }
-      propertyId
       specialRequests
       status
       updatedAt
@@ -3774,6 +3778,22 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
         __typename
       }
       propertyId
+      propertySnapshot {
+        address {
+          city
+          district
+          region
+          street
+          __typename
+        }
+        currency
+        images
+        nightlyRate
+        propertyType
+        thumbnail
+        title
+        __typename
+      }
       specialRequests
       status
       updatedAt

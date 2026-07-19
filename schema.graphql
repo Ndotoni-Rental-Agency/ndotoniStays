@@ -189,6 +189,7 @@ type Booking @aws_api_key @aws_cognito_user_pools {
   pricing: BookingPricing! @aws_api_key @aws_cognito_user_pools @aws_iam
   property: ShortTermProperty @aws_api_key @aws_cognito_user_pools @aws_iam
   propertyId: ID! @aws_api_key @aws_cognito_user_pools @aws_iam
+  propertySnapshot: PropertySnapshot @aws_api_key @aws_cognito_user_pools @aws_iam
   specialRequests: String @aws_api_key @aws_cognito_user_pools @aws_iam
   status: BookingStatus! @aws_api_key @aws_cognito_user_pools @aws_iam
   updatedAt: AWSDateTime! @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -897,6 +898,23 @@ type PropertySearchResponse @aws_api_key @aws_cognito_user_pools {
   total: Int!
 }
 
+type PropertySnapshot @aws_api_key @aws_cognito_user_pools {
+  address: PropertySnapshotAddress @aws_api_key @aws_cognito_user_pools @aws_iam
+  currency: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+  images: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
+  nightlyRate: Float! @aws_api_key @aws_cognito_user_pools @aws_iam
+  propertyType: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+  thumbnail: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  title: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+}
+
+type PropertySnapshotAddress @aws_api_key @aws_cognito_user_pools {
+  city: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  district: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  region: String @aws_api_key @aws_cognito_user_pools @aws_iam
+  street: String @aws_api_key @aws_cognito_user_pools @aws_iam
+}
+
 type PropertySpecifications @aws_api_key @aws_cognito_user_pools {
   bathrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
   bedrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1334,7 +1352,7 @@ type WhatsAppConversationSummary @aws_cognito_user_pools {
 }
 
 type WhatsAppLinkedUser @aws_cognito_user_pools {
-  email: String!
+  email: String
   firstName: String!
   lastName: String!
   phoneNumber: String

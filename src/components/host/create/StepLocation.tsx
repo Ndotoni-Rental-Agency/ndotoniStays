@@ -147,7 +147,7 @@ export function StepLocation({ form, setForm }: StepProps) {
   const [mapsCoords, setMapsCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [resolvingLink, setResolvingLink] = useState(false);
 
-  // Resolve Google Maps link to coordinates when it changes
+  // Resolve Google Maps link with a short debounce (fires on change, not on Enter)
   useEffect(() => {
     const link = form.googleMapsLink?.trim();
     if (!link || !link.startsWith('http')) {
@@ -155,21 +155,24 @@ export function StepLocation({ form, setForm }: StepProps) {
       return;
     }
 
-    setResolvingLink(true);
-    resolveGoogleMapsCoords(link).then((result) => {
-      if (result) {
-        setMapsCoords({ lat: result.lat, lng: result.lng });
-        setForm((prev) => ({
-          ...prev,
-          lat: result.lat,
-          lng: result.lng,
-          // Always autofill region/district/ward from the Google Maps link
-          ...(result.region ? { region: result.region } : {}),
-          ...(result.district ? { district: result.district } : {}),
-          ...(result.ward ? { ward: result.ward } : {}),
-        }));
-      }
-    }).finally(() => setResolvingLink(false));
+    const timer = setTimeout(() => {
+      setResolvingLink(true);
+      resolveGoogleMapsCoords(link).then((result) => {
+        if (result) {
+          setMapsCoords({ lat: result.lat, lng: result.lng });
+          setForm((prev) => ({
+            ...prev,
+            lat: result.lat,
+            lng: result.lng,
+            ...(result.region ? { region: result.region } : {}),
+            ...(result.district ? { district: result.district } : {}),
+            ...(result.ward ? { ward: result.ward } : {}),
+          }));
+        }
+      }).finally(() => setResolvingLink(false));
+    }, 600);
+
+    return () => clearTimeout(timer);
   }, [form.googleMapsLink]);
 
   useEffect(() => {

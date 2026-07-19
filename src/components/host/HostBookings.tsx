@@ -235,7 +235,7 @@ export function HostBookings({ propertyIds }: Props) {
         <div className="space-y-3">
           {filteredBookings.map((booking) => {
             const statusCfg = STATUS_CONFIG[booking.status] || STATUS_CONFIG.PENDING;
-            const guestName = booking.guestName || (booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim() : 'Guest');
+            const guestName = booking.guest?.firstName || booking.guestName?.split(' ')[0] || 'Guest';
             const isProcessing = actionLoading === booking.bookingId;
             const isPast = booking.checkInDate < today;
 

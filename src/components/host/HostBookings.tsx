@@ -4,44 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listPropertyBookings } from '@/graphql/queries';
 import { approveBooking, declineBooking } from '@/graphql/mutations';
+import { ListPropertyBookingsQuery, BookingStatus } from '@/API';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
-interface BookingGuest {
-  firstName: string;
-  lastName: string;
-  whatsappNumber?: string;
-}
-
-interface BookingPricing {
-  total: number;
-  subtotal: number;
-  cleaningFee?: number;
-  serviceFee?: number;
-  currency: string;
-  numberOfNights: number;
-  nightlyRate: number;
-}
-
-interface Booking {
-  bookingId: string;
-  propertyId: string;
-  checkInDate: string;
-  checkOutDate: string;
-  numberOfGuests: number;
-  numberOfNights: number;
-  status: string;
-  bookingType: string;
-  paymentStatus: string;
-  guest: BookingGuest | null;
-  guestName: string | null;
-  guestEmail: string | null;
-  guestPhone: string | null;
-  pricing: BookingPricing;
-  specialRequests: string | null;
-  createdAt: string;
-  property?: { title: string; thumbnail?: string } | null;
-}
+type Booking = ListPropertyBookingsQuery['listPropertyBookings']['bookings'][number];
 
 interface Props {
   propertyIds: string[];
@@ -145,7 +112,7 @@ export function HostBookings({ propertyIds }: Props) {
       toast.success('Booking approved');
       // Update local state
       setBookings((prev) =>
-        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: 'CONFIRMED' } : b))
+        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: BookingStatus.CONFIRMED } : b))
       );
     } catch (err: any) {
       toast.error(err?.message || 'Failed to approve booking');
@@ -168,7 +135,7 @@ export function HostBookings({ propertyIds }: Props) {
       });
       toast.success('Booking declined');
       setBookings((prev) =>
-        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: 'DECLINED' } : b))
+        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: BookingStatus.DECLINED } : b))
       );
       setDeclineTarget(null);
       setDeclineReason('');
@@ -268,9 +235,7 @@ export function HostBookings({ propertyIds }: Props) {
         <div className="space-y-3">
           {filteredBookings.map((booking) => {
             const statusCfg = STATUS_CONFIG[booking.status] || STATUS_CONFIG.PENDING;
-            const guestName = booking.guestName
-              || (booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim() : null)
-              || 'Guest';
+            const guestName = booking.guestName || (booking.guest ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim() : 'Guest');
             const guestContact = booking.guestPhone || booking.guest?.whatsappNumber || null;
             const isProcessing = actionLoading === booking.bookingId;
             const isPast = booking.checkInDate < today;

@@ -20,6 +20,44 @@ interface Ward {
   name: string;
 }
 
+/**
+ * Resolve a Google Maps URL to coordinates by fetching the page and extracting from body.
+ */
+async function resolveGoogleMapsCoords(url: string): Promise<{ lat: number; lng: number } | null> {
+  if (!url || !url.startsWith('http')) return null;
+  try {
+    const response = await fetch(url, { method: 'GET', redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const finalUrl = response.url;
+
+    // Try extracting from the final URL
+    const atMatch = finalUrl?.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (atMatch) {
+      const lat = parseFloat(atMatch[1]);
+      const lng = parseFloat(atMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+    }
+
+    // Fall back to page body
+    const body = await response.text();
+    const centerMatch = body.match(/center=(-?\d+\.\d+)%2C(-?\d+\.\d+)/);
+    if (centerMatch) {
+      const lat = parseFloat(centerMatch[1]);
+      const lng = parseFloat(centerMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+    }
+
+    const bodyAtMatch = body.match(/@(-?\d+\.\d{4,}),(-?\d+\.\d{4,})/);
+    if (bodyAtMatch) {
+      const lat = parseFloat(bodyAtMatch[1]);
+      const lng = parseFloat(bodyAtMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+    }
+  } catch (err) {
+    console.warn('[StepLocation] Failed to resolve Google Maps link:', err);
+  }
+  return null;
+}
+
 export function StepLocation({ form, setForm }: StepProps) {
   const { t } = useLanguage();
   const [locations, setLocations] = useState<LocationData | null>(null);
@@ -27,6 +65,25 @@ export function StepLocation({ form, setForm }: StepProps) {
   const [wards, setWards] = useState<Ward[]>([]);
   const [loadingWards, setLoadingWards] = useState(false);
   const [wardSearchMode, setWardSearchMode] = useState<'select' | 'custom'>('select');
+  const [mapsCoords, setMapsCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [resolvingLink, setResolvingLink] = useState(false);
+
+  // Resolve Google Maps link to coordinates when it changes
+  useEffect(() => {
+    const link = form.googleMapsLink?.trim();
+    if (!link || !link.startsWith('http')) {
+      setMapsCoords(null);
+      return;
+    }
+
+    setResolvingLink(true);
+    resolveGoogleMapsCoords(link).then((coords) => {
+      if (coords) {
+        setMapsCoords(coords);
+        setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }));
+      }
+    }).finally(() => setResolvingLink(false));
+  }, [form.googleMapsLink]);
 
   useEffect(() => {
     fetchLocations()
@@ -221,14 +278,14 @@ export function StepLocation({ form, setForm }: StepProps) {
               placeholder="e.g. https://maps.app.goo.gl/..."
             />
             <p className="text-xs text-ink-400 mt-1">
-              Paste a Google Maps link to pinpoint your property&apos;s exact location.
+              {resolvingLink ? 'Resolving location...' : 'Paste a Google Maps link to pinpoint your property\u0027s exact location.'}
             </p>
           </div>
         </div>
       </div>
 
       {/* Map for pinning exact location */}
-      {form.region && form.district && (
+      {(form.region && form.district) || mapsCoords ? (
         <div className="border-t border-ink-100 pt-8">
           <h3 className="text-base sm:text-lg font-semibold text-ink-900 mb-1">{t('create.location.pinTitle')}</h3>
           <p className="text-sm text-ink-500 mb-4">{t('create.location.pinSubtitle')}</p>
@@ -239,6 +296,7 @@ export function StepLocation({ form, setForm }: StepProps) {
               ward: form.ward,
               street: form.street,
             }}
+            initialCoords={mapsCoords}
             onChange={(coords) =>
               setForm((prev) => ({ ...prev, lat: coords.lat, lng: coords.lng }))
             }
@@ -249,7 +307,7 @@ export function StepLocation({ form, setForm }: StepProps) {
             </p>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

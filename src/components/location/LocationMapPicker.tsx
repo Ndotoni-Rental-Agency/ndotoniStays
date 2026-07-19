@@ -15,15 +15,24 @@ interface Props {
     ward?: string;
     street?: string;
   };
+  initialCoords?: { lat: number; lng: number } | null;
   onChange: (coords: { lat: number; lng: number }) => void;
 }
 
-export default function LocationMapPicker({ location, onChange }: Props) {
+export default function LocationMapPicker({ location, initialCoords, onChange }: Props) {
   const [position, setPosition] = useState<[number, number]>([
     -6.7924,
     39.2083,
   ]);
   const [loading, setLoading] = useState(false);
+
+  // If initialCoords are provided (e.g. from Google Maps URL), use them directly
+  useEffect(() => {
+    if (initialCoords && initialCoords.lat !== 0 && initialCoords.lng !== 0) {
+      setPosition([initialCoords.lat, initialCoords.lng]);
+      onChange(initialCoords);
+    }
+  }, [initialCoords?.lat, initialCoords?.lng]);
 
   const query = [
     location.street,
@@ -35,7 +44,9 @@ export default function LocationMapPicker({ location, onChange }: Props) {
     .filter(Boolean)
     .join(', ');
 
+  // Only geocode from location text if no initialCoords provided
   useEffect(() => {
+    if (initialCoords && initialCoords.lat !== 0 && initialCoords.lng !== 0) return;
     if (!location.region || !location.district) return;
 
     setLoading(true);

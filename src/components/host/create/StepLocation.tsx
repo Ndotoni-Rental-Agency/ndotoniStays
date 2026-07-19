@@ -123,9 +123,9 @@ export function StepLocation({ form, setForm }: StepProps) {
           ...prev,
           lat: result.lat,
           lng: result.lng,
-          // Auto-fill region/district if not already set
-          ...(result.region && !prev.region ? { region: result.region } : {}),
-          ...(result.district && !prev.district ? { district: result.district } : {}),
+          // Always autofill region/district from the Google Maps link
+          ...(result.region ? { region: result.region } : {}),
+          ...(result.district ? { district: result.district } : {}),
         }));
       }
     }).finally(() => setResolvingLink(false));
@@ -207,6 +207,30 @@ export function StepLocation({ form, setForm }: StepProps) {
         <p className="text-sm sm:text-base text-ink-500 mb-6">{t('create.location.subtitle')}</p>
 
         <div className="max-w-xl space-y-4">
+          {/* Google Maps link — primary input */}
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">
+              Google Maps link
+            </label>
+            <input
+              type="url"
+              value={form.googleMapsLink}
+              onChange={(e) => setForm((prev) => ({ ...prev, googleMapsLink: e.target.value }))}
+              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
+              placeholder="e.g. https://maps.app.goo.gl/..."
+            />
+            <p className="text-xs text-ink-400 mt-1">
+              {resolvingLink ? 'Resolving location...' : 'Paste your property\u0027s Google Maps link to auto-fill location and pin the map.'}
+            </p>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-ink-100" />
+            <span className="text-xs text-ink-400">or select manually</span>
+            <div className="h-px flex-1 bg-ink-100" />
+          </div>
+
           {/* Region */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
@@ -306,26 +330,6 @@ export function StepLocation({ form, setForm }: StepProps) {
               className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
               placeholder={t('create.location.streetPlaceholder')}
             />
-          </div>
-
-          {/* Google Maps link */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-medium text-ink-700">
-                Google Maps link
-              </label>
-              <span className="text-xs text-ink-400">optional</span>
-            </div>
-            <input
-              type="url"
-              value={form.googleMapsLink}
-              onChange={(e) => setForm((prev) => ({ ...prev, googleMapsLink: e.target.value }))}
-              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-              placeholder="e.g. https://maps.app.goo.gl/..."
-            />
-            <p className="text-xs text-ink-400 mt-1">
-              {resolvingLink ? 'Resolving location...' : 'Paste a Google Maps link to pinpoint your property\u0027s exact location.'}
-            </p>
           </div>
         </div>
       </div>

@@ -1,11 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { Icon } from 'leaflet';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Circle, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix: tell Leaflet where to load marker images from
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 
 const PIN_COLOR = '#1f2937'; // gray-800
 
-const createPin = (L: typeof import('leaflet')) => {
+const createCustomPin = () => {
   return new L.Icon({
     iconUrl: 'data:image/svg+xml;base64,' + btoa(`
       <svg width="25" height="41" viewBox="0 0 25 41" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -29,13 +34,7 @@ interface Props {
 }
 
 export default function LeafletMapView({ lat, lng, radius = 600 }: Props) {
-  const [pin, setPin] = useState<Icon | null>(null);
-  const [mapModules, setMapModules] = useState<{
-    MapContainer: typeof import('react-leaflet').MapContainer;
-    TileLayer: typeof import('react-leaflet').TileLayer;
-    Circle: typeof import('react-leaflet').Circle;
-    Marker: typeof import('react-leaflet').Marker;
-  } | null>(null);
+  const [pin, setPin] = useState<L.Icon | null>(null);
 
   // Offset for privacy (consistent per property)
   const getApproximateLocation = (): [number, number] => {
@@ -49,25 +48,10 @@ export default function LeafletMapView({ lat, lng, radius = 600 }: Props) {
   const [pinPosition] = useState(getApproximateLocation());
 
   useEffect(() => {
-    let cancelled = false;
-    Promise.all([import('leaflet'), import('react-leaflet')]).then(([leaflet, reactLeaflet]) => {
-      if (cancelled) return;
-      const L = leaflet;
-      delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
-      setMapModules({
-        MapContainer: reactLeaflet.MapContainer,
-        TileLayer: reactLeaflet.TileLayer,
-        Circle: reactLeaflet.Circle,
-        Marker: reactLeaflet.Marker,
-      });
-      setPin(createPin(L));
-    });
-    return () => { cancelled = true; };
+    setPin(createCustomPin());
   }, []);
 
-  if (!pin || !mapModules) return null;
-
-  const { MapContainer, TileLayer, Circle, Marker } = mapModules;
+  if (!pin) return null;
 
   return (
     <div className="h-full w-full rounded-xl overflow-hidden relative z-0">

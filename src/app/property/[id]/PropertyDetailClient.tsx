@@ -4,53 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty } from '@/graphql/queries';
+import { ShortTermProperty } from '@/API';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { usePropertyCoordinates } from '@/hooks/usePropertyCoordinates';
-
-interface ShortTermProperty {
-  propertyId: string;
-  hostId: string;
-  host: { userId: string; firstName: string; lastName: string; profileImage: string | null; phoneNumber: string } | null;
-  title: string;
-  description: string;
-  propertyType: string;
-  address: { street: string; city: string; region: string; district: string; country: string } | null;
-  coordinates: { latitude: number; longitude: number } | null;
-  googleMapsUrl: string | null;
-  region: string;
-  district: string;
-  images: string[];
-  videos?: string[];
-  thumbnail: string;
-  amenities: string[];
-  nightlyRate: number;
-  currency: string;
-  cleaningFee: number | null;
-  serviceFeePercentage: number | null;
-  taxPercentage: number | null;
-  minimumStay: number | null;
-  maximumStay: number | null;
-  instantBookEnabled: boolean;
-  cancellationPolicy: string | null;
-  checkInTime: string | null;
-  checkOutTime: string | null;
-  checkInInstructions: string | null;
-  maxGuests: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  allowsPets: boolean | null;
-  allowsChildren: boolean | null;
-  allowsSmoking: boolean | null;
-  houseRules: string[] | null;
-  ratingSummary: { averageRating: number; totalReviews: number; cleanliness: number; accuracy: number; communication: number; location: number; value: number } | null;
-  averageRating: number | null;
-  status: string;
-  createdAt: string;
-}
 
 export function PropertyDetailClient() {
   const { id } = useParams();
@@ -116,13 +76,13 @@ export function PropertyDetailClient() {
     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
       {/* Gallery — full-bleed on mobile, padded on desktop */}
       <div className="sm:px-0">
-        <PropertyGallery images={property.images} videos={property.videos} title={property.title} />
+        <PropertyGallery images={property.images ?? []} videos={property.videos ?? undefined} title={property.title} />
       </div>
 
       {/* Mobile booking card - shown above property details on small screens */}
       <div className="mt-6 px-4 sm:px-0 lg:hidden">
         <BookingSidebar
-          property={property}
+          property={property as any}
           initialCheckIn={checkIn}
           initialCheckOut={checkOut}
         />
@@ -132,10 +92,10 @@ export function PropertyDetailClient() {
       <div className="mt-8 px-4 sm:px-0 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Property info */}
         <div className="lg:col-span-2">
-          <PropertyInfo property={property} />
+          <PropertyInfo property={property as any} />
           <PropertyReviews
             propertyId={property.propertyId}
-            ratingSummary={property.ratingSummary}
+            ratingSummary={property.ratingSummary as any}
           />
           <PropertyLocationMap
             lat={coords?.lat || 0}
@@ -147,7 +107,7 @@ export function PropertyDetailClient() {
         {/* Right: Booking sidebar (sticky) - desktop only */}
         <div className="hidden lg:block lg:col-span-1">
           <BookingSidebar
-            property={property}
+            property={property as any}
             initialCheckIn={checkIn}
             initialCheckOut={checkOut}
           />

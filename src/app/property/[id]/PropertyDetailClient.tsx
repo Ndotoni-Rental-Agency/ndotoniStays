@@ -82,7 +82,7 @@ export function PropertyDetailClient() {
       {/* Mobile booking card - shown above property details on small screens */}
       <div className="mt-6 px-4 sm:px-0 lg:hidden">
         <BookingSidebar
-          property={property as any}
+          property={property}
           initialCheckIn={checkIn}
           initialCheckOut={checkOut}
         />
@@ -92,10 +92,10 @@ export function PropertyDetailClient() {
       <div className="mt-8 px-4 sm:px-0 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Property info */}
         <div className="lg:col-span-2">
-          <PropertyInfo property={property as any} />
+          <PropertyInfo property={property} />
           <PropertyReviews
             propertyId={property.propertyId}
-            ratingSummary={property.ratingSummary as any}
+            ratingSummary={property.ratingSummary}
           />
           <PropertyLocationMap
             lat={coords?.lat || 0}
@@ -107,7 +107,7 @@ export function PropertyDetailClient() {
         {/* Right: Booking sidebar (sticky) - desktop only */}
         <div className="hidden lg:block lg:col-span-1">
           <BookingSidebar
-            property={property as any}
+            property={property}
             initialCheckIn={checkIn}
             initialCheckOut={checkOut}
           />

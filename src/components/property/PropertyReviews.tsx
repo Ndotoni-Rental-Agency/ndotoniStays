@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
+import { PropertyRatingSummary } from '@/API';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
@@ -53,19 +54,9 @@ interface Review {
   createdAt: string;
 }
 
-interface RatingSummary {
-  averageRating: number;
-  totalReviews: number;
-  cleanliness: number;
-  accuracy: number;
-  communication: number;
-  location: number;
-  value: number;
-}
-
 interface Props {
   propertyId: string;
-  ratingSummary: RatingSummary | null;
+  ratingSummary: PropertyRatingSummary | null | undefined;
 }
 
 const CATEGORY_LABELS = [
@@ -151,7 +142,7 @@ export function PropertyReviews({ propertyId, ratingSummary }: Props) {
       {ratingSummary && ratingSummary.totalReviews > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
           {CATEGORY_LABELS.map(({ key, label, emoji }) => {
-            const score = ratingSummary[key as keyof RatingSummary] as number;
+            const score = ratingSummary[key as keyof PropertyRatingSummary] as number;
             return (
               <div key={key} className="flex items-center justify-between">
                 <span className="text-sm text-ink-700">{emoji} {label}</span>

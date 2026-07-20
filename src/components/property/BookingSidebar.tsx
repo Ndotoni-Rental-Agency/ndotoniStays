@@ -9,18 +9,10 @@ import { calculateBookingPrice, getBlockedDates, checkAvailability } from "@/gra
 import { useAuth } from "@/contexts/AuthContext";
 import CalendarDatePicker from "@/components/ui/CalendarDatePicker";
 
+import { ShortTermProperty } from '@/API';
+
 interface Props {
-  property: {
-    propertyId: string;
-    title: string;
-    nightlyRate: number;
-    currency: string;
-    cleaningFee: number | null;
-    maxGuests: number | null;
-    instantBookEnabled: boolean;
-    minimumStay: number | null;
-    host: { firstName: string; phoneNumber: string } | null;
-  };
+  property: ShortTermProperty;
   initialCheckIn: string;
   initialCheckOut: string;
 }

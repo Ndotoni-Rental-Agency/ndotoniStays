@@ -1,35 +1,9 @@
 import { StarIcon, MapPinIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ShortTermProperty } from '@/API';
 
 interface Props {
-  property: {
-    title: string;
-    description: string;
-    propertyType: string;
-    region: string;
-    district: string;
-    host: { firstName: string; lastName: string; profileImage?: string | null } | null;
-    amenities: string[];
-    maxGuests: number | null;
-    bedrooms?: number | null;
-    bathrooms?: number | null;
-    checkInTime: string | null;
-    checkOutTime: string | null;
-    cancellationPolicy: string | null;
-    allowsPets: boolean | null;
-    allowsSmoking: boolean | null;
-    houseRules: string[] | null;
-    instantBookEnabled: boolean;
-    ratingSummary: {
-      averageRating: number;
-      totalReviews: number;
-      cleanliness: number;
-      accuracy: number;
-      communication: number;
-      location: number;
-      value: number;
-    } | null;
-  };
+  property: ShortTermProperty;
 }
 
 function capitalize(name: string): string {
@@ -116,7 +90,7 @@ export function PropertyInfo({ property }: Props) {
       )}
 
       {/* Amenities */}
-      {property.amenities?.length > 0 && (
+      {property.amenities && property.amenities.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-ink-900 mb-3">What&apos;s included</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

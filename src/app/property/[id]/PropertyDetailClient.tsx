@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty } from '@/graphql/queries';
-import { GoogleMapsParser } from '@/lib/parse-google-maps-link';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
+import { usePropertyCoordinates } from '@/hooks/usePropertyCoordinates';
 
 interface ShortTermProperty {
   propertyId: string;
@@ -61,6 +61,8 @@ export function PropertyDetailClient() {
 
   const checkIn = searchParams.get('checkIn') || '';
   const checkOut = searchParams.get('checkOut') || '';
+
+  const coords = usePropertyCoordinates(property);
 
   useEffect(() => {
     if (!id) return;
@@ -136,8 +138,8 @@ export function PropertyDetailClient() {
             ratingSummary={property.ratingSummary}
           />
           <PropertyLocationMap
-            lat={property.coordinates?.latitude || (property.googleMapsUrl ? GoogleMapsParser.parse(property.googleMapsUrl)?.latitude : 0) || 0}
-            lng={property.coordinates?.longitude || (property.googleMapsUrl ? GoogleMapsParser.parse(property.googleMapsUrl)?.longitude : 0) || 0}
+            lat={coords?.lat || 0}
+            lng={coords?.lng || 0}
             title={property.title}
           />
         </div>

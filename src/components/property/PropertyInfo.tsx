@@ -1,6 +1,10 @@
+'use client';
+
 import { StarIcon, MapPinIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/solid';
-import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { ShortTermProperty } from '@/API';
+import { useChatNavigation } from '@/hooks/useChatNavigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Props {
   property: ShortTermProperty;
@@ -15,9 +19,13 @@ function capitalize(name: string): string {
 }
 
 export function PropertyInfo({ property }: Props) {
+  const { navigateToChat } = useChatNavigation();
+  const { user } = useAuth();
   const hostName = property.host
     ? capitalize(`${property.host.firstName} ${property.host.lastName}`)
     : 'Host';
+
+  const isOwnProperty = user?.userId === property.hostId;
 
   return (
     <div className="space-y-8">
@@ -68,7 +76,7 @@ export function PropertyInfo({ property }: Props) {
             {hostName.charAt(0)}
           </div>
         )}
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-medium text-ink-900">Hosted by {hostName}</p>
           {property.instantBookEnabled && (
             <p className="text-xs text-brand-600 flex items-center gap-1">
@@ -77,6 +85,19 @@ export function PropertyInfo({ property }: Props) {
             </p>
           )}
         </div>
+        {!isOwnProperty && (
+          <button
+            onClick={() => navigateToChat({
+              propertyId: property.propertyId,
+              propertyTitle: property.title,
+              landlordName: hostName,
+            })}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
+          >
+            <ChatBubbleLeftRightIcon className="h-4 w-4" />
+            Message
+          </button>
+        )}
       </div>
 
       {/* Description */}

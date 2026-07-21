@@ -75,6 +75,14 @@ export class GraphQLClient {
 
     return result.data as T;
   }
+
+  /**
+   * Get the raw Amplify client for subscriptions and other advanced features
+   */
+  static getRawClient() {
+    return getClient();
+  }
 }
+
 
 export default GraphQLClient;

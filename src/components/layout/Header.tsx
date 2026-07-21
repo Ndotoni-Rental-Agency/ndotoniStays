@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { useChat } from '@/contexts/ChatContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 
 export function Header() {
   const { user, isAuthenticated, signOut } = useAuth();
+  const { unreadCount } = useChat();
   const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -58,6 +60,25 @@ export function Header() {
 
               {isAuthenticated ? (
                 <div className="relative">
+                  <Link
+                    href="/chat"
+                    className="relative p-2 text-ink-600 hover:text-ink-900 transition-colors"
+                    title={t('nav.messages') || 'Messages'}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-brand-500 rounded-full">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              ) : null}
+
+              {isAuthenticated ? (
+                <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                     className="flex items-center gap-2 rounded-full border border-ink-200 py-1.5 pl-3 pr-1.5 hover:shadow-md transition-shadow"
@@ -78,6 +99,14 @@ export function Header() {
                         </div>
                         <Link href="/profile" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           {t('nav.profile')}
+                        </Link>
+                        <Link href="/chat" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
+                          {t('nav.messages') || 'Messages'}
+                          {unreadCount > 0 && (
+                            <span className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-brand-500 rounded-full">
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                          )}
                         </Link>
                         <Link href="/bookings" className="block px-4 py-2 text-sm text-ink-700 hover:bg-ink-50" onClick={() => setUserMenuOpen(false)}>
                           {t('nav.myBookings')}
@@ -160,6 +189,18 @@ export function Header() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t('nav.profile')}
+                    </Link>
+                    <Link
+                      href="/chat"
+                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50 flex items-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {t('nav.messages') || 'Messages'}
+                      {unreadCount > 0 && (
+                        <span className="ml-2 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-brand-500 rounded-full">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       href="/bookings"

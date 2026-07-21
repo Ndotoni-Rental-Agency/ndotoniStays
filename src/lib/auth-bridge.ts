@@ -186,6 +186,40 @@ export class AuthBridge {
   }
 
   /**
+   * Sign in with Apple via Cognito Hosted UI
+   */
+  static async signInWithApple() {
+    try {
+      await cognitoSignOut().catch(() => {});
+      await signInWithRedirect({ provider: 'Apple' });
+    } catch (error: any) {
+      const hasSession = await AuthBridge.hasSession();
+      if (hasSession) {
+        window.location.reload();
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Sign in with Facebook via Cognito Hosted UI
+   */
+  static async signInWithFacebook() {
+    try {
+      await cognitoSignOut().catch(() => {});
+      await signInWithRedirect({ provider: 'Facebook' });
+    } catch (error: any) {
+      const hasSession = await AuthBridge.hasSession();
+      if (hasSession) {
+        window.location.reload();
+        return;
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Sign out
    */
   static async signOut() {

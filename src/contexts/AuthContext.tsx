@@ -38,6 +38,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (input: { email: string; password: string; firstName: string; lastName: string; phoneNumber: string }) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   resendVerificationCode: (email: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -105,6 +107,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await AuthBridge.signInWithGoogle();
   }
 
+  async function signInWithApple() {
+    await AuthBridge.signInWithApple();
+  }
+
+  async function signInWithFacebook() {
+    await AuthBridge.signInWithFacebook();
+  }
+
   async function verifyEmail(email: string, code: string) {
     await AuthBridge.verifyEmail(email, code);
   }
@@ -137,6 +147,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         signInWithGoogle,
+        signInWithApple,
+        signInWithFacebook,
         verifyEmail,
         resendVerificationCode,
         forgotPassword,
@@ -161,6 +173,8 @@ export function useAuth() {
         signIn: async () => {},
         signUp: async () => {},
         signInWithGoogle: async () => {},
+        signInWithApple: async () => {},
+        signInWithFacebook: async () => {},
         verifyEmail: async () => {},
         resendVerificationCode: async () => {},
         forgotPassword: async () => {},

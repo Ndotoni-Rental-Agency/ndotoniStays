@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listPropertyBookings } from '@/graphql/queries';
-import { approveBooking, declineBooking } from '@/graphql/mutations';
+import { approveBooking, declineBooking, initializeDirectChat } from '@/graphql/mutations';
 import { ListPropertyBookingsQuery, BookingStatus } from '@/API';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
 type Booking = ListPropertyBookingsQuery['listPropertyBookings']['bookings'][number];
 
@@ -34,11 +36,13 @@ const PAYMENT_CONFIG: Record<string, { label: string; classes: string }> = {
 };
 
 export function HostBookings({ propertyIds }: Props) {
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>('ALL');
   const [timeFilter, setTimeFilter] = useState<'upcoming' | 'past'>('upcoming');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [messagingGuest, setMessagingGuest] = useState<string | null>(null);
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
 
@@ -143,6 +147,23 @@ export function HostBookings({ propertyIds }: Props) {
       toast.error(err?.message || 'Failed to decline booking');
     } finally {
       setActionLoading(null);
+    }
+  }
+
+  async function handleMessageGuest(guestId: string, guestName: string) {
+    setMessagingGuest(guestId);
+    try {
+      const data = await GraphQLClient.executeAuthenticated<{
+        initializeDirectChat: { conversationId: string; targetUserInfo: any };
+      }>(initializeDirectChat, { targetUserId: guestId });
+
+      const { conversationId } = data.initializeDirectChat;
+      router.push(`/chat?conversationId=${conversationId}&landlordName=${encodeURIComponent(guestName)}`);
+    } catch (err: any) {
+      console.error('Error starting chat with guest:', err);
+      toast.error('Failed to start conversation');
+    } finally {
+      setMessagingGuest(null);
     }
   }
 
@@ -336,7 +357,28 @@ export function HostBookings({ propertyIds }: Props) {
                   </div>
                 )}
 
-                {/* In-app messaging — available through the mobile app */}
+                {/* Message guest button */}
+                {booking.guestId && (
+                  <div className={cn('pt-2', booking.status === 'PENDING' && !isPast ? '' : 'border-t border-ink-100')}>
+                    <button
+                      onClick={() => handleMessageGuest(
+                        booking.guestId!,
+                        booking.guest
+                          ? `${booking.guest.firstName} ${booking.guest.lastName || ''}`.trim()
+                          : booking.guestName || 'Guest'
+                      )}
+                      disabled={messagingGuest === booking.guestId}
+                      className="flex items-center gap-1.5 text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors disabled:opacity-50"
+                    >
+                      {messagingGuest === booking.guestId ? (
+                        <div className="w-4 h-4 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" />
+                      ) : (
+                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                      )}
+                      Message Guest
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

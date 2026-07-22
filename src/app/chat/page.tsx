@@ -20,6 +20,7 @@ import { ChatHeader } from '@/components/chat/ChatHeader';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
 import { LoadingSpinner, UnauthenticatedState } from '@/components/chat/LoadingStates';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 function ChatPageContent() {
   const searchParams = useSearchParams();
@@ -215,7 +216,12 @@ function ChatPageContent() {
   }
 
   if (!isAuthenticated) {
-    return <UnauthenticatedState onSignIn={() => setShowAuthModal(true)} />;
+    return (
+      <>
+        <UnauthenticatedState onSignIn={() => setShowAuthModal(true)} />
+        <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      </>
+    );
   }
 
   return (

@@ -9,6 +9,7 @@ import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getMediaUploadUrl } from '@/graphql/mutations';
 import { UserCircleIcon, PencilIcon, CheckIcon, XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
+import { getSafeErrorMessage } from '@/lib/error-utils';
 
 interface ProfileFormData {
   firstName: string;
@@ -138,7 +139,7 @@ export default function ProfilePage() {
         await refreshUser();
       }
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to update profile');
+      showError(getSafeErrorMessage(error, 'updating your profile'));
     }
   };
 
@@ -160,7 +161,7 @@ export default function ProfilePage() {
         await refreshUser();
       }
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to update address');
+      showError(getSafeErrorMessage(error, 'updating your address'));
     }
   };
 
@@ -178,7 +179,7 @@ export default function ProfilePage() {
         await refreshUser();
       }
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to update emergency contact');
+      showError(getSafeErrorMessage(error, 'updating emergency contact'));
     }
   };
 
@@ -245,7 +246,7 @@ export default function ProfilePage() {
                     await refreshUser();
                   }
                 } catch (err) {
-                  showError(err instanceof Error ? err.message : 'Failed to update photo');
+                  showError(getSafeErrorMessage(err, 'updating your photo'));
                 }
               }}
             />

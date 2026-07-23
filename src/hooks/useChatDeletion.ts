@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { deleteConversation, deleteMessage } from '@/graphql/mutations';
 import { toast } from 'react-hot-toast';
+import { getSafeErrorMessage } from '@/lib/error-utils';
 
 interface DeleteResponse {
   success: boolean;
@@ -40,7 +41,7 @@ export function useChatDeletion(): UseChatDeletionReturn {
       }
     } catch (error) {
       console.error('Error deleting conversation:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete conversation');
+      toast.error(getSafeErrorMessage(error, 'deleting conversation'));
       return false;
     } finally {
       setIsDeletingConversation(false);
@@ -66,7 +67,7 @@ export function useChatDeletion(): UseChatDeletionReturn {
       }
     } catch (error) {
       console.error('Error deleting message:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete message');
+      toast.error(getSafeErrorMessage(error, 'deleting message'));
       return false;
     } finally {
       setIsDeletingMessage(false);

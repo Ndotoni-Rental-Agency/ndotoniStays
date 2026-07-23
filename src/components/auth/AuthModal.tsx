@@ -4,6 +4,7 @@ import { useState, Fragment } from 'react';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { getSafeErrorMessage } from '@/lib/error-utils';
 
 type AuthView = 'signIn' | 'signUp' | 'verify' | 'forgotPassword' | 'resetPassword';
 
@@ -51,7 +52,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
         setView('verify');
         setError(null);
       } else {
-        setError(err.message || 'Sign in failed. Check your credentials.');
+        setError(getSafeErrorMessage(err, 'signing in'));
       }
     } finally {
       setLoading(false);
@@ -68,7 +69,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
       setView('verify');
       setSuccess('Account created! Check your email for the verification code.');
     } catch (err: any) {
-      setError(err.message || 'Sign up failed.');
+      setError(getSafeErrorMessage(err, 'creating your account'));
     } finally {
       setLoading(false);
     }
@@ -87,7 +88,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
         resetForm();
       }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Verification failed.');
+      setError(getSafeErrorMessage(err, 'verifying your email'));
     } finally {
       setLoading(false);
     }
@@ -98,7 +99,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
       await resendVerificationCode(email);
       setSuccess('New code sent to your email.');
     } catch (err: any) {
-      setError(err.message || 'Failed to resend code.');
+      setError(getSafeErrorMessage(err, 'resending verification code'));
     }
   }
 
@@ -112,7 +113,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
       setView('resetPassword');
       setSuccess('Reset code sent to your email.');
     } catch (err: any) {
-      setError(err.message || 'Failed to send reset email.');
+      setError(getSafeErrorMessage(err, 'sending reset email'));
     } finally {
       setLoading(false);
     }
@@ -131,7 +132,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
         resetForm();
       }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Password reset failed.');
+      setError(getSafeErrorMessage(err, 'resetting your password'));
     } finally {
       setLoading(false);
     }

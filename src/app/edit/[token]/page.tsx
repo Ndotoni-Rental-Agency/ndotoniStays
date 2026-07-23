@@ -15,6 +15,7 @@ import {
   KeyIcon,
 } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
+import { getSafeErrorMessage } from '@/lib/error-utils';
 
 const API_BASE = process.env.NEXT_PUBLIC_WHATSAPP_API_URL || '';
 
@@ -59,7 +60,7 @@ export default function TokenEditPage() {
       })
       .catch((e) => {
         console.error('[EditToken] Error:', e.message);
-        setError(e.message);
+        setError(getSafeErrorMessage(e, 'kupakia taarifa'));
       })
       .finally(() => setLoading(false));
   }, [token]);
@@ -253,7 +254,7 @@ function PropertyEditorFull({
       await saveViaToken(input);
       toast.success('Imehifadhiwa!');
     } catch (err: any) {
-      toast.error(err?.message || 'Imeshindikana kuhifadhi');
+      toast.error(getSafeErrorMessage(err, 'kuhifadhi'));
     } finally {
       setSaving(false);
     }
@@ -266,7 +267,7 @@ function PropertyEditorFull({
       toast.success('Picha zimehifadhiwa!');
       setHasMediaChanges(false);
     } catch (err: any) {
-      toast.error(err?.message || 'Imeshindikana kuhifadhi picha');
+      toast.error(getSafeErrorMessage(err, 'kuhifadhi picha'));
     } finally {
       setSaving(false);
     }
@@ -278,7 +279,7 @@ function PropertyEditorFull({
       toast.success('Nyumba imefutwa');
       if (onBack) onBack();
     } catch (err: any) {
-      toast.error(err?.message || 'Imeshindikana kufuta');
+      toast.error(getSafeErrorMessage(err, 'kufuta'));
     }
   }
 

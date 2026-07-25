@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
@@ -63,6 +63,23 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
     }
     return () => { document.body.style.overflow = ''; };
   }, [showFilters]);
+
+  // Auto-search when main filters change (debounced 400ms)
+  const isInitialMount = useRef(true);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Skip auto-search on initial mount (URL params already trigger search in SearchContent)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      handleApply();
+    }, 400);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [localRegion, localCheckIn, localCheckOut, localGuests]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMinPriceChange = (value: string) => {
     setLocalMinPrice(value);

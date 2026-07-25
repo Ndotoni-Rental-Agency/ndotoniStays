@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyBookings } from '@/graphql/queries';
-import { createReview } from '@/graphql/mutations';
+import { createReview, cancelBooking } from '@/graphql/mutations';
 import { getCdnUrl } from '@/lib/utils';
 
 // Lightweight query just for property images
@@ -78,6 +78,7 @@ export default function MyBookingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
   const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -164,6 +165,23 @@ export default function MyBookingsPage() {
       } else {
         throw err;
       }
+    }
+  }
+
+  async function handleCancelBooking(booking: Booking) {
+    if (!confirm(`Are you sure you want to cancel your booking at ${booking.property?.title || 'this property'}?`)) return;
+    setCancellingId(booking.bookingId);
+    try {
+      await GraphQLClient.executeAuthenticated(cancelBooking, {
+        bookingId: booking.bookingId,
+        reason: 'Cancelled by guest',
+      });
+      toast.success('Booking cancelled.');
+      await fetchBookings();
+    } catch (err: any) {
+      toast.error(err?.errors?.[0]?.message || err?.message || 'Failed to cancel booking.');
+    } finally {
+      setCancellingId(null);
     }
   }
 
@@ -354,6 +372,19 @@ export default function MyBookingsPage() {
                       className="w-full py-2.5 rounded-xl border-2 border-ink-800 text-xs font-semibold text-ink-800 hover:bg-ink-800 hover:text-white transition-colors touch-manipulation"
                     >
                       ⭐ Write a review
+                    </button>
+                  </div>
+                )}
+
+                {/* Cancel button for upcoming unpaid bookings */}
+                {activeTab === 'upcoming' && (booking.status === 'PENDING' || booking.status === 'CONFIRMED') && booking.paymentStatus !== 'CAPTURED' && booking.paymentStatus !== 'AUTHORIZED' && (
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
+                    <button
+                      onClick={() => handleCancelBooking(booking)}
+                      disabled={cancellingId === booking.bookingId}
+                      className="w-full py-2.5 rounded-xl border-2 border-red-400 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white transition-colors touch-manipulation disabled:opacity-50"
+                    >
+                      {cancellingId === booking.bookingId ? 'Cancelling...' : 'Cancel booking'}
                     </button>
                   </div>
                 )}

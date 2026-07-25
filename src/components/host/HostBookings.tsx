@@ -150,6 +150,24 @@ export function HostBookings({ propertyIds }: Props) {
     }
   }
 
+  async function handleDismissExpired(bookingId: string) {
+    setActionLoading(bookingId);
+    try {
+      await GraphQLClient.executeAuthenticated(declineBooking, {
+        bookingId,
+        reason: 'Booking expired — check-in date passed',
+      });
+      setBookings((prev) =>
+        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: BookingStatus.DECLINED } : b))
+      );
+      toast.success('Expired booking dismissed');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to dismiss booking');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   async function handleMessageGuest(guestId: string, guestName: string) {
     setMessagingGuest(guestId);
     try {
@@ -180,7 +198,7 @@ export function HostBookings({ propertyIds }: Props) {
     return `TZS ${amount.toLocaleString()}`;
   }
 
-  const pendingCount = bookings.filter((b) => b.status === 'PENDING').length;
+  const pendingCount = bookings.filter((b) => b.status === 'PENDING' && b.checkInDate >= today).length;
   const today = new Date().toISOString().split('T')[0];
   const filteredBookings = bookings.filter((b) => {
     if (timeFilter === 'upcoming') return b.checkOutDate >= today;

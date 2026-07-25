@@ -256,6 +256,8 @@ export function BookingSidebar({
               blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
+              rangeMode
+              onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
             />
             <CalendarDatePicker
               value={checkOut}
@@ -267,6 +269,9 @@ export function BookingSidebar({
               blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
+              rangeMode
+              rangePhaseStart="checkOut"
+              onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
             />
           </div>
 

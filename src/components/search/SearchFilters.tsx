@@ -131,7 +131,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           </select>
         </div>
 
-        <div className="hidden sm:flex gap-2 min-w-[280px]">
+        <div className="hidden sm:flex gap-2">
           <DateRangePicker
             checkIn={localCheckIn}
             checkOut={localCheckOut}

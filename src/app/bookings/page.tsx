@@ -282,7 +282,12 @@ export default function MyBookingsPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
           {filtered.map((booking) => {
-            const badge = STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
+            const isPaid = booking.paymentStatus === 'CAPTURED' || booking.paymentStatus === 'AUTHORIZED';
+            const badge = booking.status === 'CONFIRMED' && !isPaid
+              ? { label: 'Confirmed — Pay now', classes: 'bg-blue-100 text-blue-700' }
+              : booking.status === 'CONFIRMED' && isPaid
+              ? { label: 'Confirmed & Paid', classes: 'bg-green-100 text-green-700' }
+              : STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
             const canReview = (
               !reviewedBookingIds.has(booking.bookingId) &&
               (booking.status === 'COMPLETED' ||

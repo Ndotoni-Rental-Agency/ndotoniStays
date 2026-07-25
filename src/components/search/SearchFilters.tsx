@@ -65,6 +65,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
   }, [showFilters]);
 
   // Auto-search when main filters change (debounced 400ms)
+  // Don't trigger if check-in changed but check-out is empty (user still picking dates)
   const isInitialMount = useRef(true);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,6 +75,9 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
       isInitialMount.current = false;
       return;
     }
+    // Don't auto-search if user selected check-in but hasn't picked check-out yet
+    if (localCheckIn && !localCheckOut) return;
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       handleApply();

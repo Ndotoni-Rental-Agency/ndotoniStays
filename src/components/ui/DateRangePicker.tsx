@@ -8,7 +8,10 @@ interface DateRangePickerProps {
   checkOut: string;
   onCheckInChange: (value: string) => void;
   onCheckOutChange: (value: string) => void;
-  label?: string;
+  checkInLabel?: string;
+  checkOutLabel?: string;
+  checkInPlaceholder?: string;
+  checkOutPlaceholder?: string;
   className?: string;
   disabled?: boolean;
   blockedDates?: Set<string>;
@@ -21,7 +24,10 @@ export default function DateRangePicker({
   checkOut,
   onCheckInChange,
   onCheckOutChange,
-  label,
+  checkInLabel = 'Check-in',
+  checkOutLabel = 'Check-out',
+  checkInPlaceholder = 'Add date',
+  checkOutPlaceholder = 'Add date',
   className,
   disabled = false,
   blockedDates = new Set(),
@@ -37,8 +43,7 @@ export default function DateRangePicker({
     if (isOpen) {
       setTempCheckIn(checkIn);
       setTempCheckOut(checkOut);
-      setPhase(checkIn ? 'checkOut' : 'checkIn');
-      // Set current month to check-in date or today
+      // Set current month based on existing selection or today
       if (checkIn) {
         const [y, m] = checkIn.split('-').map(Number);
         setCurrentMonth(new Date(y, m - 1, 1));
@@ -52,10 +57,16 @@ export default function DateRangePicker({
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-  const formatDisplay = (dateStr: string, placeholder: string) => {
-    if (!dateStr) return placeholder;
+  const formatDisplay = (dateStr: string) => {
+    if (!dateStr) return '';
     const [year, month, day] = dateStr.split('-').map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const openPicker = (startPhase: SelectionPhase) => {
+    if (disabled) return;
+    setPhase(startPhase);
+    setIsOpen(true);
   };
 
   const handleDateClick = (dateStr: string) => {
@@ -64,15 +75,14 @@ export default function DateRangePicker({
       setTempCheckOut('');
       setPhase('checkOut');
     } else {
-      // Check-out must be after check-in
       if (dateStr <= tempCheckIn) {
-        // User clicked before check-in — reset and make this the new check-in
+        // Clicked before check-in — reset
         setTempCheckIn(dateStr);
         setTempCheckOut('');
         setPhase('checkOut');
       } else {
         setTempCheckOut(dateStr);
-        // Apply and close
+        // Apply both and close
         onCheckInChange(tempCheckIn);
         onCheckOutChange(dateStr);
         setIsOpen(false);
@@ -88,7 +98,7 @@ export default function DateRangePicker({
 
   const isInRange = (dateStr: string): boolean => {
     const start = tempCheckIn;
-    const end = tempCheckOut || hoveredDate;
+    const end = tempCheckOut || (phase === 'checkOut' ? hoveredDate : null);
     if (!start || !end) return false;
     if (end <= start) return false;
     return dateStr > start && dateStr < end;
@@ -101,7 +111,7 @@ export default function DateRangePicker({
 
     const days = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${month}-${i}`} className="h-10" />);
+      days.push(<div key={`empty-${month}-${i}`} className="h-9" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -111,6 +121,7 @@ export default function DateRangePicker({
       const isEnd = tempCheckOut === dateStr;
       const inRange = isInRange(dateStr);
       const isToday = dateStr === todayStr;
+      const isPast = dateStr < todayStr;
 
       days.push(
         <button
@@ -120,13 +131,13 @@ export default function DateRangePicker({
           onMouseEnter={() => phase === 'checkOut' && tempCheckIn && !isDisabled && setHoveredDate(dateStr)}
           disabled={isDisabled}
           className={cn(
-            'h-10 w-full flex items-center justify-center text-sm rounded-lg transition-colors',
-            isStart && 'bg-ink-900 text-white font-semibold',
-            isEnd && 'bg-ink-900 text-white font-semibold',
-            inRange && !isStart && !isEnd && 'bg-ink-100 text-ink-900',
-            !isStart && !isEnd && !inRange && !isDisabled && 'hover:bg-ink-50 text-ink-900',
-            isDisabled && 'text-ink-200 cursor-not-allowed',
-            isToday && !isStart && !isEnd && 'ring-1 ring-ink-300'
+            'h-9 w-full flex items-center justify-center text-sm rounded-lg transition-colors',
+            (isStart || isEnd) && 'bg-brand-600 text-white font-semibold',
+            inRange && !isStart && !isEnd && 'bg-brand-50 text-ink-900',
+            !isStart && !isEnd && !inRange && !isDisabled && !isPast && 'hover:bg-brand-50 text-ink-900',
+            isDisabled && 'bg-red-50 text-red-300 cursor-not-allowed line-through',
+            isPast && !isDisabled && !inRange && !isStart && !isEnd && 'text-ink-200',
+            isToday && !isStart && !isEnd && 'ring-2 ring-brand-500'
           )}
         >
           {day}
@@ -135,16 +146,16 @@ export default function DateRangePicker({
     }
 
     return (
-      <div>
+      <div className="min-w-[280px]">
         <h4 className="text-sm font-semibold text-ink-900 text-center mb-3">
           {new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
         </h4>
-        <div className="grid grid-cols-7 gap-1 mb-1">
+        <div className="grid grid-cols-7 gap-0.5 mb-1">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-            <div key={d} className="text-xs font-medium text-ink-400 text-center">{d}</div>
+            <div key={d} className="text-xs font-medium text-ink-400 text-center py-1">{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {days}
         </div>
       </div>
@@ -155,59 +166,80 @@ export default function DateRangePicker({
   const month1Month = currentMonth.getMonth();
   const month2Date = new Date(month1Year, month1Month + 1, 1);
 
+  const nights = tempCheckIn && tempCheckOut
+    ? Math.ceil((new Date(tempCheckOut).getTime() - new Date(tempCheckIn).getTime()) / 86400000)
+    : 0;
+
   return (
-    <div className={cn('relative', className)}>
-      {/* Trigger */}
+    <div className={cn('flex gap-2 sm:gap-3', className)}>
+      {/* Check-in trigger — same style as CalendarDatePicker */}
       <button
         type="button"
-        onClick={() => !disabled && setIsOpen(true)}
+        onClick={() => openPicker('checkIn')}
         disabled={disabled}
         className={cn(
-          'w-full px-4 border border-ink-200 rounded-xl bg-white',
+          'flex-1 w-full px-4 border border-ink-200 rounded-xl bg-white relative',
           'hover:border-brand-500 transition-all',
-          'flex items-center gap-2 text-sm',
+          'flex items-center justify-between text-sm',
           disabled && 'opacity-50 cursor-not-allowed',
-          label ? 'pt-5 pb-2' : 'py-3',
+          'pt-5 pb-2',
+          checkIn ? 'text-ink-900' : 'text-ink-400'
         )}
       >
-        {label && (
-          <span className="absolute left-4 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
-            {label}
-          </span>
-        )}
-        <span className={cn(checkIn ? 'text-ink-900 font-medium' : 'text-ink-400')}>
-          {formatDisplay(checkIn, 'Check-in')}
+        <span className="absolute left-4 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+          {checkInLabel}
         </span>
-        <svg className="w-4 h-4 text-ink-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
-        <span className={cn(checkOut ? 'text-ink-900 font-medium' : 'text-ink-400')}>
-          {formatDisplay(checkOut, 'Check-out')}
-        </span>
-        <svg className="w-5 h-5 text-ink-400 shrink-0 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span>{checkIn ? formatDisplay(checkIn) : checkInPlaceholder}</span>
+        <svg className="w-5 h-5 text-ink-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </button>
 
-      {/* Modal */}
+      {/* Check-out trigger — same style */}
+      <button
+        type="button"
+        onClick={() => openPicker(checkIn ? 'checkOut' : 'checkIn')}
+        disabled={disabled}
+        className={cn(
+          'flex-1 w-full px-4 border border-ink-200 rounded-xl bg-white relative',
+          'hover:border-brand-500 transition-all',
+          'flex items-center justify-between text-sm',
+          disabled && 'opacity-50 cursor-not-allowed',
+          'pt-5 pb-2',
+          checkOut ? 'text-ink-900' : 'text-ink-400'
+        )}
+      >
+        <span className="absolute left-4 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+          {checkOutLabel}
+        </span>
+        <span>{checkOut ? formatDisplay(checkOut) : checkOutPlaceholder}</span>
+        <svg className="w-5 h-5 text-ink-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </button>
+
+      {/* Range calendar modal */}
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 z-[100]" onClick={() => setIsOpen(false)} />
           <div
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] p-5 sm:p-6 bg-white rounded-2xl shadow-2xl border border-ink-100 w-[calc(100vw-2rem)] sm:w-auto max-h-[90vh] overflow-y-auto"
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] p-5 bg-white rounded-2xl shadow-2xl border border-ink-100 w-[calc(100vw-2rem)] sm:w-auto max-h-[90vh] overflow-y-auto"
             onMouseLeave={() => setHoveredDate(null)}
           >
-            {/* Phase indicator */}
-            <div className="flex items-center gap-4 mb-5 pb-4 border-b border-ink-100">
+            {/* Header with phase tabs */}
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-ink-100">
               <button
                 type="button"
                 onClick={() => { setPhase('checkIn'); setTempCheckOut(''); }}
                 className={cn(
-                  'flex-1 text-center py-2 rounded-xl text-sm font-medium transition-colors',
-                  phase === 'checkIn' ? 'bg-ink-900 text-white' : 'bg-ink-50 text-ink-600 hover:bg-ink-100'
+                  'flex-1 text-center py-2 px-3 rounded-xl text-sm font-medium transition-colors border',
+                  phase === 'checkIn'
+                    ? 'border-brand-600 bg-brand-50 text-brand-700'
+                    : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50'
                 )}
               >
-                {tempCheckIn ? formatDisplay(tempCheckIn, 'Check-in') : 'Check-in'}
+                <span className="block text-[10px] uppercase text-ink-400 font-semibold mb-0.5">{checkInLabel}</span>
+                {tempCheckIn ? formatDisplay(tempCheckIn) : checkInPlaceholder}
               </button>
               <svg className="w-4 h-4 text-ink-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -216,17 +248,20 @@ export default function DateRangePicker({
                 type="button"
                 onClick={() => tempCheckIn && setPhase('checkOut')}
                 className={cn(
-                  'flex-1 text-center py-2 rounded-xl text-sm font-medium transition-colors',
-                  phase === 'checkOut' ? 'bg-ink-900 text-white' : 'bg-ink-50 text-ink-600 hover:bg-ink-100',
+                  'flex-1 text-center py-2 px-3 rounded-xl text-sm font-medium transition-colors border',
+                  phase === 'checkOut'
+                    ? 'border-brand-600 bg-brand-50 text-brand-700'
+                    : 'border-ink-200 bg-white text-ink-600 hover:bg-ink-50',
                   !tempCheckIn && 'opacity-50 cursor-not-allowed'
                 )}
               >
-                {tempCheckOut ? formatDisplay(tempCheckOut, 'Check-out') : 'Check-out'}
+                <span className="block text-[10px] uppercase text-ink-400 font-semibold mb-0.5">{checkOutLabel}</span>
+                {tempCheckOut ? formatDisplay(tempCheckOut) : checkOutPlaceholder}
               </button>
             </div>
 
             {/* Month navigation */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <button
                 type="button"
                 onClick={() => setCurrentMonth(new Date(month1Year, month1Month - 1, 1))}
@@ -236,9 +271,9 @@ export default function DateRangePicker({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <div className="text-sm font-medium text-ink-500">
+              <span className="text-xs text-ink-500 font-medium">
                 {phase === 'checkIn' ? 'Select check-in date' : 'Select check-out date'}
-              </div>
+              </span>
               <button
                 type="button"
                 onClick={() => setCurrentMonth(new Date(month1Year, month1Month + 1, 1))}
@@ -250,29 +285,49 @@ export default function DateRangePicker({
               </button>
             </div>
 
-            {/* Two-month grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+            {/* Two-month calendar grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {renderMonth(month1Year, month1Month)}
               {renderMonth(month2Date.getFullYear(), month2Date.getMonth())}
             </div>
 
             {/* Footer */}
-            <div className="mt-5 pt-4 border-t border-ink-100 flex items-center justify-between">
+            <div className="mt-4 pt-3 border-t border-ink-100 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => {
                   setTempCheckIn('');
                   setTempCheckOut('');
+                  onCheckInChange('');
+                  onCheckOutChange('');
                   setPhase('checkIn');
                 }}
                 className="text-sm font-medium text-ink-500 hover:text-ink-700 underline"
               >
                 Clear dates
               </button>
-              {tempCheckIn && tempCheckOut && (
-                <span className="text-xs text-ink-500">
-                  {Math.ceil((new Date(tempCheckOut).getTime() - new Date(tempCheckIn).getTime()) / 86400000)} nights
-                </span>
+              <div className="flex items-center gap-3">
+                {nights > 0 && (
+                  <span className="text-xs text-ink-500">{nights} night{nights !== 1 ? 's' : ''}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded bg-brand-600" />
+                <span>Selected</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-3 h-3 rounded bg-brand-50 border border-brand-200" />
+                <span>In range</span>
+              </div>
+              {blockedDates.size > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded bg-red-50 border border-red-200" />
+                  <span>Unavailable</span>
+                </div>
               )}
             </div>
           </div>

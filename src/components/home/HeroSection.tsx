@@ -123,7 +123,7 @@ export function HeroSection() {
         {/* Search Card */}
         <form onSubmit={handleSearch} className="mt-8 max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-2xl p-3 sm:p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               {/* Location — fuzzy search modal */}
               <div className="relative lg:col-span-1">
                 <div className="relative">
@@ -192,7 +192,7 @@ export function HeroSection() {
               </div>
 
               {/* Dates */}
-              <div className="sm:col-span-2 lg:col-span-1">
+              <div className="sm:col-span-2 lg:col-span-2 flex gap-2">
                 <DateRangePicker
                   checkIn={checkIn}
                   checkOut={checkOut}
@@ -201,7 +201,10 @@ export function HeroSection() {
                     if (checkOut && val >= checkOut) setCheckOut('');
                   }}
                   onCheckOutChange={setCheckOut}
-                  label={t('hero.search.checkInLabel')}
+                  checkInLabel={t('hero.search.checkInLabel')}
+                  checkOutLabel={t('hero.search.checkOutLabel')}
+                  checkInPlaceholder={t('hero.search.checkIn')}
+                  checkOutPlaceholder={t('hero.search.checkOut')}
                 />
               </div>
 

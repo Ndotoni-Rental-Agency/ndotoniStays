@@ -131,7 +131,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           </select>
         </div>
 
-        <div className="hidden sm:block min-w-[220px]">
+        <div className="hidden sm:flex gap-2 min-w-[280px]">
           <DateRangePicker
             checkIn={localCheckIn}
             checkOut={localCheckOut}
@@ -140,7 +140,10 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
               if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
             }}
             onCheckOutChange={setLocalCheckOut}
-            label="Dates"
+            checkInLabel="Check-in"
+            checkOutLabel="Check-out"
+            checkInPlaceholder="Add date"
+            checkOutPlaceholder="Add date"
           />
         </div>
 
@@ -191,7 +194,10 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
             if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
           }}
           onCheckOutChange={setLocalCheckOut}
-          label="Dates"
+          checkInLabel="Check-in"
+          checkOutLabel="Check-out"
+          checkInPlaceholder="Add date"
+          checkOutPlaceholder="Add date"
         />
       </div>
 

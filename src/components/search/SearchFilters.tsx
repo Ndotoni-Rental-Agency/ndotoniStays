@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import DateRangePicker from '@/components/ui/DateRangePicker';
+import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 
 const REGIONS = [
   'Dar es Salaam', 'Arusha', 'Dodoma', 'Mwanza', 'Zanzibar',
@@ -131,19 +131,34 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           </select>
         </div>
 
-        <div className="hidden sm:flex gap-2">
-          <DateRangePicker
-            checkIn={localCheckIn}
-            checkOut={localCheckOut}
-            onCheckInChange={(val) => {
+        <div className="hidden sm:block min-w-[130px]">
+          <CalendarDatePicker
+            value={localCheckIn}
+            onChange={(val) => {
               setLocalCheckIn(val);
               if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
             }}
-            onCheckOutChange={setLocalCheckOut}
-            checkInLabel="Check-in"
-            checkOutLabel="Check-out"
-            checkInPlaceholder="Add date"
-            checkOutPlaceholder="Add date"
+            label="Check-in"
+            placeholder="Check-in"
+            rangeStart={localCheckIn}
+            rangeEnd={localCheckOut}
+            rangeMode
+            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
+          />
+        </div>
+
+        <div className="hidden sm:block min-w-[130px]">
+          <CalendarDatePicker
+            value={localCheckOut}
+            onChange={setLocalCheckOut}
+            minExclusive={localCheckIn || undefined}
+            label="Check-out"
+            placeholder="Check-out"
+            rangeStart={localCheckIn}
+            rangeEnd={localCheckOut}
+            rangeMode
+            rangePhaseStart="checkOut"
+            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
           />
         </div>
 
@@ -184,21 +199,37 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
         </button>
       </div>
 
-      {/* Mobile date picker — below bar on small screens */}
-      <div className="mt-2 sm:hidden">
-        <DateRangePicker
-          checkIn={localCheckIn}
-          checkOut={localCheckOut}
-          onCheckInChange={(val) => {
-            setLocalCheckIn(val);
-            if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
-          }}
-          onCheckOutChange={setLocalCheckOut}
-          checkInLabel="Check-in"
-          checkOutLabel="Check-out"
-          checkInPlaceholder="Add date"
-          checkOutPlaceholder="Add date"
-        />
+      {/* Mobile date pickers — below bar on small screens */}
+      <div className="flex gap-2 mt-2 sm:hidden">
+        <div className="flex-1">
+          <CalendarDatePicker
+            value={localCheckIn}
+            onChange={(val) => {
+              setLocalCheckIn(val);
+              if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
+            }}
+            label="Check-in"
+            placeholder="Check-in"
+            rangeStart={localCheckIn}
+            rangeEnd={localCheckOut}
+            rangeMode
+            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
+          />
+        </div>
+        <div className="flex-1">
+          <CalendarDatePicker
+            value={localCheckOut}
+            onChange={setLocalCheckOut}
+            minExclusive={localCheckIn || undefined}
+            label="Check-out"
+            placeholder="Check-out"
+            rangeStart={localCheckIn}
+            rangeEnd={localCheckOut}
+            rangeMode
+            rangePhaseStart="checkOut"
+            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
+          />
+        </div>
       </div>
 
       {/* Filter drawer/modal */}

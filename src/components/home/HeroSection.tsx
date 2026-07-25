@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
 import { MapPinIcon } from '@heroicons/react/24/solid';
-import DateRangePicker from '@/components/ui/DateRangePicker';
+import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
 import { useRegionSearch } from '@/hooks/useRegionSearch';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { FlattenedLocation } from '@/lib/location/cloudfront-locations';
@@ -191,22 +191,36 @@ export function HeroSection() {
                 )}
               </div>
 
-              {/* Dates */}
-              <div className="sm:col-span-2 lg:col-span-2 flex gap-2">
-                <DateRangePicker
-                  checkIn={checkIn}
-                  checkOut={checkOut}
-                  onCheckInChange={(val) => {
-                    setCheckIn(val);
-                    if (checkOut && val >= checkOut) setCheckOut('');
-                  }}
-                  onCheckOutChange={setCheckOut}
-                  checkInLabel={t('hero.search.checkInLabel')}
-                  checkOutLabel={t('hero.search.checkOutLabel')}
-                  checkInPlaceholder={t('hero.search.checkIn')}
-                  checkOutPlaceholder={t('hero.search.checkOut')}
-                />
-              </div>
+              {/* Check-in */}
+              <CalendarDatePicker
+                value={checkIn}
+                onChange={(val) => {
+                  setCheckIn(val);
+                  if (checkOut && val >= checkOut) setCheckOut('');
+                }}
+                min={minCheckIn}
+                label={t('hero.search.checkInLabel')}
+                placeholder={t('hero.search.checkIn')}
+                rangeStart={checkIn}
+                rangeEnd={checkOut}
+                rangeMode
+                onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
+              />
+
+              {/* Check-out */}
+              <CalendarDatePicker
+                value={checkOut}
+                onChange={setCheckOut}
+                minExclusive={checkIn || undefined}
+                min={minCheckIn}
+                label={t('hero.search.checkOutLabel')}
+                placeholder={t('hero.search.checkOut')}
+                rangeStart={checkIn}
+                rangeEnd={checkOut}
+                rangeMode
+                rangePhaseStart="checkOut"
+                onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
+              />
 
               {/* Guests */}
               <div className="relative">

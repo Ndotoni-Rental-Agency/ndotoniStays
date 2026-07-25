@@ -16,6 +16,12 @@ interface CalendarDatePickerProps {
   disabled?: boolean;
   rangeStart?: string;
   rangeEnd?: string;
+  /** When true, opens a two-month range calendar instead of single month */
+  rangeMode?: boolean;
+  /** Which phase to start in when opening in range mode (default: 'checkIn') */
+  rangePhaseStart?: 'checkIn' | 'checkOut';
+  /** Called with (checkIn, checkOut) when a full range is selected */
+  onRangeComplete?: (checkIn: string, checkOut: string) => void;
 }
 
 export default function CalendarDatePicker({
@@ -30,15 +36,28 @@ export default function CalendarDatePicker({
   disabled = false,
   rangeStart,
   rangeEnd,
+  rangeMode = false,
+  rangePhaseStart = 'checkIn',
+  onRangeComplete,
 }: CalendarDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Range mode state
+  const [rangePhase, setRangePhase] = useState<'checkIn' | 'checkOut'>(rangePhaseStart);
+  const [tempCheckIn, setTempCheckIn] = useState(rangeStart || '');
+  const [tempCheckOut, setTempCheckOut] = useState(rangeEnd || '');
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+
   useEffect(() => {
     if (isOpen) {
+      if (rangeMode) {
+        setTempCheckIn(rangeStart || '');
+        setTempCheckOut(rangeEnd || '');
+        setRangePhase(rangePhaseStart);
+      }
       if (rangeStart && !value) {
-        // Parse as local date to avoid timezone shift
         const [y, m] = rangeStart.split('-').map(Number);
         setCurrentMonth(new Date(y, m - 1, 1));
       } else if (value) {
@@ -61,7 +80,25 @@ export default function CalendarDatePicker({
   };
 
   const handleDateSelect = (dateStr: string) => {
-    if (!isDateDisabled(dateStr)) {
+    if (isDateDisabled(dateStr)) return;
+
+    if (rangeMode) {
+      if (rangePhase === 'checkIn') {
+        setTempCheckIn(dateStr);
+        setTempCheckOut('');
+        setRangePhase('checkOut');
+      } else {
+        if (dateStr <= tempCheckIn) {
+          setTempCheckIn(dateStr);
+          setTempCheckOut('');
+          setRangePhase('checkOut');
+        } else {
+          setTempCheckOut(dateStr);
+          onRangeComplete?.(tempCheckIn, dateStr);
+          setIsOpen(false);
+        }
+      }
+    } else {
       onChange(dateStr);
       setIsOpen(false);
     }
@@ -75,16 +112,31 @@ export default function CalendarDatePicker({
   };
 
   const isInRange = (dateStr: string): boolean => {
+    if (rangeMode) {
+      const start = tempCheckIn;
+      const end = tempCheckOut || (rangePhase === 'checkOut' ? hoveredDate : null);
+      if (!start || !end) return false;
+      if (end <= start) return false;
+      return dateStr > start && dateStr < end;
+    }
     if (!rangeStart || !rangeEnd) return false;
     return dateStr > rangeStart && dateStr < rangeEnd;
   };
 
-  const isRangeStart = (dateStr: string): boolean => rangeStart === dateStr;
-  const isRangeEnd = (dateStr: string): boolean => rangeEnd === dateStr;
+  const isRangeStart = (dateStr: string): boolean => {
+    if (rangeMode) return tempCheckIn === dateStr;
+    return rangeStart === dateStr;
+  };
+  const isRangeEnd = (dateStr: string): boolean => {
+    if (rangeMode) return tempCheckOut === dateStr;
+    return rangeEnd === dateStr;
+  };
 
   const renderCalendar = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
+    return renderCalendarMonth(currentMonth.getFullYear(), currentMonth.getMonth());
+  };
+
+  const renderCalendarMonth = (year: number, month: number) => {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
@@ -113,11 +165,12 @@ export default function CalendarDatePicker({
           key={day}
           type="button"
           onClick={() => handleDateSelect(dateStr)}
+          onMouseEnter={rangeMode && rangePhase === 'checkOut' && tempCheckIn && !isDisabled ? () => setHoveredDate(dateStr) : undefined}
           disabled={isDisabled}
           className={cn(
             'h-10 w-full flex items-center justify-center text-sm rounded-lg transition-colors',
-            isSelected && 'bg-brand-600 text-white font-semibold',
-            (isStart || isEnd) && !isSelected && 'bg-brand-600 text-white font-semibold',
+            isSelected && !rangeMode && 'bg-brand-600 text-white font-semibold',
+            (isStart || isEnd) && 'bg-brand-600 text-white font-semibold',
             inRange && !isSelected && !isStart && !isEnd && 'bg-brand-50 text-ink-900',
             !isSelected && !isDisabled && !isPast && !inRange && !isStart && !isEnd && 'hover:bg-brand-50 text-ink-900',
             isDisabled && 'bg-red-50 text-red-300 cursor-not-allowed line-through',
@@ -164,7 +217,26 @@ export default function CalendarDatePicker({
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 z-[100]" onClick={() => setIsOpen(false)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] p-5 bg-white rounded-2xl shadow-2xl border border-ink-100 w-80 max-w-[calc(100vw-2rem)]">
+          <div
+            className={cn(
+              'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] p-5 bg-white rounded-2xl shadow-2xl border border-ink-100 max-w-[calc(100vw-2rem)]',
+              rangeMode ? 'w-auto' : 'w-80'
+            )}
+            onMouseLeave={rangeMode ? () => setHoveredDate(null) : undefined}
+          >
+            {/* Range phase indicator */}
+            {rangeMode && (
+              <div className="flex items-center gap-2 mb-4 pb-3 border-b border-ink-100 text-xs">
+                <span className={cn('px-3 py-1.5 rounded-lg font-medium', rangePhase === 'checkIn' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-ink-500')}>
+                  {tempCheckIn ? formatDisplayDate(tempCheckIn) : 'Check-in'}
+                </span>
+                <span className="text-ink-300">→</span>
+                <span className={cn('px-3 py-1.5 rounded-lg font-medium', rangePhase === 'checkOut' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-ink-500')}>
+                  {tempCheckOut ? formatDisplayDate(tempCheckOut) : 'Check-out'}
+                </span>
+              </div>
+            )}
+
             {/* Month nav */}
             <div className="flex items-center justify-between mb-4">
               <button
@@ -176,9 +248,11 @@ export default function CalendarDatePicker({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h3 className="text-sm font-semibold text-ink-900">
-                {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </h3>
+              {!rangeMode && (
+                <h3 className="text-sm font-semibold text-ink-900">
+                  {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </h3>
+              )}
               <button
                 type="button"
                 onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
@@ -190,19 +264,41 @@ export default function CalendarDatePicker({
               </button>
             </div>
 
-            {/* Day headers */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
-                <div key={day} className="text-xs font-medium text-ink-400 text-center">
-                  {day}
+            {rangeMode ? (
+              /* Two-month grid for range mode */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[0, 1].map((offset) => {
+                  const mDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
+                  return (
+                    <div key={offset} className="min-w-[280px]">
+                      <h4 className="text-sm font-semibold text-ink-900 text-center mb-3">
+                        {mDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h4>
+                      <div className="grid grid-cols-7 gap-1 mb-1">
+                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                          <div key={d} className="text-xs font-medium text-ink-400 text-center">{d}</div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-7 gap-1">
+                        {renderCalendarMonth(mDate.getFullYear(), mDate.getMonth())}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Single month for non-range mode */
+              <>
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                    <div key={day} className="text-xs font-medium text-ink-400 text-center">{day}</div>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            {/* Days grid */}
-            <div className="grid grid-cols-7 gap-1">
-              {renderCalendar()}
-            </div>
+                <div className="grid grid-cols-7 gap-1">
+                  {renderCalendar()}
+                </div>
+              </>
+            )}
 
             {/* Legend */}
             <div className="mt-4 pt-3 border-t border-ink-100 flex flex-wrap gap-3 text-xs text-ink-500">

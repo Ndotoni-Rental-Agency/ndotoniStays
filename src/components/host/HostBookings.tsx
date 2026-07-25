@@ -44,7 +44,7 @@ export function HostBookings({ propertyIds }: Props) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [messagingGuest, setMessagingGuest] = useState<string | null>(null);
   const [declineTarget, setDeclineTarget] = useState<string | null>(null);
-  const [declineReason, setDeclineReason] = useState('');
+  const [declineReason, setDeclineReason] = useState('Not available');
 
   const fetchBookings = useCallback(async (isPolling = false) => {
     if (propertyIds.length === 0) {
@@ -142,7 +142,7 @@ export function HostBookings({ propertyIds }: Props) {
         prev.map((b) => (b.bookingId === bookingId ? { ...b, status: BookingStatus.DECLINED } : b))
       );
       setDeclineTarget(null);
-      setDeclineReason('');
+      setDeclineReason('Not available');
     } catch (err: any) {
       toast.error(err?.message || 'Failed to decline booking');
     } finally {

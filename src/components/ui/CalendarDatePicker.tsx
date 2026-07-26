@@ -147,7 +147,7 @@ export default function CalendarDatePicker({
     const days = [];
 
     for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(<div key={`empty-${i}`} className="h-10" />);
+      days.push(<div key={`empty-${i}`} className="h-9 sm:h-10" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -168,7 +168,7 @@ export default function CalendarDatePicker({
           onMouseEnter={rangeMode && rangePhase === 'checkOut' && tempCheckIn && !isDisabled ? () => setHoveredDate(dateStr) : undefined}
           disabled={isDisabled}
           className={cn(
-            'h-10 w-full flex items-center justify-center text-sm rounded-lg transition-colors',
+            'h-9 sm:h-10 w-full flex items-center justify-center text-sm rounded-lg transition-colors',
             isSelected && !rangeMode && 'bg-brand-600 text-white font-semibold',
             (isStart || isEnd) && 'bg-brand-600 text-white font-semibold',
             inRange && !isSelected && !isStart && !isEnd && 'bg-brand-50 text-ink-900',
@@ -219,8 +219,12 @@ export default function CalendarDatePicker({
           <div className="fixed inset-0 bg-black/40 z-[100]" onClick={() => setIsOpen(false)} />
           <div
             className={cn(
-              'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[101] p-5 bg-white rounded-2xl shadow-2xl border border-ink-100 max-w-[calc(100vw-2rem)]',
-              rangeMode ? 'w-auto' : 'w-80'
+              'fixed z-[101] bg-white shadow-2xl border border-ink-100 overflow-hidden',
+              // Mobile: full-width bottom sheet
+              'inset-x-0 bottom-0 top-auto rounded-t-2xl p-4 max-h-[85vh] overflow-y-auto',
+              // Desktop: centered popup (same as original)
+              'sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:p-5 sm:max-h-[90vh] sm:overflow-visible',
+              rangeMode ? 'sm:w-auto sm:max-w-[calc(100vw-2rem)]' : 'sm:w-80'
             )}
             onMouseLeave={rangeMode ? () => setHoveredDate(null) : undefined}
           >
@@ -266,20 +270,20 @@ export default function CalendarDatePicker({
 
             {rangeMode ? (
               /* Two-month grid for range mode */
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {[0, 1].map((offset) => {
                   const mDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1);
                   return (
-                    <div key={offset} className="min-w-[280px]">
+                    <div key={offset} className="w-full min-w-0 sm:min-w-[280px]">
                       <h4 className="text-sm font-semibold text-ink-900 text-center mb-3">
                         {mDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </h4>
-                      <div className="grid grid-cols-7 gap-1 mb-1">
+                      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1">
                         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
                           <div key={d} className="text-xs font-medium text-ink-400 text-center">{d}</div>
                         ))}
                       </div>
-                      <div className="grid grid-cols-7 gap-1">
+                      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                         {renderCalendarMonth(mDate.getFullYear(), mDate.getMonth())}
                       </div>
                     </div>
@@ -289,12 +293,12 @@ export default function CalendarDatePicker({
             ) : (
               /* Single month for non-range mode */
               <>
-                <div className="grid grid-cols-7 gap-1 mb-2">
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
                   {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
                     <div key={day} className="text-xs font-medium text-ink-400 text-center">{day}</div>
                   ))}
                 </div>
-                <div className="grid grid-cols-7 gap-1">
+                <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
                   {renderCalendar()}
                 </div>
               </>

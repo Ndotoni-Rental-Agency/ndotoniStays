@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     'vacation rental',
     'daily rental',
   ],
+  itunes: {
+    appId: '6767931205',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -47,6 +50,12 @@ export const metadata: Metadata = {
       'Book places to stay, celebrate, and create. Nightly stays, party venues, and more.',
     siteName: 'ndotoni Stays',
     type: 'website',
+  },
+  appLinks: {
+    ios: {
+      url: 'https://www.ndotonistays.com',
+      app_store_id: '6767931205',
+    },
   },
 };
 

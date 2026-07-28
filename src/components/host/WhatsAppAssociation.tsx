@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { initiateWhatsAppAssociation, confirmWhatsAppAssociation } from '@/graphql/mutations';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -104,7 +105,7 @@ export default function WhatsAppAssociation({ existingWhatsappNumber }: Props) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-ink-100 p-6">
         <div className="text-center">
-          <div className="text-4xl mb-3">✅</div>
+          <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-ink-900 mb-2">{t('wa.link.success.title')}</h3>
           <p className="text-sm text-ink-500">{message}</p>
         </div>

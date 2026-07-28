@@ -117,7 +117,7 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
           <CheckCircleIcon className="h-5 w-5 text-green-600 shrink-0" />
           <p className="text-sm font-medium text-green-800">
-            ✨ Instructions generated! Review and edit below, then save.
+            Instructions generated! Review and edit below, then save.
           </p>
         </div>
       )}
@@ -228,9 +228,10 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
 
       {/* Status indicator */}
       {hasContent && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-2">
+          <CheckCircleIcon className="h-5 w-5 text-green-600 shrink-0" />
           <p className="text-sm text-green-800 font-medium">
-            ✅ Check-in instructions are set. They will be sent to guests when you click "Send Instructions" from a paid booking.
+            Check-in instructions are set. They will be sent to guests when you click &quot;Send Instructions&quot; from a paid booking.
           </p>
         </div>
       )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, XMarkIcon, SparklesIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
 import { PropertyFormData } from './types';
 import { AIService } from '@/lib/ai/AIService';
@@ -182,7 +182,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 {generatingTitle ? (
                   <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Generating...</>
                 ) : (
-                  <>✨ Suggest title</>
+                  <><SparklesIcon className="h-3.5 w-3.5" /> Suggest title</>
                 )}
               </button>
             </div>
@@ -206,7 +206,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 {generatingDescription ? (
                   <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Writing...</>
                 ) : (
-                  <>✨ Generate description</>
+                  <><SparklesIcon className="h-3.5 w-3.5" /> Generate description</>
                 )}
               </button>
             </div>
@@ -225,7 +225,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                       : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50'
                   }`}
                 >
-                  <span className="text-lg sm:text-xl">{t.icon}</span>
+                  <t.icon className="w-5 h-5 sm:w-6 sm:h-6 text-ink-500" />
                   <span className="text-[10px] sm:text-[11px] font-medium text-ink-700 leading-tight text-center">{t.label}</span>
                 </button>
               ))}
@@ -255,7 +255,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                         : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:bg-ink-50'
                     }`}
                   >
-                    <span className="text-base">{cat.icon}</span>
+                    <cat.icon className="w-4 h-4 shrink-0" />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -374,7 +374,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
                 {predictingPrice ? (
                   <><span className="h-3 w-3 border-2 border-brand-300 border-t-brand-600 rounded-full animate-spin" /> Analyzing...</>
                 ) : (
-                  <>💰 Suggest price</>
+                  <><BanknotesIcon className="h-3.5 w-3.5" /> Suggest price</>
                 )}
               </button>
             </div>

@@ -8,6 +8,7 @@ import { approveBooking, declineBooking } from '@/graphql/mutations';
 import type { Booking } from '@/API';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { Moon, Users, Banknote } from 'lucide-react';
 
 type PageState = 'loading' | 'review' | 'confirming' | 'confirmed' | 'declined' | 'error';
 
@@ -177,15 +178,15 @@ export default function ConfirmBookingPage() {
             <span>{booking?.checkInDate} → {booking?.checkOutDate}</span>
           </div>
           <div className="flex justify-between">
-            <span>🌙 Nights</span>
+            <span className="inline-flex items-center gap-1.5"><Moon className="w-4 h-4" /> Nights</span>
             <span>{nights}</span>
           </div>
           <div className="flex justify-between">
-            <span>👥 Guests</span>
+            <span className="inline-flex items-center gap-1.5"><Users className="w-4 h-4" /> Guests</span>
             <span>{booking?.numberOfGuests}</span>
           </div>
           <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
-            <span>💰 You receive</span>
+            <span className="inline-flex items-center gap-1.5"><Banknote className="w-4 h-4" /> You receive</span>
             <span>{formatPrice(hostPayout, currency)}</span>
           </div>
           {serviceFee > 0 && (

@@ -8,6 +8,7 @@ import { HostCheckInTab } from '@/components/host/HostCheckInTab';
 import { MediaGrid } from '@/components/media/MediaGrid';
 import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
 import { ShortTermProperty } from '@/API';
+import { Home } from 'lucide-react';
 import {
   HomeModernIcon,
   PhotoIcon,
@@ -92,7 +93,7 @@ export default function TokenEditPage() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <span className="text-2xl">🏡</span>
+              <Home className="w-6 h-6 text-emerald-700" />
             </div>
             <h1 className="text-xl font-bold text-gray-900">Nyumba Zako</h1>
             <p className="text-sm text-gray-500 mt-1">Chagua nyumba unayotaka kuhariri</p>
@@ -108,7 +109,9 @@ export default function TokenEditPage() {
                   {prop.images?.[0] ? (
                     <img src={prop.images[0]} alt={prop.title} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover flex-shrink-0" />
                   ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-stone-100 flex items-center justify-center flex-shrink-0 text-2xl">🏠</div>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-stone-100 flex items-center justify-center flex-shrink-0">
+                      <Home className="w-6 h-6 text-stone-400" />
+                    </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 truncate text-sm">{prop.title}</p>

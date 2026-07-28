@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Home } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { searchShortTermProperties } from '@/graphql/queries';
 import { PropertyCard } from '@/components/property/PropertyCard';
@@ -148,7 +149,7 @@ export function SearchContent() {
       {/* Results grid */}
       {!loading && !error && properties.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-2xl mb-2">🏠</p>
+          <Home className="w-6 h-6 text-ink-400 mx-auto mb-2" />
           <h3 className="text-lg font-semibold text-ink-700">No places found</h3>
           <p className="text-ink-500 mt-1">
             Try changing your dates or searching a different area.

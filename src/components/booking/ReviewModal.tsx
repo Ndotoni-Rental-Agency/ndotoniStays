@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutline, XMarkIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { Sparkles, Camera, MessageCircle, MapPin, Banknote, type LucideIcon } from 'lucide-react';
 import { cn, getCdnUrl } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -32,13 +33,15 @@ export interface ReviewFormData {
   comment: string;
 }
 
-const CATEGORIES = [
-  { key: 'cleanliness', label: 'Cleanliness', emoji: '🧹' },
-  { key: 'accuracy', label: 'Accuracy', emoji: '📸' },
-  { key: 'communication', label: 'Communication', emoji: '💬' },
-  { key: 'location', label: 'Location', emoji: '📍' },
-  { key: 'value', label: 'Value', emoji: '💰' },
-] as const;
+type RatingCategory = 'cleanliness' | 'accuracy' | 'communication' | 'location' | 'value';
+
+const CATEGORIES: { key: RatingCategory; label: string; icon: LucideIcon }[] = [
+  { key: 'cleanliness', label: 'Cleanliness', icon: Sparkles },
+  { key: 'accuracy', label: 'Accuracy', icon: Camera },
+  { key: 'communication', label: 'Communication', icon: MessageCircle },
+  { key: 'location', label: 'Location', icon: MapPin },
+  { key: 'value', label: 'Value', icon: Banknote },
+];
 
 const RATING_LABELS = ['', 'Terrible', 'Poor', 'Okay', 'Great', 'Amazing'];
 
@@ -186,10 +189,10 @@ export function ReviewModal({ isOpen, onClose, onSubmit, property, checkInDate, 
                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <p className="text-sm font-medium text-ink-600">Rate each category</p>
                   <div className="space-y-2.5">
-                    {CATEGORIES.map(({ key, label, emoji }) => (
+                    {CATEGORIES.map(({ key, label, icon: Icon }) => (
                       <div key={key} className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-ink-50 transition-colors">
-                        <span className="text-sm text-ink-700 font-medium">
-                          {emoji} {label}
+                        <span className="text-sm text-ink-700 font-medium inline-flex items-center gap-1.5">
+                          <Icon className="w-4 h-4" /> {label}
                         </span>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (

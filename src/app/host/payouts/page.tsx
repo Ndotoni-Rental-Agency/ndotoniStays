@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Smartphone, Landmark, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { updateUser } from '@/graphql/mutations';
@@ -181,8 +182,8 @@ export default function PayoutsPage() {
 
       {/* Success/Error messages */}
       {success && (
-        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
-          ✅ {success}
+        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 shrink-0" /> {success}
         </div>
       )}
       {error && (
@@ -195,7 +196,7 @@ export default function PayoutsPage() {
       {hasSavedPayout && !isEditing && (
         <div className="bg-white rounded-2xl shadow-sm border border-ink-100 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-2xl">{savedData?.payoutMethod === 'MPESA' ? '📱' : '🏦'}</span>
+            <span className="text-2xl">{savedData?.payoutMethod === 'MPESA' ? <Smartphone className="w-6 h-6 text-ink-600" /> : <Landmark className="w-6 h-6 text-ink-600" />}</span>
             <div>
               <h3 className="font-semibold text-ink-900">
                 {savedData?.payoutMethod === 'MPESA' ? 'M-Pesa' : 'Bank'}
@@ -260,7 +261,7 @@ export default function PayoutsPage() {
                     : 'border-ink-200 hover:border-ink-300'
                 }`}
               >
-                <span className="text-2xl">📱</span>
+                <Smartphone className="w-6 h-6 text-ink-600" />
                 <span className="text-sm font-medium text-ink-800">M-Pesa</span>
                 <span className="text-xs text-ink-500">Fast & easy</span>
               </button>
@@ -273,7 +274,7 @@ export default function PayoutsPage() {
                     : 'border-ink-200 hover:border-ink-300'
                 }`}
               >
-                <span className="text-2xl">🏦</span>
+                <Landmark className="w-6 h-6 text-ink-600" />
                 <span className="text-sm font-medium text-ink-800">Bank</span>
                 <span className="text-xs text-ink-500">Bank transfer</span>
               </button>

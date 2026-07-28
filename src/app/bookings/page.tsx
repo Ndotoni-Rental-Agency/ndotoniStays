@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Star } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyBookings } from '@/graphql/queries';
@@ -376,7 +377,7 @@ export default function MyBookingsPage() {
                       onClick={() => setReviewingBooking(booking)}
                       className="w-full py-2.5 rounded-xl border-2 border-ink-800 text-xs font-semibold text-ink-800 hover:bg-ink-800 hover:text-white transition-colors touch-manipulation"
                     >
-                      ⭐ Write a review
+                      <Star className="w-3.5 h-3.5 inline mr-1" /> Write a review
                     </button>
                   </div>
                 )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { MapPin } from 'lucide-react';
 import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getWards } from '@/graphql/queries';
@@ -396,8 +397,8 @@ export function StepLocation({ form, setForm }: StepProps) {
             }
           />
           {form.lat !== 0 && form.lng !== 0 && (
-            <p className="text-xs text-ink-400 mt-2">
-              📍 {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
+            <p className="text-xs text-ink-400 mt-2 inline-flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> {form.lat.toFixed(5)}, {form.lng.toFixed(5)}
             </p>
           )}
         </div>

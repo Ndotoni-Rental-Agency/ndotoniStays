@@ -6,7 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { createShortTermPropertyDraft } from '@/graphql/mutations';
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { PartyPopper, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { generateVideoThumbnail } from '@/lib/video-thumbnail';
@@ -220,11 +221,13 @@ export default function ListYourPlacePage() {
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-ink-50/50 px-4">
         <div className="text-center max-w-md">
           <div className="relative mb-6">
-            <div className="text-7xl animate-bounce">🎉</div>
-            <div className="absolute -top-2 -left-4 text-3xl animate-ping opacity-50">✨</div>
-            <div className="absolute -top-1 -right-3 text-2xl animate-ping opacity-50 delay-100">🎊</div>
-            <div className="absolute top-8 -right-6 text-xl animate-ping opacity-40 delay-200">⭐</div>
-            <div className="absolute top-10 -left-5 text-xl animate-ping opacity-40 delay-300">🌟</div>
+            <div className="animate-bounce">
+              <PartyPopper className="w-16 h-16 text-brand-600 mx-auto" />
+            </div>
+            <SparklesIcon className="absolute -top-2 -left-4 w-7 h-7 text-brand-400 animate-ping opacity-50" />
+            <SparklesIcon className="absolute -top-1 -right-3 w-5 h-5 text-brand-400 animate-ping opacity-50" />
+            <SparklesIcon className="absolute top-8 -right-6 w-4 h-4 text-brand-300 animate-ping opacity-40" />
+            <SparklesIcon className="absolute top-10 -left-5 w-4 h-4 text-brand-300 animate-ping opacity-40" />
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-3">
@@ -316,7 +319,7 @@ export default function ListYourPlacePage() {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Reassurance banner */}
         <div className="flex items-center gap-3 bg-brand-50 border border-brand-100 rounded-xl px-4 py-3 mb-6">
-          <span className="text-2xl">⚡</span>
+          <Zap className="w-6 h-6 text-brand-600 shrink-0" />
           <div>
             <p className="text-sm font-medium text-brand-800">{t('create.reassurance')}</p>
             <p className="text-xs text-brand-600">{t('create.reassurance.desc')}</p>

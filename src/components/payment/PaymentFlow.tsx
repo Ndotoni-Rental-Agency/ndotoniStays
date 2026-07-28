@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Smartphone } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { initiatePayment } from '@/graphql/mutations';
 import { getPayment } from '@/graphql/queries';
@@ -130,7 +131,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           onClick={() => setMethod('mobile_money')}
           className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-ink-100 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-left group"
         >
-          <span className="text-3xl">📱</span>
+          <Smartphone className="w-7 h-7 text-ink-600" />
           <div className="flex-1">
             <p className="font-semibold text-ink-900 group-hover:text-brand-700">Mobile Money</p>
             <p className="text-xs text-ink-500">All networks: Vodacom, Airtel, Tigo, Halotel & more</p>

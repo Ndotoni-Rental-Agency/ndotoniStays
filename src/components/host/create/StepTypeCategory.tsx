@@ -1,22 +1,8 @@
 'use client';
 
-import { STAY_CATEGORIES } from '@/components/host/constants';
+import { PROPERTY_TYPES, STAY_CATEGORIES } from '@/components/host/constants';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
-
-const PROPERTY_TYPES = [
-  { value: 'APARTMENT', label: 'Apartment', icon: '🏢' },
-  { value: 'HOUSE', label: 'House', icon: '🏠' },
-  { value: 'VILLA', label: 'Villa', icon: '🏡' },
-  { value: 'STUDIO', label: 'Studio', icon: '🎨' },
-  { value: 'ROOM', label: 'Room', icon: '🛏️' },
-  { value: 'GUESTHOUSE', label: 'Guesthouse', icon: '🏘️' },
-  { value: 'HOTEL', label: 'Hotel', icon: '🏨' },
-  { value: 'COTTAGE', label: 'Cottage', icon: '🛖' },
-  { value: 'BUNGALOW', label: 'Bungalow', icon: '🌴' },
-  { value: 'LODGE', label: 'Lodge', icon: '🏕️' },
-  { value: 'OTHER', label: 'Other', icon: '🏗️' },
-];
 
 export function StepTypeCategory({ form, updateField, setForm }: StepProps) {
   const { t } = useLanguage();
@@ -38,7 +24,7 @@ export function StepTypeCategory({ form, updateField, setForm }: StepProps) {
                   : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50 hover:shadow-sm'
               }`}
             >
-              <span className="text-3xl sm:text-4xl">{pt.icon}</span>
+              <pt.icon className="w-8 h-8 sm:w-10 sm:h-10 text-ink-500" />
               <span className="text-xs sm:text-sm font-medium text-ink-700">{pt.label}</span>
             </button>
           ))}
@@ -69,7 +55,7 @@ export function StepTypeCategory({ form, updateField, setForm }: StepProps) {
                     : 'border-ink-100 text-ink-600 hover:border-ink-200 hover:bg-ink-50'
                 }`}
               >
-                <span className="text-xl shrink-0">{cat.icon}</span>
+                <cat.icon className="w-5 h-5 shrink-0" />
                 <span className="text-left leading-tight">{cat.label}</span>
               </button>
             );

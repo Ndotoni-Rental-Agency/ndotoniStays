@@ -5,6 +5,7 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { PropertyRatingSummary } from '@/API';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
+import { Sparkles, Camera, MessageCircle, MapPin, Banknote, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Public query — only requests fields accessible without auth
@@ -59,13 +60,13 @@ interface Props {
   ratingSummary: PropertyRatingSummary | null | undefined;
 }
 
-const CATEGORY_LABELS = [
-  { key: 'cleanliness', label: 'Cleanliness', emoji: '🧹' },
-  { key: 'accuracy', label: 'Accuracy', emoji: '📸' },
-  { key: 'communication', label: 'Communication', emoji: '💬' },
-  { key: 'location', label: 'Location', emoji: '📍' },
-  { key: 'value', label: 'Value', emoji: '💰' },
-] as const;
+const CATEGORY_LABELS: { key: string; label: string; icon: LucideIcon }[] = [
+  { key: 'cleanliness', label: 'Cleanliness', icon: Sparkles },
+  { key: 'accuracy', label: 'Accuracy', icon: Camera },
+  { key: 'communication', label: 'Communication', icon: MessageCircle },
+  { key: 'location', label: 'Location', icon: MapPin },
+  { key: 'value', label: 'Value', icon: Banknote },
+];
 
 export function PropertyReviews({ propertyId, ratingSummary }: Props) {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -141,11 +142,11 @@ export function PropertyReviews({ propertyId, ratingSummary }: Props) {
       {/* Category breakdown */}
       {ratingSummary && ratingSummary.totalReviews > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          {CATEGORY_LABELS.map(({ key, label, emoji }) => {
+          {CATEGORY_LABELS.map(({ key, label, icon: Icon }) => {
             const score = ratingSummary[key as keyof PropertyRatingSummary] as number;
             return (
               <div key={key} className="flex items-center justify-between">
-                <span className="text-sm text-ink-700">{emoji} {label}</span>
+                <span className="text-sm text-ink-700 inline-flex items-center gap-1.5"><Icon className="w-4 h-4" /> {label}</span>
                 <div className="flex items-center gap-2">
                   <div className="w-20 h-1.5 bg-ink-100 rounded-full overflow-hidden">
                     <div

@@ -2,14 +2,22 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { Moon, Waves, Binoculars, PartyPopper, Camera, Briefcase, type LucideIcon } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const CATEGORIES = [
+const CATEGORIES: {
+  id: string;
+  titleKey: string;
+  descKey: string;
+  icon: LucideIcon;
+  image: string;
+  searchParams: string;
+}[] = [
   {
     id: 'stays',
     titleKey: 'categories.nightlyStays',
     descKey: 'categories.nightlyStays.desc',
-    icon: '🏠',
+    icon: Moon,
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=NIGHTLY_STAY',
   },
@@ -17,7 +25,7 @@ const CATEGORIES = [
     id: 'beach',
     titleKey: 'categories.beach',
     descKey: 'categories.beach.desc',
-    icon: '🏖️',
+    icon: Waves,
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=BEACH',
   },
@@ -25,7 +33,7 @@ const CATEGORIES = [
     id: 'safari',
     titleKey: 'categories.safari',
     descKey: 'categories.safari.desc',
-    icon: '🦁',
+    icon: Binoculars,
     image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=SAFARI',
   },
@@ -33,7 +41,7 @@ const CATEGORIES = [
     id: 'parties',
     titleKey: 'categories.parties',
     descKey: 'categories.parties.desc',
-    icon: '🎉',
+    icon: PartyPopper,
     image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=PARTY',
   },
@@ -41,7 +49,7 @@ const CATEGORIES = [
     id: 'photoshoot',
     titleKey: 'categories.photoshoot',
     descKey: 'categories.photoshoot.desc',
-    icon: '📸',
+    icon: Camera,
     image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=PHOTOSHOOT',
   },
@@ -49,7 +57,7 @@ const CATEGORIES = [
     id: 'business',
     titleKey: 'categories.business',
     descKey: 'categories.business.desc',
-    icon: '💼',
+    icon: Briefcase,
     image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop',
     searchParams: 'category=MEETING',
   },
@@ -86,7 +94,7 @@ export function CategoryGrid() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6">
-                <span className="text-2xl mb-1">{cat.icon}</span>
+                <cat.icon className="w-6 h-6 text-white mb-1" />
                 <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-brand-300 transition-colors">
                   {t(cat.titleKey)}
                 </h3>

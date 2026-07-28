@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { SearchX } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty } from '@/graphql/queries';
 import { ShortTermProperty } from '@/API';
@@ -64,7 +65,7 @@ export function PropertyDetailClient() {
   if (error || !property) {
     return (
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <p className="text-4xl mb-4">😕</p>
+        <SearchX className="w-10 h-10 text-ink-400 mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-ink-700">
           {error || 'Property not found'}
         </h2>

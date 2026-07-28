@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Moon, PartyPopper, Camera, Waves, Zap, ShieldCheck, MessageCircle, Banknote, Smartphone } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About Us – ndotoni Stays',
@@ -47,28 +48,28 @@ export default function AboutPage() {
         <h2 className="text-2xl font-semibold text-ink-900 mb-6">What We Offer</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="rounded-xl border border-ink-100 p-6">
-            <p className="text-2xl mb-2">🏠</p>
+            <Moon className="w-6 h-6 text-ink-600 mb-2" />
             <h3 className="font-semibold text-ink-900 mb-1">Nightly Stays</h3>
             <p className="text-ink-600 text-sm">
               Apartments and rooms for a comfortable night in cities across Tanzania.
             </p>
           </div>
           <div className="rounded-xl border border-ink-100 p-6">
-            <p className="text-2xl mb-2">🎉</p>
+            <PartyPopper className="w-6 h-6 text-ink-600 mb-2" />
             <h3 className="font-semibold text-ink-900 mb-1">Parties &amp; Events</h3>
             <p className="text-ink-600 text-sm">
               Birthday venues, celebration spaces, and event locations.
             </p>
           </div>
           <div className="rounded-xl border border-ink-100 p-6">
-            <p className="text-2xl mb-2">📸</p>
+            <Camera className="w-6 h-6 text-ink-600 mb-2" />
             <h3 className="font-semibold text-ink-900 mb-1">Photoshoots</h3>
             <p className="text-ink-600 text-sm">
               Beautiful backdrops for content creators and photographers.
             </p>
           </div>
           <div className="rounded-xl border border-ink-100 p-6">
-            <p className="text-2xl mb-2">🏖️</p>
+            <Waves className="w-6 h-6 text-ink-600 mb-2" />
             <h3 className="font-semibold text-ink-900 mb-1">Beach Getaways</h3>
             <p className="text-ink-600 text-sm">
               Sun, sand, and ocean views in Zanzibar and along the coast.
@@ -82,35 +83,35 @@ export default function AboutPage() {
         <h2 className="text-2xl font-semibold text-ink-900 mb-6">Why ndotoni Stays</h2>
         <ul className="space-y-4">
           <li className="flex items-start gap-3">
-            <span className="text-xl">⚡</span>
+            <Zap className="w-5 h-5 text-ink-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-ink-900">Instant Booking</p>
               <p className="text-ink-600 text-sm">No waiting for host approval. Book and get confirmed immediately.</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="text-xl">✅</span>
+            <ShieldCheck className="w-5 h-5 text-ink-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-ink-900">Verified Places</p>
               <p className="text-ink-600 text-sm">Every listing is reviewed. Real photos, accurate descriptions.</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="text-xl">💬</span>
+            <MessageCircle className="w-5 h-5 text-ink-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-ink-900">WhatsApp Support</p>
               <p className="text-ink-600 text-sm">Chat with us or your host directly on WhatsApp.</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="text-xl">💰</span>
+            <Banknote className="w-5 h-5 text-ink-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-ink-900">Fair Pricing</p>
               <p className="text-ink-600 text-sm">All fees shown upfront. No hidden charges at check-in.</p>
             </div>
           </li>
           <li className="flex items-start gap-3">
-            <span className="text-xl">📱</span>
+            <Smartphone className="w-5 h-5 text-ink-600 mt-0.5 shrink-0" />
             <div>
               <p className="font-medium text-ink-900">Local Payments</p>
               <p className="text-ink-600 text-sm">Pay with M-Pesa, Stripe, or card — whatever works for you.</p>
@@ -142,7 +143,7 @@ export default function AboutPage() {
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 rounded-full bg-green-600 px-6 py-3 text-white font-medium hover:bg-green-700 transition-colors"
           >
-            💬 WhatsApp Us
+            <MessageCircle className="w-5 h-5" /> WhatsApp Us
           </a>
           <a
             href="mailto:info@ndotoni.com"

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { MediaGrid } from '@/components/media/MediaGrid';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -78,7 +79,7 @@ export function StepPhotosContact({ form, updateField, setForm, error }: Props) 
                 {t('create.pricing.generating')}
               </>
             ) : (
-              <>{t('create.pricing.suggestTitle')}</>
+              <><Sparkles className="h-3.5 w-3.5" /> {t('create.pricing.suggestTitle')}</>
             )}
           </button>
         </div>

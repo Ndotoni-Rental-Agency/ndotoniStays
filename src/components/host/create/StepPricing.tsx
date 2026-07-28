@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Banknote, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 import { AIService } from '@/lib/ai/AIService';
@@ -103,7 +104,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
                     {t('create.pricing.analyzing')}
                   </>
                 ) : (
-                  <>{t('create.pricing.suggestPrice')}</>
+                  <><Banknote className="h-3.5 w-3.5" /> {t('create.pricing.suggestPrice')}</>
                 )}
               </button>
             </div>
@@ -183,7 +184,7 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
         {/* Instant Book Toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-ink-200 bg-ink-50/50">
           <div>
-            <p className="text-sm font-medium text-ink-800">{t('create.pricing.instantBook')}</p>
+            <p className="text-sm font-medium text-ink-800 inline-flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> {t('create.pricing.instantBook')}</p>
             <p className="text-xs text-ink-500 mt-0.5">{t('create.pricing.instantBookDesc')}</p>
           </div>
           <button

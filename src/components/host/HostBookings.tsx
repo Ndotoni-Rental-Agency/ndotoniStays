@@ -198,8 +198,8 @@ export function HostBookings({ propertyIds }: Props) {
     return `TZS ${amount.toLocaleString()}`;
   }
 
-  const pendingCount = bookings.filter((b) => b.status === 'PENDING' && b.checkInDate >= today).length;
   const today = new Date().toISOString().split('T')[0];
+  const pendingCount = bookings.filter((b) => b.status === 'PENDING' && b.checkInDate >= today).length;
   const filteredBookings = bookings.filter((b) => {
     if (timeFilter === 'upcoming') return b.checkOutDate >= today;
     return b.checkOutDate < today;

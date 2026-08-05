@@ -12,9 +12,20 @@ function VerifyEmail() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const code = searchParams.get('code');
+  // Present only when this email was sent to the app: a ndotoniapp:// deep
+  // link. Custom URI schemes are often stripped of their href by email
+  // clients, so the CTA button always points here (a normal https link)
+  // instead, and this page attempts the app redirect itself on load.
+  const appLink = searchParams.get('app');
 
   const [status, setStatus] = useState<Status>(email && code ? 'confirming' : 'missing-params');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (appLink) {
+      window.location.href = appLink;
+    }
+  }, [appLink]);
 
   useEffect(() => {
     if (!email || !code) return;
@@ -22,8 +33,16 @@ function VerifyEmail() {
     AuthBridge.verifyEmail(email, code)
       .then(() => setStatus('success'))
       .catch((err: any) => {
+        // The app may have completed verification first (if it opened via
+        // the redirect above) — Cognito rejects a second confirm attempt
+        // with "already confirmed", which is a success from the user's POV.
+        const message = err?.message || '';
+        if (/already confirmed|current status is confirmed/i.test(message)) {
+          setStatus('success');
+          return;
+        }
         setStatus('error');
-        setError(err?.message || 'This link may have expired. Try signing up again to get a new one.');
+        setError(message || 'This link may have expired. Try signing up again to get a new one.');
       });
   }, [email, code]);
 

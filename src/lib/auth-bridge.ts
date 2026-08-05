@@ -32,8 +32,8 @@ const verifyEmailMutation = /* GraphQL */ `
 `;
 
 const resendVerificationCodeMutation = /* GraphQL */ `
-  mutation ResendVerificationCode($email: String!) {
-    resendVerificationCode(email: $email) {
+  mutation ResendVerificationCode($email: String!, $platform: String) {
+    resendVerificationCode(email: $email, platform: $platform) {
       success
       message
     }
@@ -41,8 +41,8 @@ const resendVerificationCodeMutation = /* GraphQL */ `
 `;
 
 const forgotPasswordMutation = /* GraphQL */ `
-  mutation ForgotPassword($email: String!) {
-    forgotPassword(email: $email) {
+  mutation ForgotPassword($email: String!, $platform: String) {
+    forgotPassword(email: $email, platform: $platform) {
       success
       message
     }
@@ -71,7 +71,7 @@ export class AuthBridge {
   }) {
     const data = await GraphQLClient.executePublic<{ signUp: { success: boolean; message: string } }>(
       signUpMutation,
-      { input }
+      { input: { ...input, platform: 'ndotonistays' } }
     );
 
     if (!data.signUp?.success) {
@@ -129,7 +129,7 @@ export class AuthBridge {
   static async resendVerificationCode(email: string) {
     const data = await GraphQLClient.executePublic<{ resendVerificationCode: { success: boolean; message: string } }>(
       resendVerificationCodeMutation,
-      { email }
+      { email, platform: 'ndotonistays' }
     );
 
     if (!data.resendVerificationCode?.success) {
@@ -143,7 +143,7 @@ export class AuthBridge {
   static async forgotPassword(email: string) {
     const data = await GraphQLClient.executePublic<{ forgotPassword: { success: boolean; message: string } }>(
       forgotPasswordMutation,
-      { email }
+      { email, platform: 'ndotonistays' }
     );
 
     if (!data.forgotPassword?.success) {

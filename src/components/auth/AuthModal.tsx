@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Fragment } from 'react';
+import { useState } from 'react';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { PhoneInput } from '@/components/ui/PhoneInput';
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
-  const { signIn, signUp, signInWithGoogle, signInWithApple, signInWithFacebook, verifyEmail, resendVerificationCode, forgotPassword, resetPassword } = useAuth();
+  const { signIn, signUp, signInWithGoogle, signInWithApple, signInWithFacebook, resendVerificationCode, forgotPassword } = useAuth();
   const [view, setView] = useState<AuthView>(initialView);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +28,6 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [code, setCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
 
   if (!isOpen) return null;
 
@@ -67,28 +65,9 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
     try {
       await signUp({ email, password, firstName, lastName, phoneNumber });
       setView('verify');
-      setSuccess('Account created! Check your email for the verification code.');
+      setSuccess(null);
     } catch (err: any) {
       setError(getSafeErrorMessage(err, 'creating your account'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      await verifyEmail(email, code);
-      setSuccess('Email verified! You can now sign in.');
-      setTimeout(() => {
-        setView('signIn');
-        resetForm();
-      }, 1500);
-    } catch (err: any) {
-      setError(getSafeErrorMessage(err, 'verifying your email'));
     } finally {
       setLoading(false);
     }
@@ -97,9 +76,9 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
   async function handleResendCode() {
     try {
       await resendVerificationCode(email);
-      setSuccess('New code sent to your email.');
+      setSuccess('Confirmation link resent — check your email.');
     } catch (err: any) {
-      setError(getSafeErrorMessage(err, 'resending verification code'));
+      setError(getSafeErrorMessage(err, 'resending confirmation email'));
     }
   }
 
@@ -111,28 +90,8 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
     try {
       await forgotPassword(email);
       setView('resetPassword');
-      setSuccess('Reset code sent to your email.');
     } catch (err: any) {
       setError(getSafeErrorMessage(err, 'sending reset email'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleResetPassword(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      await resetPassword(email, code, newPassword);
-      setSuccess('Password reset! You can now sign in.');
-      setTimeout(() => {
-        setView('signIn');
-        resetForm();
-      }, 1500);
-    } catch (err: any) {
-      setError(getSafeErrorMessage(err, 'resetting your password'));
     } finally {
       setLoading(false);
     }
@@ -361,40 +320,29 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
         {/* Verify Email View */}
         {view === 'verify' && (
-          <>
-            <h2 className="text-2xl font-bold text-ink-900 mb-1">Verify your email</h2>
-            <p className="text-sm text-ink-500 mb-6">Enter the 6-digit code sent to <strong>{email}</strong></p>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-ink-900 mb-2">Check your email</h2>
+            <p className="text-sm text-ink-500 mb-6">
+              We sent a confirmation link to <strong className="text-ink-700">{email}</strong>. Click it to activate your account, then sign in.
+            </p>
 
-            <form onSubmit={handleVerify} className="space-y-4">
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Enter verification code"
-                className="input text-center text-lg tracking-widest"
-                maxLength={6}
-                required
-              />
+            {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg mb-3">{error}</p>}
+            {success && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg mb-3">{success}</p>}
 
-              {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-              {success && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{success}</p>}
-
-              <button type="submit" disabled={loading} className="btn-primary w-full">
-                {loading ? 'Verifying...' : 'Verify Email'}
-              </button>
-            </form>
-
-            <button onClick={handleResendCode} className="mt-3 w-full text-center text-sm text-brand-600 hover:underline">
-              Resend code
+            <button onClick={handleResendCode} className="w-full text-center text-sm text-brand-600 hover:underline">
+              Resend confirmation link
             </button>
-          </>
+            <button onClick={() => { resetForm(); setView('signIn'); }} className="mt-3 w-full text-center text-sm text-ink-500 hover:text-ink-700">
+              Back to sign in
+            </button>
+          </div>
         )}
 
         {/* Forgot Password View */}
         {view === 'forgotPassword' && (
           <>
             <h2 className="text-2xl font-bold text-ink-900 mb-1">Reset password</h2>
-            <p className="text-sm text-ink-500 mb-6">We&apos;ll send a reset code to your email</p>
+            <p className="text-sm text-ink-500 mb-6">We&apos;ll send a reset link to your email</p>
 
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="input" required />
@@ -402,7 +350,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
               {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
               <button type="submit" disabled={loading} className="btn-primary w-full">
-                {loading ? 'Sending...' : 'Send Reset Code'}
+                {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
             </form>
 
@@ -414,22 +362,16 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
         {/* Reset Password View */}
         {view === 'resetPassword' && (
-          <>
-            <h2 className="text-2xl font-bold text-ink-900 mb-1">Set new password</h2>
-            <p className="text-sm text-ink-500 mb-6">Enter the code from your email and your new password</p>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-ink-900 mb-2">Check your email</h2>
+            <p className="text-sm text-ink-500 mb-6">
+              We sent a password reset link to <strong className="text-ink-700">{email}</strong>.
+            </p>
 
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Reset code" className="input text-center tracking-widest" required />
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 8 characters)" className="input" required minLength={8} />
-
-              {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-              {success && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{success}</p>}
-
-              <button type="submit" disabled={loading} className="btn-primary w-full">
-                {loading ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </form>
-          </>
+            <button onClick={() => { resetForm(); setView('signIn'); }} className="w-full text-center text-sm text-ink-500 hover:text-ink-700">
+              Back to sign in
+            </button>
+          </div>
         )}
       </div>
     </div>

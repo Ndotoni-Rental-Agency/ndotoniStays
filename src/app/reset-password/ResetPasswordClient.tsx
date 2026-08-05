@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircleIcon, EyeIcon, EyeSlashIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { AuthBridge } from '@/lib/auth-bridge';
@@ -12,23 +12,12 @@ function ResetPassword() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const code = searchParams.get('code');
-  // Present only when this email was sent to the app: a ndotoniapp:// deep
-  // link. Custom URI schemes are often stripped of their href by email
-  // clients, so the CTA button always points here (a normal https link)
-  // instead, and this page attempts the app redirect itself on load.
-  const appLink = searchParams.get('app');
 
   const [status, setStatus] = useState<Status>(email && code ? 'form' : 'missing-params');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (appLink) {
-      window.location.href = appLink;
-    }
-  }, [appLink]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

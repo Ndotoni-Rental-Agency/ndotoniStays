@@ -48,25 +48,25 @@ function VerifyEmail() {
 
   if (status === 'confirming') {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div className="text-center">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4 animate-pulse">
           <CheckCircleIcon className="h-8 w-8 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-2">Confirming your email…</h1>
-        <p className="text-ink-500 text-sm">This only takes a second.</p>
+        <h1 className="text-xl font-bold text-ink-900 mb-2">Confirming your email…</h1>
+        <p className="text-sm text-ink-500">This only takes a second.</p>
       </div>
     );
   }
 
   if (status === 'success') {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+      <div className="text-center">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4">
           <CheckCircleIcon className="h-8 w-8 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-2">Email confirmed</h1>
-        <p className="text-ink-500 text-sm mb-6">Your account is ready. Sign in to get started.</p>
-        <button onClick={() => router.push('/')} className="btn-primary">
+        <h1 className="text-xl font-bold text-ink-900 mb-2">Email confirmed</h1>
+        <p className="text-sm text-ink-500 mb-6">Your account is ready. Sign in to get started.</p>
+        <button onClick={() => router.push('/')} className="btn-primary w-full">
           Go to ndotoniStays
         </button>
       </div>
@@ -74,19 +74,19 @@ function VerifyEmail() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-16 text-center">
+    <div className="text-center">
       <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
         <XCircleIcon className="h-8 w-8 text-red-500" />
       </div>
-      <h1 className="text-2xl font-bold text-ink-900 mb-2">
+      <h1 className="text-xl font-bold text-ink-900 mb-2">
         {status === 'missing-params' ? 'Invalid confirmation link' : "Couldn't confirm your email"}
       </h1>
-      <p className="text-ink-500 text-sm mb-6">
+      <p className="text-sm text-ink-500 mb-6">
         {status === 'missing-params'
           ? 'This link is missing some information. Copy the full link from your confirmation email, or request a new one.'
           : error}
       </p>
-      <button onClick={() => router.push('/')} className="btn-primary">
+      <button onClick={() => router.push('/')} className="btn-primary w-full">
         Back to ndotoniStays
       </button>
     </div>
@@ -95,8 +95,12 @@ function VerifyEmail() {
 
 export default function VerifyEmailClient() {
   return (
-    <Suspense fallback={null}>
-      <VerifyEmail />
-    </Suspense>
+    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-white">
+      <div className="w-full max-w-md">
+        <Suspense fallback={null}>
+          <VerifyEmail />
+        </Suspense>
+      </div>
+    </div>
   );
 }

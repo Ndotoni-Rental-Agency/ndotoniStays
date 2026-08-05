@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { DM_Sans } from 'next/font/google';
 import './globals.css';
 import 'leaflet/dist/leaflet.css';
-import { Header } from '@/components/layout/Header';
+import { ConditionalHeader } from '@/components/layout/ConditionalHeader';
 import { ConditionalFooter } from '@/components/layout/ConditionalFooter';
 import { ClientProviders } from '@/components/providers/ClientProviders';
 import { Analytics } from '@vercel/analytics/react';
@@ -78,7 +78,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ClientProviders>
-          <Header />
+          <ConditionalHeader />
           <main className="min-h-screen">{children}</main>
           <ConditionalFooter />
           <WhatsAppFAB />

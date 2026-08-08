@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { MessageBubble, ChatInput } from '@/components/chat';
+import { MessageBubble, ChatInput, MessageActionSheet } from '@/components/chat';
 import { Conversation as APIConversation, ChatMessage } from '@/API';
 import { UserProfile as User } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
@@ -83,6 +83,7 @@ export function ChatArea({
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [actionSheetMessage, setActionSheetMessage] = useState<ChatMessage | null>(null);
 
   const listItems = useMemo(() => buildListItems(messages), [messages]);
 
@@ -119,6 +120,13 @@ export function ChatArea({
     }
   };
 
+  const handleDeleteOne = (messageId: string) => {
+    if (!onDeleteMessage) return;
+    if (window.confirm('Delete this message?')) {
+      onDeleteMessage(messageId);
+    }
+  };
+
   const handleSend = async (content: string) => {
     const replyToMessageId = replyingTo?.id;
     await onSendMessage(content, replyToMessageId);
@@ -133,8 +141,8 @@ export function ChatArea({
     const el = document.getElementById(`message-${messageId}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('ring-2', 'ring-brand-400');
-      setTimeout(() => el.classList.remove('ring-2', 'ring-brand-400'), 1200);
+      el.classList.add('ring-2', 'ring-brand-400', 'ring-offset-2');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-brand-400', 'ring-offset-2'), 1200);
     }
   };
 
@@ -157,6 +165,7 @@ export function ChatArea({
   useEffect(() => {
     exitSelectionMode();
     setReplyingTo(null);
+    setActionSheetMessage(null);
   }, [selectedConversation?.id]);
 
   if (!selectedConversation) {
@@ -184,7 +193,7 @@ export function ChatArea({
       !showConversationList ? 'block' : 'hidden md:flex'
     }`}>
       {/* Chat Header */}
-      <div className="sticky top-0 z-10 flex-shrink-0 px-4 sm:px-6 py-3 border-b border-stone-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg">
+      <div className="sticky top-0 z-10 flex-shrink-0 px-4 sm:px-6 py-3 border-b border-stone-200 dark:border-gray-700 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg">
         {selectionMode ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -226,7 +235,11 @@ export function ChatArea({
       </div>
 
       {/* Messages Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-white dark:bg-gray-800" style={{ minHeight: 0 }}>
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 space-y-1 bg-[#f7f5f2] dark:bg-gray-800"
+        style={{ minHeight: 0 }}
+      >
         {loadingMessages ? (
           <div className="flex items-center justify-center h-full">
             <div className="flex items-center space-x-3">
@@ -238,8 +251,8 @@ export function ChatArea({
           listItems.map((item) => {
             if (item.type === 'date') {
               return (
-                <div key={item.id} className="flex justify-center">
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1">
+                <div key={item.id} className="sticky top-1 z-[5] flex justify-center py-2">
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm shadow-sm rounded-full px-3 py-1">
                     {item.label}
                   </span>
                 </div>
@@ -247,20 +260,18 @@ export function ChatArea({
             }
             const message = item.message;
             return (
-              <div key={message.id} id={`message-${message.id}`} className="transition-shadow rounded-2xl">
+              <div key={message.id} id={`message-${message.id}`} className="py-0.5 rounded-2xl transition-shadow">
                 <MessageBubble
                   message={message}
                   isOwnMessage={message.isMine}
                   senderName={message.senderName}
                   myUserId={myUserId}
-                  onDelete={onDeleteMessage}
-                  onReply={setReplyingTo}
+                  onOpenActions={setActionSheetMessage}
                   onReact={(messageId, emoji) => toggleReaction(messageId, emoji)}
                   onJumpToMessage={scrollToMessage}
                   selectionMode={selectionMode}
                   isSelected={selectedMessages.has(message.id)}
                   onSelect={() => handleMessageSelect(message.id)}
-                  onEnterSelectionMode={() => enterSelectionMode(message.id)}
                 />
               </div>
             );
@@ -297,6 +308,17 @@ export function ChatArea({
           sendingMessage={sendingMessage}
         />
       </div>
+
+      {actionSheetMessage && (
+        <MessageActionSheet
+          message={actionSheetMessage}
+          onClose={() => setActionSheetMessage(null)}
+          onReply={setReplyingTo}
+          onReact={(messageId, emoji) => toggleReaction(messageId, emoji)}
+          onEnterSelectionMode={enterSelectionMode}
+          onDelete={actionSheetMessage.isMine ? handleDeleteOne : undefined}
+        />
+      )}
     </div>
   );
 }

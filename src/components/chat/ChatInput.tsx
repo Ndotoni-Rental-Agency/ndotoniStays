@@ -138,7 +138,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
       <div className="flex items-end gap-2">
-        <div className="flex-1 relative">
+        <div className="flex-1 flex items-end bg-gray-100 dark:bg-gray-700 rounded-3xl px-4 py-2 focus-within:ring-2 focus-within:ring-brand-500/40 transition-all">
           <textarea
             ref={textareaRef}
             value={message}
@@ -147,32 +147,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="w-full px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 rounded-xl border border-stone-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            style={{ minHeight: '42px', maxHeight: '120px', overflowY: message.length > 100 ? 'auto' : 'hidden' }}
+            className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
+            style={{ minHeight: '24px', maxHeight: '120px', overflowY: message.length > 100 ? 'auto' : 'hidden' }}
           />
         </div>
 
         <button
           onClick={handleSend}
           disabled={!message.trim() || disabled || isSending || sendingMessage}
-          className="flex-shrink-0 px-4 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors flex items-center"
+          className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full bg-brand-500 hover:bg-brand-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white transition-colors"
           title="Send message"
         >
           {isSending || sendingMessage ? (
-            <>
-              <svg className="w-4 h-4 mr-1.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Sending...
-            </>
+            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
           ) : (
-            <>
-              <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              Send
-            </>
+            <svg className="w-5 h-5 -rotate-45 -translate-x-px" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.94 2.94a1.5 1.5 0 011.61-.35l12.5 5a1.5 1.5 0 010 2.82l-12.5 5a1.5 1.5 0 01-2.02-1.87L4.5 10 2.53 4.46a1.5 1.5 0 01.41-1.52z" />
+            </svg>
           )}
         </button>
       </div>

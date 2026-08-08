@@ -2,6 +2,7 @@ export { default as ConversationList } from './ConversationList';
 export { ConversationItem } from './ConversationItem';
 export { SwipeableConversationItem } from './SwipeableConversationItem';
 export { default as MessageBubble } from './MessageBubble';
+export { default as MessageActionSheet } from './MessageActionSheet';
 export { default as ChatInput } from './ChatInput';
 export { ChatHeader } from './ChatHeader';
 export { ConversationSidebar } from './ConversationSidebar';

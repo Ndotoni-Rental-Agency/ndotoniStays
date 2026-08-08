@@ -64,6 +64,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  // Tells supporting mobile browsers to shrink the actual layout viewport when
+  // the on-screen keyboard opens (rather than just the visual viewport), so a
+  // 100dvh container — like the chat page — correctly resizes and its bottom
+  // content stays flush with the keyboard instead of leaving a gap.
+  interactiveWidget: 'resizes-content',
 };
 
 export default function RootLayout({

@@ -150,7 +150,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
+            className="flex-1 bg-transparent text-base text-gray-900 placeholder-gray-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
             style={{ minHeight: '24px', maxHeight: '120px', overflowY: message.length > 100 ? 'auto' : 'hidden' }}
           />
         </div>

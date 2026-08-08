@@ -68,9 +68,12 @@ export interface AISuggestionResult {
 class AIServiceClass {
   /**
    * Core method — calls the backend GraphQL mutation.
+   * generateAISuggestion is public (schema allows @aws_api_key), so use the
+   * auto-detecting client: signed-in hosts still hit it as themselves, but a
+   * guest mid-draft on /become-host isn't blocked before they've signed in.
    */
   private async suggest(input: Record<string, any>): Promise<AISuggestionResult> {
-    const result = await GraphQLClient.executeAuthenticated<{
+    const result = await GraphQLClient.execute<{
       generateAISuggestion: AISuggestionResult;
     }>(GENERATE_AI_SUGGESTION, { input });
     return result.generateAISuggestion;

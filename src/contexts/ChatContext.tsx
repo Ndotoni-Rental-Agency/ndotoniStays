@@ -210,14 +210,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             : newMessage.isMine;
         const resolvedMessage = { ...newMessage, isMine: resolvedIsMine };
 
-        console.log('[ChatContext] onNewMessage received:', {
-          messageId: newMessage.id,
-          senderId: newMessage.senderId,
-          myUserId: myUserIdRef.current,
-          serverIsMine: newMessage.isMine,
-          resolvedIsMine,
-        });
-
         setMessages(prev => {
           const exists = prev.some(msg => msg.id === resolvedMessage.id);
           if (exists) return prev;

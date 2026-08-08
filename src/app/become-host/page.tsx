@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
-import { createShortTermPropertyDraft } from '@/graphql/mutations';
+import { createShortTermPropertyDraft, submitContactInquiry } from '@/graphql/mutations';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { PartyPopper, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -85,6 +85,38 @@ export default function ListYourPlacePage() {
     } catch {
       // ignore parse errors
     }
+  }, []);
+
+  // Let the team know a host started a listing, so they can follow up if it's abandoned.
+  // Skip when we're just restoring an in-progress draft — that's a continuation, not a start.
+  const hasNotifiedStartRef = useRef(false);
+  useEffect(() => {
+    if (hasNotifiedStartRef.current) return;
+    hasNotifiedStartRef.current = true;
+
+    let resuming = false;
+    try {
+      resuming = !!localStorage.getItem(STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+    if (resuming) return;
+
+    const name = user ? `${user.firstName} ${user.lastName}`.trim() : '';
+    const displayName = name || 'A visitor';
+    const locationLine = form.region ? `\nLocation: ${[form.region, form.district].filter(Boolean).join(', ')}` : '';
+
+    GraphQLClient.executePublic(submitContactInquiry, {
+      input: {
+        inquiryType: 'PROPERTY',
+        subject: 'New listing started (Website)',
+        name: name || 'Anonymous visitor',
+        email: user?.email || 'anonymous-lead@ndotonistays.com',
+        phone: user?.phoneNumber || undefined,
+        message: `${displayName} just started creating a new short-term listing on ndotonistays.com.${locationLine}`,
+      },
+    }).catch(err => console.error('Failed to notify listing started:', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Pre-fill phone from user profile

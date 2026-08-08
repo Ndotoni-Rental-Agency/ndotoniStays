@@ -45,10 +45,10 @@ export function ConversationSidebar({
   };
 
   return (
-    <div className={`w-full md:w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full ${
+    <div className={`w-full md:w-80 bg-white border-r border-gray-200 flex flex-col h-full ${
       showConversationList ? 'block' : 'hidden md:flex'
     }`}>
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <input
@@ -56,13 +56,13 @@ export function ConversationSidebar({
               placeholder={t('messages.searchConversations') || 'Search conversations...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-200"
+              className="w-full pl-10 pr-10 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder-gray-500 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-200"
             />
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
               {isSearching ? (
                 <div className="w-4 h-4 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin"></div>
               ) : (
-                <svg className="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               )}
@@ -70,7 +70,7 @@ export function ConversationSidebar({
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -88,7 +88,7 @@ export function ConversationSidebar({
           </button>
         </div>
         {searchQuery && (
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-gray-500">
             {filteredConversations.length} of {conversations.length} conversations
           </p>
         )}

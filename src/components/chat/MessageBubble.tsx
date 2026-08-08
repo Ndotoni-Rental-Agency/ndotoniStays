@@ -84,7 +84,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
             isSelected
               ? 'bg-brand-500 border-brand-500'
-              : 'border-stone-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              : 'border-stone-300 bg-white'
           }`}>
             {isSelected && (
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
       {!isOwnMessage && !selectionMode && (
         <div className="flex-shrink-0 mb-1">
-          <div className="w-7 h-7 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-700 dark:text-brand-300 text-xs font-semibold overflow-hidden">
+          <div className="w-7 h-7 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 text-xs font-semibold overflow-hidden">
             {senderImage ? (
               <img src={senderImage} alt={displayName} className="w-full h-full object-cover" />
             ) : (
@@ -112,14 +112,14 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div className={`hidden sm:flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity mb-1 ${isOwnMessage ? 'order-first' : 'order-last'}`}>
           <button
             onClick={() => onReact(message.id, '👍')}
-            className="w-7 h-7 flex items-center justify-center rounded-full text-sm bg-white dark:bg-gray-700 border border-stone-200 dark:border-gray-600 shadow-sm hover:scale-110 transition-transform"
+            className="w-7 h-7 flex items-center justify-center rounded-full text-sm bg-white border border-stone-200 shadow-sm hover:scale-110 transition-transform"
             title="Quick react"
           >
             🙂
           </button>
           <button
             onClick={() => onOpenActions(message)}
-            className="w-7 h-7 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 border border-stone-200 dark:border-gray-600 shadow-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-white border border-stone-200 shadow-sm text-gray-500 hover:text-gray-700"
             title="More"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,10 +141,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           onMouseLeave={cancelLongPress}
           className={`relative px-3.5 py-2 shadow-sm transition-transform ${
             selectionMode ? 'cursor-pointer' : 'cursor-default select-none'
-          } ${isSelected ? 'ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-gray-800' : ''} ${
+          } ${isSelected ? 'ring-2 ring-brand-500 ring-offset-2' : ''} ${
             isOwnMessage
               ? 'bg-brand-500 text-white rounded-2xl rounded-br-md'
-              : 'bg-white dark:bg-gray-700 text-ink-900 dark:text-white rounded-2xl rounded-bl-md border border-stone-200 dark:border-gray-600'
+              : 'bg-white text-ink-900 rounded-2xl rounded-bl-md border border-stone-200'
           }`}
         >
           {message.replyToContent && (
@@ -156,13 +156,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               className={`block w-full text-left mb-1.5 px-2.5 py-1.5 rounded-lg border-l-2 truncate ${
                 isOwnMessage
                   ? 'bg-white/15 border-white/70'
-                  : 'bg-black/5 dark:bg-white/10 border-brand-500'
+                  : 'bg-black/5 border-brand-500'
               }`}
             >
-              <div className={`text-xs font-semibold truncate ${isOwnMessage ? 'text-white/90' : 'text-brand-600 dark:text-brand-400'}`}>
+              <div className={`text-xs font-semibold truncate ${isOwnMessage ? 'text-white/90' : 'text-brand-600'}`}>
                 {message.replyToSenderName}
               </div>
-              <div className={`text-xs truncate ${isOwnMessage ? 'text-white/75' : 'text-gray-500 dark:text-gray-400'}`}>
+              <div className={`text-xs truncate ${isOwnMessage ? 'text-white/75' : 'text-gray-500'}`}>
                 {message.replyToContent}
               </div>
             </button>
@@ -174,7 +174,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
           {!selectionMode && (
             <div className={`flex items-center gap-1 mt-1 ${isOwnMessage ? 'justify-end' : 'justify-end'}`}>
-              <span className={`text-[11px] ${isOwnMessage ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'}`}>
+              <span className={`text-[11px] ${isOwnMessage ? 'text-white/70' : 'text-gray-400'}`}>
                 {formatTime(message.timestamp)}
               </span>
               {isOwnMessage && (
@@ -198,13 +198,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 onClick={() => onReact(message.id, r.emoji)}
                 className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors ${
                   myUserId && r.userIds.includes(myUserId)
-                    ? 'bg-brand-50 dark:bg-brand-900/30 border-brand-400'
-                    : 'bg-white dark:bg-gray-700 border-stone-200 dark:border-gray-600'
+                    ? 'bg-brand-50 border-brand-400'
+                    : 'bg-white border-stone-200'
                 }`}
               >
                 <span>{r.emoji}</span>
                 {r.userIds.length > 1 && (
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">{r.userIds.length}</span>
+                  <span className="text-gray-500 font-medium">{r.userIds.length}</span>
                 )}
               </button>
             ))}

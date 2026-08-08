@@ -224,13 +224,18 @@ function ChatPageContent() {
     );
   }
 
+  // On mobile, an open conversation already has its own header (with a back
+  // button) inside ChatArea — stacking the site-wide header on top of that
+  // wastes a lot of vertical space on a small screen. Desktop always shows
+  // both panes together, so the header always stays there.
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Page Header */}
-      <ChatHeader conversationCount={conversations.length} />
+    <div className="h-screen flex flex-col bg-gray-50">
+      <div className={showConversationList ? '' : 'hidden md:block'}>
+        <ChatHeader conversationCount={conversations.length} />
+      </div>
 
       {/* Main Chat Layout */}
-      <div className="flex-1 flex overflow-hidden pt-16">
+      <div className={`flex-1 flex overflow-hidden ${showConversationList ? 'pt-16' : 'pt-0 md:pt-16'}`}>
         {/* Conversation Sidebar */}
         <ConversationSidebar
           onSelectConversation={handleSelectConversation}

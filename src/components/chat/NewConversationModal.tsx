@@ -120,14 +120,14 @@ export function NewConversationModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">
             {t('messages.newConversation') || 'New Conversation'}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="p-1.5 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -142,7 +142,7 @@ export function NewConversationModal({
               placeholder="Search by name or business..."
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 text-gray-900 placeholder-gray-500 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition"
             />
           </div>
           {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
@@ -158,15 +158,15 @@ export function NewConversationModal({
 
           {!isSearching && query.length >= 2 && results.length === 0 && (
             <div className="text-center py-8">
-              <User className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">No users found matching &quot;{query}&quot;</p>
+              <User className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No users found matching &quot;{query}&quot;</p>
             </div>
           )}
 
           {!isSearching && query.length < 2 && (
             <div className="text-center py-8">
-              <MessageCircle className="w-10 h-10 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">Search for a host to start a conversation</p>
+              <MessageCircle className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">Search for a host to start a conversation</p>
             </div>
           )}
 
@@ -175,22 +175,22 @@ export function NewConversationModal({
               key={user.userId}
               onClick={() => handleSelectUser(user)}
               disabled={isInitializing !== null}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex-shrink-0">
                 {user.profileImage ? (
                   <img src={user.profileImage} alt={getUserDisplayName(user)} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
-                    <span className="text-sm font-medium text-brand-600 dark:text-brand-400">
+                  <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center">
+                    <span className="text-sm font-medium text-brand-600">
                       {(user.firstName || '?')[0]}{(user.lastName || '?')[0]}
                     </span>
                   </div>
                 )}
               </div>
               <div className="flex-1 text-left min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{getUserDisplayName(user)}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{getUserTypeLabel(user.userType)}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{getUserDisplayName(user)}</p>
+                <p className="text-xs text-gray-500">{getUserTypeLabel(user.userType)}</p>
               </div>
               {isInitializing === user.userId ? (
                 <div className="w-5 h-5 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin" />

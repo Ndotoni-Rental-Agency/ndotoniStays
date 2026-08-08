@@ -134,17 +134,17 @@ export function SwipeableConversationItem({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="bg-white dark:bg-gray-800 relative z-10"
+        className="bg-white relative z-10"
       >
         <button
           onClick={handleClick}
           className={`w-full p-4 flex items-center space-x-3 text-left transition-all duration-200 ${
-            isSelected ? 'bg-gray-50 dark:bg-brand-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+            isSelected ? 'bg-gray-50' : 'hover:bg-gray-50'
           }`}
         >
           <div className="flex-shrink-0">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-semibold overflow-hidden transition-colors ${
-              isSelected ? 'bg-gray-900 dark:bg-brand-900' : 'bg-gray-400 dark:bg-gray-600'
+              isSelected ? 'bg-gray-900' : 'bg-gray-400'
             }`}>
               {profileImage ? (
                 <img src={profileImage} alt={displayName} className="w-full h-full object-cover" />
@@ -157,16 +157,16 @@ export function SwipeableConversationItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <h3 className={`text-base font-semibold truncate transition-colors ${
-                isSelected ? 'text-gray-900 dark:text-brand-400' : 'text-gray-900 dark:text-white'
+                isSelected ? 'text-gray-900' : 'text-gray-900'
               }`}>
                 {displayName}
               </h3>
               <div className="flex items-center space-x-2 flex-shrink-0 ml-2">
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500">
                   {formatTime(conversation.lastMessageTime)}
                 </span>
                 {unreadCount > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-gray-900 dark:bg-brand-900 rounded-full min-w-[20px] h-5">
+                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-gray-900 rounded-full min-w-[20px] h-5">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
                 )}
@@ -174,16 +174,16 @@ export function SwipeableConversationItem({
             </div>
             <div className="space-y-1">
               <p className={`text-sm truncate ${
-                unreadCount > 0 ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'
+                unreadCount > 0 ? 'font-medium text-gray-900' : 'text-gray-600'
               }`}>
                 {conversation.lastMessage || 'No messages yet'}
               </p>
               {conversation.propertyTitle && (
                 <div className="flex items-center space-x-1">
-                  <svg className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{conversation.propertyTitle}</p>
+                  <p className="text-xs text-gray-500 truncate">{conversation.propertyTitle}</p>
                 </div>
               )}
             </div>

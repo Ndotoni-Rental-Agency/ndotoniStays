@@ -118,18 +118,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t border-stone-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 py-3">
+    <div
+      className="border-t border-stone-200 bg-white px-4 sm:px-6 py-3"
+      style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+    >
       {replyingTo && (
-        <div className="flex items-center gap-2 mb-2 pl-3 pr-2 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-2 border-brand-500">
+        <div className="flex items-center gap-2 mb-2 pl-3 pr-2 py-2 bg-gray-50 rounded-lg border-l-2 border-brand-500">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 truncate">
+            <p className="text-xs font-semibold text-brand-600 truncate">
               Replying to {replyingTo.senderName}
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{replyingTo.content}</p>
+            <p className="text-xs text-gray-500 truncate">{replyingTo.content}</p>
           </div>
           <button
             onClick={onCancelReply}
-            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -138,7 +141,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         </div>
       )}
       <div className="flex items-end gap-2">
-        <div className="flex-1 flex items-end bg-gray-100 dark:bg-gray-700 rounded-3xl px-4 py-2 focus-within:ring-2 focus-within:ring-brand-500/40 transition-all">
+        <div className="flex-1 flex items-end bg-gray-100 rounded-3xl px-4 py-2 focus-within:ring-2 focus-within:ring-brand-500/40 transition-all">
           <textarea
             ref={textareaRef}
             value={message}
@@ -147,7 +150,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={disabled}
             placeholder={placeholder}
             rows={1}
-            className="flex-1 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
+            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-500 focus:outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed py-1"
             style={{ minHeight: '24px', maxHeight: '120px', overflowY: message.length > 100 ? 'auto' : 'hidden' }}
           />
         </div>
@@ -155,7 +158,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <button
           onClick={handleSend}
           disabled={!message.trim() || disabled || isSending || sendingMessage}
-          className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full bg-brand-500 hover:bg-brand-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white transition-colors"
+          className="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-full bg-brand-500 hover:bg-brand-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white transition-colors"
           title="Send message"
         >
           {isSending || sendingMessage ? (
@@ -164,8 +167,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           ) : (
-            <svg className="w-5 h-5 -rotate-45 -translate-x-px" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2.94 2.94a1.5 1.5 0 011.61-.35l12.5 5a1.5 1.5 0 010 2.82l-12.5 5a1.5 1.5 0 01-2.02-1.87L4.5 10 2.53 4.46a1.5 1.5 0 01.41-1.52z" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19V5m0 0l-6 6m6-6l6 6" />
             </svg>
           )}
         </button>

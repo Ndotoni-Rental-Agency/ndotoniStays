@@ -11,7 +11,7 @@ interface ErrorBannerProps {
 
 export function ErrorBanner({ error, onRetry, onDismiss, retryDisabled = false }: ErrorBannerProps) {
   return (
-    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
       <div className="flex items-start">
         <div className="flex-shrink-0">
           <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +19,7 @@ export function ErrorBanner({ error, onRetry, onDismiss, retryDisabled = false }
           </svg>
         </div>
         <div className="ml-3 flex-1">
-          <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+          <p className="text-sm text-red-800">{error}</p>
         </div>
         <div className="ml-4 flex-shrink-0 flex space-x-2">
           {onRetry && (
@@ -28,8 +28,8 @@ export function ErrorBanner({ error, onRetry, onDismiss, retryDisabled = false }
               disabled={retryDisabled}
               className={`text-sm font-medium ${
                 retryDisabled
-                  ? 'text-red-400 dark:text-red-500 cursor-not-allowed'
-                  : 'text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200'
+                  ? 'text-red-400 cursor-not-allowed'
+                  : 'text-red-600 hover:text-red-800'
               }`}
             >
               {retryDisabled ? 'Please wait...' : 'Retry'}
@@ -37,7 +37,7 @@ export function ErrorBanner({ error, onRetry, onDismiss, retryDisabled = false }
           )}
           <button
             onClick={onDismiss}
-            className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+            className="text-sm text-red-600 hover:text-red-800"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

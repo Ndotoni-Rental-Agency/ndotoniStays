@@ -50,15 +50,15 @@ export function ConversationItem({
         onClick={() => onSelect(conversation.id)}
         className={`w-full p-3 flex items-center gap-3 rounded-xl text-left transition-all duration-150 ${
           isSelected
-            ? 'bg-brand-50 dark:bg-brand-900/20 ring-1 ring-brand-200 dark:ring-brand-800'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+            ? 'bg-brand-50 ring-1 ring-brand-200'
+            : 'hover:bg-gray-50'
         }`}
       >
         <div className="flex-shrink-0 relative">
           <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold overflow-hidden ${
             isSelected
               ? 'bg-brand-500 text-white'
-              : 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300'
+              : 'bg-brand-100 text-brand-700'
           }`}>
             {profileImage ? (
               <img src={profileImage} alt={displayName} className="w-full h-full object-cover" />
@@ -67,19 +67,19 @@ export function ConversationItem({
             )}
           </div>
           {unreadCount > 0 && !isSelected && (
-            <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-brand-500 rounded-full border-2 border-white dark:border-gray-800" />
+            <div className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-brand-500 rounded-full border-2 border-white" />
           )}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
             <h3 className={`text-sm font-semibold truncate ${
-              unreadCount > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200'
+              unreadCount > 0 ? 'text-gray-900' : 'text-gray-700'
             }`}>
               {displayName}
             </h3>
             <span className={`text-[11px] flex-shrink-0 ml-2 ${
-              unreadCount > 0 ? 'text-brand-600 dark:text-brand-400 font-medium' : 'text-gray-400 dark:text-gray-500'
+              unreadCount > 0 ? 'text-brand-600 font-medium' : 'text-gray-400'
             }`}>
               {formatTime(conversation.lastMessageTime)}
             </span>
@@ -87,7 +87,7 @@ export function ConversationItem({
 
           <div className="flex items-center justify-between">
             <p className={`text-[13px] truncate ${
-              unreadCount > 0 ? 'font-medium text-gray-800 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
+              unreadCount > 0 ? 'font-medium text-gray-800' : 'text-gray-500'
             }`}>
               {conversation.lastMessage || 'No messages yet'}
             </p>
@@ -100,16 +100,16 @@ export function ConversationItem({
 
           {conversation.propertyTitle && !isDirectChat && (
             <div className="flex items-center gap-1 mt-1">
-              <Home className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 truncate">
+              <Home className="w-3 h-3 text-gray-400 flex-shrink-0" />
+              <p className="text-[11px] text-gray-400 truncate">
                 {conversation.propertyTitle}
               </p>
             </div>
           )}
           {isDirectChat && (
             <div className="flex items-center gap-1 mt-1">
-              <MessageCircle className="w-3 h-3 text-brand-400 dark:text-brand-500 flex-shrink-0" />
-              <p className="text-[11px] text-brand-500 dark:text-brand-400 truncate">
+              <MessageCircle className="w-3 h-3 text-brand-400 flex-shrink-0" />
+              <p className="text-[11px] text-brand-500 truncate">
                 Direct message
               </p>
             </div>

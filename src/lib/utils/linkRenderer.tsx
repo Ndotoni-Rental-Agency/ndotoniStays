@@ -49,7 +49,7 @@ export function renderTextWithLinks(text: string): React.ReactNode {
   }
 
   const linkClasses =
-    'text-blue-300 hover:text-blue-200 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2 transition-colors font-medium';
+    'text-blue-300 hover:text-blue-200 underline underline-offset-2 transition-colors font-medium';
 
   return parts.map((part, index) => {
     if (!part.isLink) {

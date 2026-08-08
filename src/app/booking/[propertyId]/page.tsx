@@ -14,6 +14,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
+import { SERVICE_FEE_ENABLED } from '@/constants/pricing';
 
 type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
@@ -129,7 +130,7 @@ export default function BookingPage() {
   const nights = calculateNights(checkIn, checkOut);
   const subtotal = property.nightlyRate * nights;
   const cleaningFee = property.cleaningFee || 0;
-  const serviceFee = Math.round(subtotal * ((property.serviceFeePercentage || 10) / 100));
+  const serviceFee = SERVICE_FEE_ENABLED ? Math.round(subtotal * ((property.serviceFeePercentage || 10) / 100)) : 0;
   const total = subtotal + cleaningFee + serviceFee;
   const depositAmount = Math.round(total * (DEPOSIT_PERCENTAGE / 100));
   const payNowAmount = paymentOption === 'full' ? total : depositAmount;

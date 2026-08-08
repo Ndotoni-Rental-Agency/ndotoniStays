@@ -88,23 +88,26 @@ export default function ListYourPlacePage() {
   }, []);
 
   // Let the team know a host started a listing, so they can follow up if it's abandoned.
-  // Skip when we're just restoring an in-progress draft — that's a continuation, not a start.
+  // Fires on the last step (just before Publish) so the notification carries the actual
+  // property details — type, location, pricing, phone — instead of an empty shell.
+  // Skipped when restoring a saved draft, since that jumps straight to step 4 and is a
+  // continuation, not a start.
   const hasNotifiedStartRef = useRef(false);
   useEffect(() => {
-    if (hasNotifiedStartRef.current) return;
+    if (step !== STEPS.length || hasNotifiedStartRef.current) return;
     hasNotifiedStartRef.current = true;
-
-    let resuming = false;
-    try {
-      resuming = !!localStorage.getItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
-    if (resuming) return;
 
     const name = user ? `${user.firstName} ${user.lastName}`.trim() : '';
     const displayName = name || 'A visitor';
-    const locationLine = form.region ? `\nLocation: ${[form.region, form.district].filter(Boolean).join(', ')}` : '';
+    const details = [
+      form.propertyType ? `Type: ${form.propertyType}` : null,
+      form.stayCategories.length ? `Categories: ${form.stayCategories.join(', ')}` : null,
+      form.region ? `Location: ${[form.region, form.district].filter(Boolean).join(', ')}` : null,
+      form.nightlyRate ? `Rate: ${form.nightlyRate} ${form.currency}/night` : null,
+      `Guests: ${form.maxGuests} · Bedrooms: ${form.bedrooms} · Bathrooms: ${form.bathrooms}`,
+      form.phoneNumber ? `Phone: ${form.phoneNumber}` : null,
+      (form.images.length || form.videos.length) ? `Media: ${form.images.length} photo(s), ${form.videos.length} video(s)` : null,
+    ].filter(Boolean).join('\n');
 
     GraphQLClient.executePublic(submitContactInquiry, {
       input: {
@@ -112,12 +115,12 @@ export default function ListYourPlacePage() {
         subject: 'New listing started (Website)',
         name: name || 'Anonymous visitor',
         email: user?.email || 'anonymous-lead@ndotonistays.com',
-        phone: user?.phoneNumber || undefined,
-        message: `${displayName} just started creating a new short-term listing on ndotonistays.com.${locationLine}`,
+        phone: user?.phoneNumber || form.phoneNumber || undefined,
+        message: `${displayName} is almost done creating a new short-term listing on ndotonistays.com.\n\n${details}`,
       },
     }).catch(err => console.error('Failed to notify listing started:', err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [step]);
 
   // Pre-fill phone from user profile
   useEffect(() => {

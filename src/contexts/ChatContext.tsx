@@ -186,6 +186,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribe = manager.subscribe(conversationId, {
       onMessage: (newMessage: ChatMessage) => {
+        console.log('[ChatContext] onNewMessage received:', {
+          messageId: newMessage.id,
+          senderId: newMessage.senderId,
+          myUserId: user?.userId,
+          serverIsMine: newMessage.isMine,
+        });
+
         setMessages(prev => {
           const exists = prev.some(msg => msg.id === newMessage.id);
           if (exists) return prev;

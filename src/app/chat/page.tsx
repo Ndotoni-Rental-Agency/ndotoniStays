@@ -229,7 +229,7 @@ function ChatPageContent() {
   // wastes a lot of vertical space on a small screen. Desktop always shows
   // both panes together, so the header always stays there.
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-[100dvh] flex flex-col bg-gray-50">
       <div className={showConversationList ? '' : 'hidden md:block'}>
         <ChatHeader conversationCount={conversations.length} />
       </div>

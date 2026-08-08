@@ -242,4 +242,20 @@ export class AuthBridge {
       return false;
     }
   }
+
+  /**
+   * Get the signed-in user's real Cognito sub. The getMe query's profile types
+   * (Tenant/Landlord/Agent/Admin) have no id field in the schema at all, so
+   * UserProfile.userId from AuthContext is always undefined — this reads it
+   * straight from the Amplify session instead, for callers that need the real
+   * id (e.g. chat isMine comparisons).
+   */
+  static async getUserId(): Promise<string | undefined> {
+    try {
+      const currentUser = await getCurrentUser();
+      return currentUser.userId;
+    } catch {
+      return undefined;
+    }
+  }
 }

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { ChatSubscriptionManager } from '@/lib/subscriptions';
+import { AuthBridge } from '@/lib/auth-bridge';
 import { useAuth } from './AuthContext';
 import { Conversation, ChatMessage } from '@/API';
 import {
@@ -60,6 +61,20 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const messageSubscriptionRef = useRef<any>(null);
   const sendingRef = useRef(false);
   const initialLoadDone = useRef(false);
+
+  // The signed-in user's real Cognito sub. UserProfile.userId (from getMe) is always
+  // undefined — the Tenant/Landlord/Agent/Admin schema types have no id field at all —
+  // so this reads it from the Amplify session directly instead. Used to compute isMine
+  // for incoming subscription messages ourselves rather than trusting the server value,
+  // since a stale/incomplete identity here would otherwise misflag every message.
+  const myUserIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!user) {
+      myUserIdRef.current = undefined;
+      return;
+    }
+    AuthBridge.getUserId().then(id => { myUserIdRef.current = id; });
+  }, [user]);
 
   const loadConversations = async (): Promise<Conversation[]> => {
     if (!user) return [];
@@ -186,17 +201,27 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribe = manager.subscribe(conversationId, {
       onMessage: (newMessage: ChatMessage) => {
+        // Recompute isMine from senderId against the real signed-in user id rather than
+        // trusting the server value — see myUserIdRef above for why user?.userId can't
+        // be used for this comparison.
+        const resolvedIsMine =
+          newMessage.senderId && myUserIdRef.current
+            ? newMessage.senderId === myUserIdRef.current
+            : newMessage.isMine;
+        const resolvedMessage = { ...newMessage, isMine: resolvedIsMine };
+
         console.log('[ChatContext] onNewMessage received:', {
           messageId: newMessage.id,
           senderId: newMessage.senderId,
-          myUserId: user?.userId,
+          myUserId: myUserIdRef.current,
           serverIsMine: newMessage.isMine,
+          resolvedIsMine,
         });
 
         setMessages(prev => {
-          const exists = prev.some(msg => msg.id === newMessage.id);
+          const exists = prev.some(msg => msg.id === resolvedMessage.id);
           if (exists) return prev;
-          return [...prev, newMessage];
+          return [...prev, resolvedMessage];
         });
 
         setConversations(prev =>
@@ -204,15 +229,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             conv.id === conversationId
               ? {
                   ...conv,
-                  lastMessage: newMessage.content,
-                  lastMessageTime: newMessage.timestamp,
-                  unreadCount: newMessage.isMine ? conv.unreadCount : (conv.unreadCount || 0) + 1,
+                  lastMessage: resolvedMessage.content,
+                  lastMessageTime: resolvedMessage.timestamp,
+                  unreadCount: resolvedMessage.isMine ? conv.unreadCount : (conv.unreadCount || 0) + 1,
                 }
               : conv
           ).sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime())
         );
 
-        if (!newMessage.isMine) {
+        if (!resolvedMessage.isMine) {
           refreshUnreadCount();
         }
       },

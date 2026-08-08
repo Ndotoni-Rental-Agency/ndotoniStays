@@ -126,7 +126,7 @@ function ChatPageContent() {
     setSuggestedMessageShown(false);
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, replyToMessageId?: string) => {
     if (!selectedConversation || !user?.email) return;
 
     try {
@@ -161,10 +161,10 @@ function ChatPageContent() {
           },
         });
 
-        await sendMessage(chatData.conversationId, content);
+        await sendMessage(chatData.conversationId, content, replyToMessageId);
         clearSuggestedMessage();
       } else {
-        await sendMessage(selectedConversation.id, content);
+        await sendMessage(selectedConversation.id, content, replyToMessageId);
         clearSuggestedMessage();
       }
     } catch (error) {

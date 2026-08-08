@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { MessageBubble, ChatInput } from '@/components/chat';
 import { Conversation as APIConversation, ChatMessage } from '@/API';
 import { UserProfile as User } from '@/contexts/AuthContext';
@@ -20,10 +20,49 @@ interface ChatAreaProps {
   currentUser: User | null;
   showConversationList: boolean;
   onBackToConversations: () => void;
-  onSendMessage: (content: string) => Promise<void>;
+  onSendMessage: (content: string, replyToMessageId?: string) => Promise<void>;
   onDeleteMessage?: (messageId: string) => void;
   getSuggestedMessage: () => string;
   landlordName?: string;
+}
+
+type ListItem =
+  | { type: 'date'; id: string; label: string }
+  | { type: 'message'; id: string; message: ChatMessage; showSender: boolean };
+
+function formatDateLabel(timestamp: string): string {
+  const date = new Date(timestamp);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+
+  if (sameDay(date, today)) return 'Today';
+  if (sameDay(date, yesterday)) return 'Yesterday';
+
+  const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric' };
+  if (date.getFullYear() !== today.getFullYear()) options.year = 'numeric';
+  return date.toLocaleDateString('en-US', options);
+}
+
+function buildListItems(messages: ChatMessage[]): ListItem[] {
+  const items: ListItem[] = [];
+  let lastDateKey = '';
+  let lastSenderId: string | null | undefined = undefined;
+
+  messages.forEach((message) => {
+    const dateKey = new Date(message.timestamp).toDateString();
+    if (dateKey !== lastDateKey) {
+      items.push({ type: 'date', id: `date-${dateKey}`, label: formatDateLabel(message.timestamp) });
+      lastDateKey = dateKey;
+      lastSenderId = undefined;
+    }
+    const showSender = !message.isMine && message.senderId !== lastSenderId;
+    items.push({ type: 'message', id: message.id, message, showSender });
+    lastSenderId = message.senderId;
+  });
+
+  return items;
 }
 
 export function ChatArea({
@@ -38,11 +77,14 @@ export function ChatArea({
   getSuggestedMessage,
   landlordName,
 }: ChatAreaProps) {
-  const { selectedConversation } = useChat();
+  const { selectedConversation, toggleReaction, sendTypingIndicator, typingUser, myUserId } = useChat();
   const { t } = useLanguage();
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+
+  const listItems = useMemo(() => buildListItems(messages), [messages]);
 
   const handleMessageSelect = (messageId: string) => {
     setSelectedMessages(prev => {
@@ -53,7 +95,7 @@ export function ChatArea({
     });
   };
 
-  const handleLongPress = (messageId: string) => {
+  const enterSelectionMode = (messageId: string) => {
     setSelectionMode(true);
     setSelectedMessages(new Set([messageId]));
   };
@@ -77,6 +119,25 @@ export function ChatArea({
     }
   };
 
+  const handleSend = async (content: string) => {
+    const replyToMessageId = replyingTo?.id;
+    await onSendMessage(content, replyToMessageId);
+    setReplyingTo(null);
+  };
+
+  const handleTextChange = () => {
+    if (selectedConversation) sendTypingIndicator(selectedConversation.id);
+  };
+
+  const scrollToMessage = (messageId: string) => {
+    const el = document.getElementById(`message-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('ring-2', 'ring-brand-400');
+      setTimeout(() => el.classList.remove('ring-2', 'ring-brand-400'), 1200);
+    }
+  };
+
   const getOtherPartyDisplayName = () => {
     if (landlordName) return landlordName;
     const extendedConversation = selectedConversation as Conversation;
@@ -95,6 +156,7 @@ export function ChatArea({
 
   useEffect(() => {
     exitSelectionMode();
+    setReplyingTo(null);
   }, [selectedConversation?.id]);
 
   if (!selectedConversation) {
@@ -148,12 +210,16 @@ export function ChatArea({
             </button>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white truncate">{getOtherPartyDisplayName()}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 truncate flex items-center space-x-1">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span>{selectedConversation.propertyTitle}</span>
-              </p>
+              {typingUser ? (
+                <p className="text-sm text-brand-600 dark:text-brand-400 truncate">typing…</p>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 truncate flex items-center space-x-1">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span>{selectedConversation.propertyTitle}</span>
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -168,20 +234,37 @@ export function ChatArea({
               <span className="text-sm text-gray-600 dark:text-gray-400">{t('messages.loadingMessages') || 'Loading messages...'}</span>
             </div>
           </div>
-        ) : messages.length > 0 ? (
-          messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isOwnMessage={message.isMine}
-              senderName={message.senderName}
-              onDelete={onDeleteMessage}
-              selectionMode={selectionMode}
-              isSelected={selectedMessages.has(message.id)}
-              onSelect={() => handleMessageSelect(message.id)}
-              onLongPress={() => handleLongPress(message.id)}
-            />
-          ))
+        ) : listItems.length > 0 ? (
+          listItems.map((item) => {
+            if (item.type === 'date') {
+              return (
+                <div key={item.id} className="flex justify-center">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1">
+                    {item.label}
+                  </span>
+                </div>
+              );
+            }
+            const message = item.message;
+            return (
+              <div key={message.id} id={`message-${message.id}`} className="transition-shadow rounded-2xl">
+                <MessageBubble
+                  message={message}
+                  isOwnMessage={message.isMine}
+                  senderName={message.senderName}
+                  myUserId={myUserId}
+                  onDelete={onDeleteMessage}
+                  onReply={setReplyingTo}
+                  onReact={(messageId, emoji) => toggleReaction(messageId, emoji)}
+                  onJumpToMessage={scrollToMessage}
+                  selectionMode={selectionMode}
+                  isSelected={selectedMessages.has(message.id)}
+                  onSelect={() => handleMessageSelect(message.id)}
+                  onEnterSelectionMode={() => enterSelectionMode(message.id)}
+                />
+              </div>
+            );
+          })
         ) : (
           <div className="flex items-center justify-center h-full text-center px-4">
             <div className="max-w-sm mx-auto">
@@ -202,7 +285,10 @@ export function ChatArea({
       {/* Chat Input */}
       <div className="sticky bottom-0 z-10 bg-white dark:bg-gray-800">
         <ChatInput
-          onSendMessage={onSendMessage}
+          onSendMessage={handleSend}
+          onTextChange={handleTextChange}
+          replyingTo={replyingTo ? { senderName: replyingTo.isMine ? 'yourself' : replyingTo.senderName, content: replyingTo.content } : null}
+          onCancelReply={() => setReplyingTo(null)}
           placeholder={t('messages.typeYourMessage') || 'Type your message...'}
           initialMessage={getSuggestedMessage()}
           disabled={sendingMessage}

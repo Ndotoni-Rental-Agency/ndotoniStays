@@ -5,7 +5,7 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { ChatSubscriptionManager } from '@/lib/subscriptions';
 import { AuthBridge } from '@/lib/auth-bridge';
 import { useAuth } from './AuthContext';
-import { Conversation, ChatMessage } from '@/API';
+import { Conversation, ChatMessage, TypingIndicatorEvent } from '@/API';
 import {
   getUserConversations,
   getConversationMessages,
@@ -15,7 +15,14 @@ import {
   sendMessage as sendMessageMutation,
   markAsRead,
   initializePropertyChat,
+  toggleMessageReaction as toggleMessageReactionMutation,
+  sendTypingIndicator as sendTypingIndicatorMutation,
 } from '@/graphql/mutations';
+
+export interface TypingUser {
+  userId: string;
+  userName: string;
+}
 
 interface ChatContextType {
   conversations: Conversation[];
@@ -26,10 +33,12 @@ interface ChatContextType {
   loadingMessages: boolean;
   sendingMessage: boolean;
   isLoading: boolean;
+  typingUser: TypingUser | null;
+  myUserId: string | undefined;
 
   loadConversations: () => Promise<Conversation[]>;
   loadMessages: (conversationId: string) => Promise<void>;
-  sendMessage: (conversationId: string, content: string) => Promise<void>;
+  sendMessage: (conversationId: string, content: string, replyToMessageId?: string) => Promise<void>;
   initializeChat: (propertyId: string) => Promise<{
     conversationId: string;
     landlordName: string;
@@ -41,6 +50,8 @@ interface ChatContextType {
   clearMessages: () => void;
   selectConversation: (conversationId: string | null) => void;
   selectTemporaryConversation: (tempConversation: Conversation & { isTemporary?: boolean; propertyId?: string; landlordInfo?: { firstName: string; lastName: string } }) => void;
+  toggleReaction: (messageId: string, emoji: string) => Promise<void>;
+  sendTypingIndicator: (conversationId: string) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -56,11 +67,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [typingUser, setTypingUserState] = useState<TypingUser | null>(null);
+  const [myUserId, setMyUserId] = useState<string | undefined>(undefined);
 
   const lastUnreadRefresh = useRef(0);
-  const messageSubscriptionRef = useRef<any>(null);
+  const subscriptionRefs = useRef<Array<() => void>>([]);
   const sendingRef = useRef(false);
   const initialLoadDone = useRef(false);
+  const typingClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingSendThrottleRef = useRef(0);
 
   // The signed-in user's real Cognito sub. UserProfile.userId (from getMe) is always
   // undefined — the Tenant/Landlord/Agent/Admin schema types have no id field at all —
@@ -71,9 +86,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!user) {
       myUserIdRef.current = undefined;
+      setMyUserId(undefined);
       return;
     }
-    AuthBridge.getUserId().then(id => { myUserIdRef.current = id; });
+    AuthBridge.getUserId().then(id => {
+      myUserIdRef.current = id;
+      setMyUserId(id);
+    });
   }, [user]);
 
   const loadConversations = async (): Promise<Conversation[]> => {
@@ -114,7 +133,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const sendMessage = async (conversationId: string, content: string): Promise<void> => {
+  const sendMessage = async (conversationId: string, content: string, replyToMessageId?: string): Promise<void> => {
     if (sendingRef.current) return;
 
     try {
@@ -123,7 +142,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
       const data = await GraphQLClient.executeAuthenticated<{ sendMessage: ChatMessage }>(
         sendMessageMutation,
-        { input: { conversationId, content } }
+        { input: { conversationId, content, replyToMessageId } }
       );
 
       const newMessage = data.sendMessage;
@@ -191,24 +210,28 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Merge a message payload into state — used for both brand-new messages
+  // (append) and updates (find-and-replace, e.g. reactions).
+  const resolveIncomingMessage = (incoming: ChatMessage): ChatMessage => {
+    // Recompute isMine from senderId against the real signed-in user id rather than
+    // trusting the server value — see myUserIdRef above for why user?.userId can't
+    // be used for this comparison.
+    const resolvedIsMine =
+      incoming.senderId && myUserIdRef.current
+        ? incoming.senderId === myUserIdRef.current
+        : incoming.isMine;
+    return { ...incoming, isMine: resolvedIsMine };
+  };
+
   const subscribeToConversation = (conversationId: string): void => {
-    if (messageSubscriptionRef.current) {
-      messageSubscriptionRef.current();
-      messageSubscriptionRef.current = null;
-    }
+    subscriptionRefs.current.forEach(unsub => unsub());
+    subscriptionRefs.current = [];
 
     const manager = ChatSubscriptionManager.getInstance();
 
-    const unsubscribe = manager.subscribe(conversationId, {
-      onMessage: (newMessage: ChatMessage) => {
-        // Recompute isMine from senderId against the real signed-in user id rather than
-        // trusting the server value — see myUserIdRef above for why user?.userId can't
-        // be used for this comparison.
-        const resolvedIsMine =
-          newMessage.senderId && myUserIdRef.current
-            ? newMessage.senderId === myUserIdRef.current
-            : newMessage.isMine;
-        const resolvedMessage = { ...newMessage, isMine: resolvedIsMine };
+    const unsubNewMessage = manager.subscribe<ChatMessage>('onNewMessage', conversationId, {
+      onEvent: (newMessage) => {
+        const resolvedMessage = resolveIncomingMessage(newMessage);
 
         setMessages(prev => {
           const exists = prev.some(msg => msg.id === resolvedMessage.id);
@@ -232,13 +255,87 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         if (!resolvedMessage.isMine) {
           refreshUnreadCount();
         }
+        // A new message from the other party means they're done typing
+        if (resolvedMessage.senderId !== myUserIdRef.current) {
+          clearTypingUser();
+        }
       },
-      onError: (error: Error) => {
-        console.error('Chat subscription error:', error);
-      },
+      onError: (error) => console.error('onNewMessage subscription error:', error),
     });
 
-    messageSubscriptionRef.current = unsubscribe;
+    const unsubMessageUpdated = manager.subscribe<ChatMessage>('onMessageUpdated', conversationId, {
+      onEvent: (updated) => {
+        const resolvedMessage = resolveIncomingMessage(updated);
+        setMessages(prev => prev.map(m => (m.id === resolvedMessage.id ? resolvedMessage : m)));
+      },
+      onError: (error) => console.error('onMessageUpdated subscription error:', error),
+    });
+
+    const unsubTyping = manager.subscribe<TypingIndicatorEvent>('onTypingIndicator', conversationId, {
+      onEvent: (event) => showTypingUser(event),
+      onError: (error) => console.error('onTypingIndicator subscription error:', error),
+    });
+
+    const unsubRead = manager.subscribe<Conversation>('onConversationRead', conversationId, {
+      onEvent: (event) => {
+        if (!event.readByUserId || !event.readAt || event.readByUserId === myUserIdRef.current) return;
+        const readAt = event.readAt;
+        setMessages(prev =>
+          prev.map(m =>
+            m.conversationId === event.id && m.isMine && m.timestamp <= readAt
+              ? { ...m, readAt }
+              : m
+          )
+        );
+      },
+      onError: (error) => console.error('onConversationRead subscription error:', error),
+    });
+
+    subscriptionRefs.current = [unsubNewMessage, unsubMessageUpdated, unsubTyping, unsubRead];
+  };
+
+  // Show/clear the live typing indicator. Ignores our own echo and auto-clears
+  // a few seconds after the last event, since there's no explicit "stopped typing"
+  // signal — the sender just stops re-broadcasting.
+  const showTypingUser = (event: TypingIndicatorEvent): void => {
+    if (event.userId === myUserIdRef.current) return;
+
+    if (typingClearTimerRef.current) clearTimeout(typingClearTimerRef.current);
+    setTypingUserState({ userId: event.userId, userName: event.userName });
+    typingClearTimerRef.current = setTimeout(() => setTypingUserState(null), 4000);
+  };
+
+  const clearTypingUser = (): void => {
+    if (typingClearTimerRef.current) {
+      clearTimeout(typingClearTimerRef.current);
+      typingClearTimerRef.current = null;
+    }
+    setTypingUserState(null);
+  };
+
+  const toggleReaction = async (messageId: string, emoji: string): Promise<void> => {
+    try {
+      const data = await GraphQLClient.executeAuthenticated<{ toggleMessageReaction: ChatMessage }>(
+        toggleMessageReactionMutation,
+        { messageId, emoji }
+      );
+      const resolvedMessage = resolveIncomingMessage(data.toggleMessageReaction);
+      setMessages(prev => prev.map(m => (m.id === resolvedMessage.id ? resolvedMessage : m)));
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
+    }
+  };
+
+  // Broadcast a typing event. Fire-and-forget, throttled so rapid keystrokes
+  // don't spam a mutation call per character.
+  const sendTypingIndicator = (conversationId: string): void => {
+    const now = Date.now();
+    if (now - typingSendThrottleRef.current < 3000) return;
+    typingSendThrottleRef.current = now;
+
+    GraphQLClient.executeAuthenticated(sendTypingIndicatorMutation, { conversationId }).catch(() => {
+      // Non-critical — a missed typing event just means the other side doesn't see it this time
+    });
   };
 
   const refreshUnreadCount = async (): Promise<void> => {
@@ -326,10 +423,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     return () => {
-      if (messageSubscriptionRef.current) {
-        messageSubscriptionRef.current();
-        messageSubscriptionRef.current = null;
-      }
+      subscriptionRefs.current.forEach(unsub => unsub());
+      subscriptionRefs.current = [];
     };
   }, []);
 
@@ -342,6 +437,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     loadingMessages,
     sendingMessage,
     isLoading,
+    typingUser,
+    myUserId,
     loadConversations,
     loadMessages,
     sendMessage,
@@ -352,6 +449,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     clearMessages,
     selectConversation,
     selectTemporaryConversation,
+    toggleReaction,
+    sendTypingIndicator,
   };
 
   return (
@@ -374,6 +473,8 @@ export function useChat() {
         loadingMessages: false,
         sendingMessage: false,
         isLoading: true,
+        typingUser: null,
+        myUserId: undefined,
         loadConversations: async () => [],
         loadMessages: async () => {},
         sendMessage: async () => {},
@@ -384,6 +485,8 @@ export function useChat() {
         clearMessages: () => {},
         selectConversation: () => {},
         selectTemporaryConversation: () => {},
+        toggleReaction: async () => {},
+        sendTypingIndicator: () => {},
       } as ChatContextType;
     }
     throw new Error('useChat must be used within a ChatProvider');

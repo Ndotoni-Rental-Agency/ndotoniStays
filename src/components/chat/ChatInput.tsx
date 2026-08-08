@@ -2,8 +2,16 @@
 
 import React, { useState, useRef, KeyboardEvent, useEffect } from 'react';
 
+interface ReplyPreview {
+  senderName: string;
+  content: string;
+}
+
 interface ChatInputProps {
   onSendMessage: (content: string) => Promise<void>;
+  onTextChange?: (text: string) => void;
+  replyingTo?: ReplyPreview | null;
+  onCancelReply?: () => void;
   disabled?: boolean;
   placeholder?: string;
   initialMessage?: string;
@@ -14,6 +22,9 @@ interface ChatInputProps {
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
+  onTextChange,
+  replyingTo,
+  onCancelReply,
   disabled = false,
   placeholder = 'Type your message...',
   initialMessage = '',
@@ -99,6 +110,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     setMessage(newValue);
+    if (newValue.trim() && onTextChange) onTextChange(newValue);
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
@@ -107,6 +119,24 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className="border-t border-stone-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 py-3">
+      {replyingTo && (
+        <div className="flex items-center gap-2 mb-2 pl-3 pr-2 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-2 border-brand-500">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 truncate">
+              Replying to {replyingTo.senderName}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{replyingTo.content}</p>
+          </div>
+          <button
+            onClick={onCancelReply}
+            className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="flex items-end gap-2">
         <div className="flex-1 relative">
           <textarea

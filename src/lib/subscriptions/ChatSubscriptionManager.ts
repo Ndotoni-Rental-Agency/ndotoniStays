@@ -1,28 +1,38 @@
 'use client';
 
 import { GraphQLClient } from '@/lib/graphql-client';
-import { onNewMessage } from '@/graphql/subscriptions';
-import type { ChatMessage } from '@/API';
+import { onNewMessage, onMessageUpdated, onTypingIndicator, onConversationRead } from '@/graphql/subscriptions';
 
-type MessageCallback = (message: ChatMessage) => void;
+export type ChatChannel = 'onNewMessage' | 'onMessageUpdated' | 'onTypingIndicator' | 'onConversationRead';
+
+const CHANNEL_QUERIES: Record<ChatChannel, string> = {
+  onNewMessage,
+  onMessageUpdated,
+  onTypingIndicator,
+  onConversationRead,
+};
+
+type EventCallback<T> = (event: T) => void;
 type ErrorCallback = (error: Error) => void;
 
-interface SubscriptionOptions {
-  onMessage: MessageCallback;
+interface SubscriptionOptions<T> {
+  onEvent: EventCallback<T>;
   onError?: ErrorCallback;
   onConnect?: () => void;
   onDisconnect?: () => void;
 }
 
 /**
- * Manages GraphQL subscriptions for chat messages.
- * Singleton pattern with automatic reconnection.
+ * Manages GraphQL subscriptions for chat events (new messages, message
+ * updates/reactions, typing indicators, read receipts). Singleton pattern
+ * with automatic reconnection, keyed per channel+conversation so multiple
+ * components can share one underlying subscription per (channel, conversation).
  */
 export class ChatSubscriptionManager {
   private static instance: ChatSubscriptionManager;
   private subscriptions: Map<string, {
     subscription: any;
-    callbacks: Set<MessageCallback>;
+    callbacks: Set<EventCallback<any>>;
     errorCallbacks: Set<ErrorCallback>;
     connectCallbacks: Set<() => void>;
     disconnectCallbacks: Set<() => void>;
@@ -38,10 +48,11 @@ export class ChatSubscriptionManager {
     return ChatSubscriptionManager.instance;
   }
 
-  subscribe(conversationId: string, options: SubscriptionOptions): () => void {
-    const { onMessage, onError, onConnect, onDisconnect } = options;
+  subscribe<T = any>(channel: ChatChannel, conversationId: string, options: SubscriptionOptions<T>): () => void {
+    const key = `${channel}:${conversationId}`;
+    const { onEvent, onError, onConnect, onDisconnect } = options;
 
-    let subData = this.subscriptions.get(conversationId);
+    let subData = this.subscriptions.get(key);
 
     if (!subData) {
       subData = {
@@ -52,11 +63,11 @@ export class ChatSubscriptionManager {
         disconnectCallbacks: new Set(),
         isConnected: false,
       };
-      this.subscriptions.set(conversationId, subData);
-      this.setupSubscription(conversationId);
+      this.subscriptions.set(key, subData);
+      this.setupSubscription(channel, conversationId, key);
     }
 
-    subData.callbacks.add(onMessage);
+    subData.callbacks.add(onEvent);
     if (onError) subData.errorCallbacks.add(onError);
     if (onConnect) subData.connectCallbacks.add(onConnect);
     if (onDisconnect) subData.disconnectCallbacks.add(onDisconnect);
@@ -66,45 +77,46 @@ export class ChatSubscriptionManager {
     }
 
     return () => {
-      this.unsubscribe(conversationId, onMessage, onError, onConnect, onDisconnect);
+      this.unsubscribe(key, onEvent, onError, onConnect, onDisconnect);
     };
   }
 
   private unsubscribe(
-    conversationId: string,
-    onMessage: MessageCallback,
+    key: string,
+    onEvent: EventCallback<any>,
     onError?: ErrorCallback,
     onConnect?: () => void,
     onDisconnect?: () => void
   ): void {
-    const subData = this.subscriptions.get(conversationId);
+    const subData = this.subscriptions.get(key);
     if (!subData) return;
 
-    subData.callbacks.delete(onMessage);
+    subData.callbacks.delete(onEvent);
     if (onError) subData.errorCallbacks.delete(onError);
     if (onConnect) subData.connectCallbacks.delete(onConnect);
     if (onDisconnect) subData.disconnectCallbacks.delete(onDisconnect);
 
     if (subData.callbacks.size === 0) {
-      this.cleanupSubscription(conversationId);
+      this.cleanupSubscription(key);
     }
   }
 
-  private async setupSubscription(conversationId: string): Promise<void> {
-    const subData = this.subscriptions.get(conversationId);
+  private async setupSubscription(channel: ChatChannel, conversationId: string, key: string): Promise<void> {
+    const subData = this.subscriptions.get(key);
     if (!subData) return;
 
     try {
       const client = GraphQLClient.getRawClient();
+      const query = CHANNEL_QUERIES[channel];
 
       const subscription = client.graphql({
-        query: onNewMessage,
+        query,
         variables: { conversationId },
         authMode: 'userPool',
       }).subscribe({
         next: ({ data }: any) => {
-          const message = data.onNewMessage as ChatMessage;
-          if (!message) return;
+          const event = data?.[channel];
+          if (!event) return;
 
           if (!subData.isConnected) {
             subData.isConnected = true;
@@ -113,14 +125,14 @@ export class ChatSubscriptionManager {
 
           subData.callbacks.forEach(callback => {
             try {
-              callback(message);
+              callback(event);
             } catch (error) {
-              console.error('Error in chat subscription callback:', error);
+              console.error(`Error in ${channel} subscription callback:`, error);
             }
           });
         },
         error: (error: any) => {
-          console.error('Chat subscription error for:', conversationId, error);
+          console.error(`Chat subscription error for ${key}:`, error);
 
           if (subData.isConnected) {
             subData.isConnected = false;
@@ -138,9 +150,9 @@ export class ChatSubscriptionManager {
 
           // Attempt reconnection
           setTimeout(() => {
-            if (this.subscriptions.has(conversationId)) {
-              this.cleanupSubscription(conversationId, false);
-              this.setupSubscription(conversationId);
+            if (this.subscriptions.has(key)) {
+              this.cleanupSubscription(key, false);
+              this.setupSubscription(channel, conversationId, key);
             }
           }, 5000);
         },
@@ -156,8 +168,8 @@ export class ChatSubscriptionManager {
     }
   }
 
-  private cleanupSubscription(conversationId: string, removeFromMap = true): void {
-    const subData = this.subscriptions.get(conversationId);
+  private cleanupSubscription(key: string, removeFromMap = true): void {
+    const subData = this.subscriptions.get(key);
     if (!subData) return;
 
     if (subData.subscription) {
@@ -170,13 +182,13 @@ export class ChatSubscriptionManager {
     }
 
     if (removeFromMap) {
-      this.subscriptions.delete(conversationId);
+      this.subscriptions.delete(key);
     }
   }
 
   cleanupAll(): void {
-    this.subscriptions.forEach((_, conversationId) => {
-      this.cleanupSubscription(conversationId);
+    this.subscriptions.forEach((_, key) => {
+      this.cleanupSubscription(key);
     });
     this.subscriptions.clear();
   }

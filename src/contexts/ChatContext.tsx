@@ -44,21 +44,6 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-/**
- * Insert or merge a message into a list, deduped by id. OR-ing `isMine` on merge
- * means a correctly-flagged copy never gets clobbered by a later, wrongly-flagged
- * duplicate of the same message (e.g. across a subscription reconnect) — it just
- * becomes a no-op in the normal case where both copies already agree.
- */
-function upsertMessage(prev: ChatMessage[], incoming: ChatMessage): ChatMessage[] {
-  const idx = prev.findIndex(m => m.id === incoming.id);
-  if (idx === -1) return [...prev, incoming];
-  const existing = prev[idx];
-  const next = [...prev];
-  next[idx] = { ...existing, ...incoming, isMine: existing.isMine || incoming.isMine };
-  return next;
-}
-
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuth();
 
@@ -201,7 +186,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
     const unsubscribe = manager.subscribe(conversationId, {
       onMessage: (newMessage: ChatMessage) => {
-        setMessages(prev => upsertMessage(prev, newMessage));
+        setMessages(prev => {
+          const exists = prev.some(msg => msg.id === newMessage.id);
+          if (exists) return prev;
+          return [...prev, newMessage];
+        });
 
         setConversations(prev =>
           prev.map(conv =>

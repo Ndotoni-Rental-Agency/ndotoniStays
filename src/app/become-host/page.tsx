@@ -11,6 +11,7 @@ import { PartyPopper, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { generateVideoThumbnail } from '@/lib/video-thumbnail';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import {
   StepTypeCategory,
   StepLocation,
@@ -63,6 +64,50 @@ export default function ListYourPlacePage() {
     lng: 0,
   });
 
+  // Let the team know a host started a listing, so they can follow up if it's abandoned.
+  // Fires the moment there's a real way to reach them — a valid phone number — or, failing
+  // that, when they leave the page, so we still hear about a drop-off even without contact
+  // info. Guarded so only one of the two ever actually sends. formRef/userRef exist because
+  // the exit path fires from a cleanup function, whose closure would otherwise see stale
+  // (mount-time) form/user values instead of what was on screen right before they left.
+  const hasNotifiedStartRef = useRef(false);
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
+  const userRef = useRef(user);
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  function notifyListingStarted(reason: 'phone' | 'exit') {
+    if (hasNotifiedStartRef.current) return;
+    hasNotifiedStartRef.current = true;
+
+    const f = formRef.current;
+    const u = userRef.current;
+    const name = u ? `${u.firstName} ${u.lastName}`.trim() : '';
+    const displayName = name || 'A visitor';
+    const details = [
+      f.propertyType ? `Type: ${f.propertyType}` : null,
+      f.stayCategories.length ? `Categories: ${f.stayCategories.join(', ')}` : null,
+      f.region ? `Location: ${[f.region, f.district].filter(Boolean).join(', ')}` : null,
+      f.nightlyRate ? `Rate: ${f.nightlyRate} ${f.currency}/night` : null,
+      `Guests: ${f.maxGuests} · Bedrooms: ${f.bedrooms} · Bathrooms: ${f.bathrooms}`,
+      f.phoneNumber ? `Phone: ${f.phoneNumber}` : null,
+      f.images.length ? `Photos:\n${f.images.join('\n')}` : null,
+      f.videos.length ? `Videos:\n${f.videos.join('\n')}` : null,
+    ].filter(Boolean).join('\n');
+    const action = reason === 'phone' ? 'shared a phone number while' : 'left the page while';
+
+    GraphQLClient.execute(submitContactInquiry, {
+      input: {
+        inquiryType: 'PROPERTY',
+        subject: 'New listing started (Website)',
+        name: name || 'Anonymous visitor',
+        email: u?.email || 'anonymous-lead@ndotonistays.com',
+        phone: u?.phoneNumber || f.phoneNumber || undefined,
+        message: `${displayName} ${action} creating a new short-term listing on ndotonistays.com.\n\n${details}`,
+      },
+    }).catch(err => console.error('Failed to notify listing started:', err));
+  }
+
   // Restore draft from localStorage on mount
   useEffect(() => {
     try {
@@ -71,6 +116,8 @@ export default function ListYourPlacePage() {
         const parsed = JSON.parse(saved);
         setForm(parsed);
         setStep(4);
+        // Resuming an in-progress draft is a continuation, not a start — don't notify.
+        hasNotifiedStartRef.current = true;
 
         // Only auto-submit if returning from OAuth redirect AND not already authenticated.
         // If user is already authenticated, they're just revisiting — show the form normally.
@@ -87,40 +134,19 @@ export default function ListYourPlacePage() {
     }
   }, []);
 
-  // Let the team know a host started a listing, so they can follow up if it's abandoned.
-  // Fires on the last step (just before Publish) so the notification carries the actual
-  // property details — type, location, pricing, phone — instead of an empty shell.
-  // Skipped when restoring a saved draft, since that jumps straight to step 4 and is a
-  // continuation, not a start.
-  const hasNotifiedStartRef = useRef(false);
+  // Fire as soon as they've entered a valid phone number.
   useEffect(() => {
-    if (step !== STEPS.length || hasNotifiedStartRef.current) return;
-    hasNotifiedStartRef.current = true;
-
-    const name = user ? `${user.firstName} ${user.lastName}`.trim() : '';
-    const displayName = name || 'A visitor';
-    const details = [
-      form.propertyType ? `Type: ${form.propertyType}` : null,
-      form.stayCategories.length ? `Categories: ${form.stayCategories.join(', ')}` : null,
-      form.region ? `Location: ${[form.region, form.district].filter(Boolean).join(', ')}` : null,
-      form.nightlyRate ? `Rate: ${form.nightlyRate} ${form.currency}/night` : null,
-      `Guests: ${form.maxGuests} · Bedrooms: ${form.bedrooms} · Bathrooms: ${form.bathrooms}`,
-      form.phoneNumber ? `Phone: ${form.phoneNumber}` : null,
-      (form.images.length || form.videos.length) ? `Media: ${form.images.length} photo(s), ${form.videos.length} video(s)` : null,
-    ].filter(Boolean).join('\n');
-
-    GraphQLClient.executePublic(submitContactInquiry, {
-      input: {
-        inquiryType: 'PROPERTY',
-        subject: 'New listing started (Website)',
-        name: name || 'Anonymous visitor',
-        email: user?.email || 'anonymous-lead@ndotonistays.com',
-        phone: user?.phoneNumber || form.phoneNumber || undefined,
-        message: `${displayName} is almost done creating a new short-term listing on ndotonistays.com.\n\n${details}`,
-      },
-    }).catch(err => console.error('Failed to notify listing started:', err));
+    if (form.phoneNumber && isValidPhoneNumber(form.phoneNumber)) {
+      notifyListingStarted('phone');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [form.phoneNumber]);
+
+  // Otherwise, fire when they leave the page without ever giving us a phone number.
+  useEffect(() => {
+    return () => notifyListingStarted('exit');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Pre-fill phone from user profile
   useEffect(() => {

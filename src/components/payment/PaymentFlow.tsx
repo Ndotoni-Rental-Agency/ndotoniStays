@@ -173,6 +173,12 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           )}
         </div>
 
+        {currency.toUpperCase() !== 'TZS' && (
+          <p className="text-xs text-ink-500 text-center">
+            Mobile money charges in Tanzanian Shillings — your phone will prompt you for the TZS equivalent at the current exchange rate.
+          </p>
+        )}
+
         <button
           onClick={handleMobilePay}
           disabled={!isValidPhone}

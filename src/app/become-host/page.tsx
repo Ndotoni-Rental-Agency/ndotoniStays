@@ -13,7 +13,8 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { generateVideoThumbnail } from '@/lib/video-thumbnail';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import {
-  StepTypeCategory,
+  StepType,
+  StepCategory,
   StepLocation,
   StepPricing,
   StepPhotosContact,
@@ -28,7 +29,9 @@ const STEPS = [
   { id: 2, labelKey: 'create.step2' },
   { id: 3, labelKey: 'create.step3' },
   { id: 4, labelKey: 'create.step4' },
+  { id: 5, labelKey: 'create.step5' },
 ];
+const TOTAL_STEPS = STEPS.length;
 
 export default function ListYourPlacePage() {
   const { user, isAuthenticated, isLoading, refreshUser } = useAuth();
@@ -115,7 +118,7 @@ export default function ListYourPlacePage() {
       if (saved) {
         const parsed = JSON.parse(saved);
         setForm(parsed);
-        setStep(4);
+        setStep(TOTAL_STEPS);
         // Resuming an in-progress draft is a continuation, not a start — don't notify.
         hasNotifiedStartRef.current = true;
 
@@ -173,14 +176,15 @@ export default function ListYourPlacePage() {
   }
 
   function canAdvance(): boolean {
-    if (step === 1) return !!form.propertyType && form.stayCategories.length > 0;
-    if (step === 2) return !!form.region && !!form.district;
-    if (step === 3) return !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
+    if (step === 1) return !!form.propertyType;
+    if (step === 2) return form.stayCategories.length > 0;
+    if (step === 3) return !!form.region && !!form.district;
+    if (step === 4) return !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
     return true;
   }
 
   function nextStep() {
-    if (canAdvance() && step < 4) {
+    if (canAdvance() && step < TOTAL_STEPS) {
       setStep(step + 1);
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -371,7 +375,7 @@ export default function ListYourPlacePage() {
           </div>
 
           <div className="text-xs text-ink-400 hidden sm:block">
-            {t('create.step').replace('{current}', String(step)).replace('{total}', '4')}
+            {t('create.step').replace('{current}', String(step)).replace('{total}', String(TOTAL_STEPS))}
           </div>
         </div>
       </div>
@@ -390,10 +394,11 @@ export default function ListYourPlacePage() {
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl sm:rounded-3xl border border-ink-100 shadow-sm overflow-hidden">
             <div className="p-5 sm:p-8 lg:p-10">
-              {step === 1 && <StepTypeCategory {...stepProps} />}
-              {step === 2 && <StepLocation {...stepProps} />}
-              {step === 3 && <StepPricing {...stepProps} />}
-              {step === 4 && <StepPhotosContact {...stepProps} error={error} />}
+              {step === 1 && <StepType {...stepProps} />}
+              {step === 2 && <StepCategory {...stepProps} />}
+              {step === 3 && <StepLocation {...stepProps} />}
+              {step === 4 && <StepPricing {...stepProps} />}
+              {step === 5 && <StepPhotosContact {...stepProps} error={error} />}
             </div>
           </div>
 
@@ -413,7 +418,7 @@ export default function ListYourPlacePage() {
                 <div />
               )}
 
-              {step < 4 ? (
+              {step < TOTAL_STEPS ? (
                 <button
                   type="button"
                   onClick={nextStep}

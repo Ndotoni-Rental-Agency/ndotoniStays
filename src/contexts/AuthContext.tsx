@@ -87,6 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error('Error refreshing user:', err);
+      // Don't leave the user stuck showing as "logged in" (from stale
+      // localStorage) while every authenticated request silently fails.
+      // Confirm with a real, network-verified check before clearing —
+      // getMe can fail for reasons unrelated to the session (a transient
+      // network blip), so only sign out if the session is actually dead.
+      const stillValid = await AuthBridge.hasValidSession();
+      if (!stillValid) {
+        await AuthBridge.signOut();
+        setUser(null);
+        localStorage.removeItem('user');
+      }
     } finally {
       setIsLoading(false);
     }

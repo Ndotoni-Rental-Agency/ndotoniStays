@@ -9,6 +9,7 @@ import {
   signOut as cognitoSignOut,
   getCurrentUser,
   signInWithRedirect,
+  fetchAuthSession,
 } from 'aws-amplify/auth';
 import { getMe } from '@/graphql/queries';
 
@@ -233,11 +234,32 @@ export class AuthBridge {
 
   /**
    * Check if user has valid Cognito session
+   *
+   * This is a LOCAL/CACHED check only (getCurrentUser doesn't force token
+   * refresh) — it can return true even when the underlying refresh token is
+   * no longer usable (e.g. it was issued by a different app client). Use
+   * hasValidSession() below when you need a real, network-verified answer.
    */
   static async hasSession(): Promise<boolean> {
     try {
       await getCurrentUser();
       return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Force-verify the session against Cognito (refreshing tokens if needed).
+   * Unlike hasSession()/getCurrentUser(), this actually detects a refresh
+   * token that Cognito will no longer honor (expired, revoked, or issued by
+   * a different app client) — call this to confirm a session is truly dead
+   * before signing the user out, rather than acting on a transient error.
+   */
+  static async hasValidSession(): Promise<boolean> {
+    try {
+      const session = await fetchAuthSession({ forceRefresh: true });
+      return !!session.tokens?.accessToken;
     } catch {
       return false;
     }

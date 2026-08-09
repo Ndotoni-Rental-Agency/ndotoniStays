@@ -41,6 +41,7 @@ export default function ListYourPlacePage() {
   const [error, setError] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [step, setStep] = useState(1);
+  const [stepDirection, setStepDirection] = useState<'forward' | 'back'>('forward');
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdPropertyId, setCreatedPropertyId] = useState<string | null>(null);
   const pendingSubmitRef = useRef(false);
@@ -185,6 +186,7 @@ export default function ListYourPlacePage() {
 
   function nextStep() {
     if (canAdvance() && step < TOTAL_STEPS) {
+      setStepDirection('forward');
       setStep(step + 1);
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -196,6 +198,7 @@ export default function ListYourPlacePage() {
 
   function prevStep() {
     if (step > 1) {
+      setStepDirection('back');
       setStep(step - 1);
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -285,7 +288,7 @@ export default function ListYourPlacePage() {
     return (
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-ink-50/50 px-4">
         <div className="text-center max-w-md">
-          <div className="relative mb-6">
+          <div className="relative mb-6 animate-success-pop">
             <div className="animate-bounce">
               <PartyPopper className="w-16 h-16 text-brand-600 mx-auto" />
             </div>
@@ -295,14 +298,23 @@ export default function ListYourPlacePage() {
             <SparklesIcon className="absolute top-10 -left-5 w-4 h-4 text-brand-300 animate-ping opacity-40" />
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-3">
+          <h1
+            className="text-2xl sm:text-3xl font-bold text-ink-900 mb-3 animate-fade-in-up opacity-0 [animation-fill-mode:forwards]"
+            style={{ animationDelay: '150ms' }}
+          >
             {t('create.success.title')}
           </h1>
-          <p className="text-ink-500 text-base mb-8">
+          <p
+            className="text-ink-500 text-base mb-8 animate-fade-in-up opacity-0 [animation-fill-mode:forwards]"
+            style={{ animationDelay: '250ms' }}
+          >
             {t('create.success.desc')}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div
+            className="flex flex-col sm:flex-row gap-3 justify-center animate-fade-in-up opacity-0 [animation-fill-mode:forwards]"
+            style={{ animationDelay: '350ms' }}
+          >
             <button
               onClick={() => router.push(`/host/property/${createdPropertyId}/edit`)}
               className="btn-primary px-6 py-3 text-base"
@@ -347,28 +359,40 @@ export default function ListYourPlacePage() {
               <div key={s.id} className="flex items-center">
                 <button
                   type="button"
-                  onClick={() => { if (s.id < step || canAdvance()) { setStep(s.id); window.scrollTo({ top: 0, behavior: 'smooth' }); } }}
+                  onClick={() => {
+                    if (s.id < step || canAdvance()) {
+                      setStepDirection(s.id > step ? 'forward' : 'back');
+                      setStep(s.id);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
                   className="flex items-center gap-1.5"
                 >
                   <span
-                    className={`flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-[10px] sm:text-xs font-bold transition-all ${
+                    className={`flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full text-[10px] sm:text-xs font-bold transition-all duration-300 ${
                       s.id === step
-                        ? 'bg-brand-600 text-white ring-2 ring-brand-200'
+                        ? 'bg-brand-600 text-white ring-2 ring-brand-200 scale-110'
                         : s.id < step
                         ? 'bg-green-500 text-white'
                         : 'bg-ink-100 text-ink-400'
                     }`}
                   >
-                    {s.id < step ? <CheckIcon className="h-3 w-3" /> : s.id}
+                    {s.id < step ? <CheckIcon className="h-3 w-3 animate-step-in-forward" /> : s.id}
                   </span>
-                  <span className={`hidden lg:inline text-xs font-medium ${
+                  <span className={`hidden lg:inline text-xs font-medium transition-colors duration-300 ${
                     s.id === step ? 'text-brand-700' : s.id < step ? 'text-green-600' : 'text-ink-400'
                   }`}>
                     {t(s.labelKey)}
                   </span>
                 </button>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-4 sm:w-8 h-0.5 mx-1 rounded ${s.id < step ? 'bg-green-300' : 'bg-ink-100'}`} />
+                  <div className="w-4 sm:w-8 h-0.5 mx-1 rounded bg-ink-100 overflow-hidden">
+                    <div
+                      className={`h-full bg-green-300 transition-transform duration-500 ease-out origin-left ${
+                        s.id < step ? 'scale-x-100' : 'scale-x-0'
+                      }`}
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -377,6 +401,14 @@ export default function ListYourPlacePage() {
           <div className="text-xs text-ink-400 hidden sm:block">
             {t('create.step').replace('{current}', String(step)).replace('{total}', String(TOTAL_STEPS))}
           </div>
+        </div>
+
+        {/* Overall progress bar (most useful on mobile, where step labels are hidden) */}
+        <div className="mt-3 h-1 w-full bg-ink-100 rounded-full overflow-hidden sm:hidden">
+          <div
+            className="h-full bg-brand-500 rounded-full transition-[width] duration-500 ease-out"
+            style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
+          />
         </div>
       </div>
 
@@ -393,7 +425,10 @@ export default function ListYourPlacePage() {
 
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-2xl sm:rounded-3xl border border-ink-100 shadow-sm overflow-hidden">
-            <div className="p-5 sm:p-8 lg:p-10">
+            <div
+              key={step}
+              className={`p-5 sm:p-8 lg:p-10 ${stepDirection === 'forward' ? 'animate-step-in-forward' : 'animate-step-in-back'}`}
+            >
               {step === 1 && <StepType {...stepProps} />}
               {step === 2 && <StepCategory {...stepProps} />}
               {step === 3 && <StepLocation {...stepProps} />}

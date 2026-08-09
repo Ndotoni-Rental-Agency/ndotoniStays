@@ -17,9 +17,9 @@ export function StepType({ form, updateField }: StepProps) {
             key={pt.value}
             type="button"
             onClick={() => updateField('propertyType', pt.value)}
-            className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 sm:p-5 transition-all active:scale-95 ${
+            className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-200 active:scale-95 ${
               form.propertyType === pt.value
-                ? 'border-brand-500 bg-brand-50 shadow-md'
+                ? 'border-brand-500 bg-brand-50 shadow-md scale-[1.03]'
                 : 'border-ink-100 hover:border-ink-200 hover:bg-ink-50 hover:shadow-sm'
             }`}
           >

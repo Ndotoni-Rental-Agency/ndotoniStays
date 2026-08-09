@@ -26,9 +26,9 @@ export function StepCategory({ form, setForm }: StepProps) {
                     : [...prev.stayCategories, cat.value],
                 }));
               }}
-              className={`flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 sm:py-3.5 text-sm transition-all active:scale-95 ${
+              className={`flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 sm:py-3.5 text-sm transition-all duration-200 active:scale-95 ${
                 isSelected
-                  ? 'border-brand-500 bg-brand-50 text-brand-700 font-semibold shadow-sm'
+                  ? 'border-brand-500 bg-brand-50 text-brand-700 font-semibold shadow-sm scale-[1.03]'
                   : 'border-ink-100 text-ink-600 hover:border-ink-200 hover:bg-ink-50'
               }`}
             >

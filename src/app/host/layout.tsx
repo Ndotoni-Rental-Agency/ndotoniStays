@@ -71,7 +71,7 @@ export default function HostLayout({ children }: { children: React.ReactNode }) 
       <HostSidebar />
 
       {/* Main content */}
-      <main className="lg:pl-56 pb-20 lg:pb-0">
+      <main className="lg:pl-56">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           {children}
         </div>

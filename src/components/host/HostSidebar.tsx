@@ -115,9 +115,9 @@ export function HostSidebar() {
         </nav>
       </aside>
 
-      {/* Mobile bottom tab bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-ink-100 z-50 safe-area-pb">
-        <div className="flex items-stretch">
+      {/* Mobile top tab bar */}
+      <nav className="lg:hidden sticky top-16 left-0 right-0 bg-white border-b border-ink-100 z-40 overflow-x-auto">
+        <div className="flex items-stretch min-w-max">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href, item.exact);
@@ -126,8 +126,8 @@ export function HostSidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex-1 flex flex-col items-center gap-0.5 py-2 pt-2.5 text-[10px] font-medium transition-colors touch-manipulation relative',
-                  active ? 'text-brand-600' : 'text-ink-400'
+                  'flex flex-col items-center gap-0.5 py-2 px-4 text-[10px] font-medium transition-colors touch-manipulation relative border-b-2',
+                  active ? 'text-brand-600 border-brand-600' : 'text-ink-400 border-transparent'
                 )}
               >
                 <div className="relative">
@@ -138,7 +138,7 @@ export function HostSidebar() {
                     </span>
                   )}
                 </div>
-                <span>{item.name}</span>
+                <span className="whitespace-nowrap">{item.name}</span>
               </Link>
             );
           })}

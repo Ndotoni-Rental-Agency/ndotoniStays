@@ -105,11 +105,13 @@ export default function HostPropertiesPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl sm:text-2xl font-bold text-ink-900">{t('host.myProperties')}</h1>
-        <Link href="/become-host" className="btn-primary flex items-center gap-1.5 text-sm">
-          <PlusIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('host.nav.addProperty')}</span>
-          <span className="sm:hidden">{t('host.add')}</span>
-        </Link>
+        {(loading || properties.length > 0) && (
+          <Link href="/become-host" className="btn-primary flex items-center gap-1.5 text-sm">
+            <PlusIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('host.nav.addProperty')}</span>
+            <span className="sm:hidden">{t('host.add')}</span>
+          </Link>
+        )}
       </div>
 
       {/* Earnings */}

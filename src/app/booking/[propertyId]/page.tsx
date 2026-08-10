@@ -228,7 +228,10 @@ export default function BookingPage() {
 
       const result = paymentResponse.initiatePayment;
 
-      if (result.status === 'PENDING') {
+      // PROCESSING means the gateway accepted the request and the prompt is on
+      // the guest's phone — it's in-flight, not a failure. The webhook settles
+      // it to CAPTURED/FAILED later, which the poller below picks up.
+      if (result.status === 'PENDING' || result.status === 'PROCESSING') {
         setPaymentMessage('Check your phone for the M-Pesa prompt. Confirm to complete payment.');
         pollPaymentStatus(result.reference);
       } else if (result.status === 'COMPLETED' || result.status === 'CAPTURED') {

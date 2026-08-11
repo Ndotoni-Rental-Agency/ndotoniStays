@@ -1,10 +1,11 @@
 'use client';
 
 import { PROPERTY_TYPES } from '@/components/host/constants';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 
-export function StepType({ form, updateField }: StepProps) {
+export function StepType({ form, updateField, setForm }: StepProps) {
   const { t } = useLanguage();
 
   return (
@@ -27,6 +28,18 @@ export function StepType({ form, updateField }: StepProps) {
             <span className="text-xs sm:text-sm font-medium text-ink-700">{pt.label}</span>
           </button>
         ))}
+      </div>
+
+      {/* Optional early phone capture — not required to advance. Lets us follow up
+          with hosts who start a listing and drop off before reaching the mandatory
+          phone field on the last step. See notifyListingStarted() in page.tsx. */}
+      <div className="mt-8 pt-6 border-t border-ink-100 max-w-md">
+        <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.type.phone')}</label>
+        <PhoneInput
+          value={form.phoneNumber}
+          onChange={(val) => setForm(prev => ({ ...prev, phoneNumber: val }))}
+          placeholder={t('create.photos.phonePlaceholder')}
+        />
       </div>
     </div>
   );

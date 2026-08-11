@@ -466,7 +466,7 @@ export default function ListYourPlacePage() {
               ) : (
                 <button
                   type="submit"
-                  disabled={loading || !form.propertyType || !form.title || !form.nightlyRate || (form.images.length === 0 && form.videos.length === 0)}
+                  disabled={loading || !form.propertyType || !form.title || !form.nightlyRate || (form.images.length === 0 && form.videos.length === 0) || !isValidPhoneNumber(form.phoneNumber)}
                   className="btn-primary inline-flex items-center gap-2 px-6 sm:px-10 py-3 sm:py-3.5 text-sm sm:text-base font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {loading ? (

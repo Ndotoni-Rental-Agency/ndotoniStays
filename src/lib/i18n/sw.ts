@@ -186,6 +186,7 @@ export const sw: Record<string, string> = {
   'create.type.categoryTitle': 'Eneo hili linafaa kwa nini?',
   'create.type.categorySubtitle': 'Chagua zote zinazofaa — husaidia wageni kupata eneo lako',
   'create.type.categoryRequired': 'Chagua angalau kategoria moja',
+  'create.type.phone': 'Nambari yako (si lazima)',
   'create.location.title': 'Eneo lako liko wapi?',
   'create.location.subtitle': 'Saidia wageni kukupata kwa kuongeza mahali pako',
   'create.location.region': 'Mkoa',
@@ -235,6 +236,7 @@ export const sw: Record<string, string> = {
   'create.photos.phone': 'Nambari yako ya WhatsApp / simu',
   'create.photos.phonePlaceholder': 'Nambari ya simu',
   'create.photos.phoneDesc': 'Ili wageni na timu yetu waweze kuwasiliana nawe kuhusu booking',
+  'create.photos.phoneInvalid': 'Tafadhali weka nambari sahihi ya WhatsApp',
 
   // Auth
   'auth.signIn': 'Ingia',

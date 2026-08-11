@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { MediaGrid } from '@/components/media/MediaGrid';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -110,7 +111,9 @@ export function StepPhotosContact({ form, updateField, setForm, error }: Props) 
 
       {/* Phone */}
       <div className="border-t border-ink-100 pt-8 max-w-md">
-        <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.photos.phone')}</label>
+        <label className="block text-sm font-medium text-ink-700 mb-2">
+          {t('create.photos.phone')} <span className="text-red-500">*</span>
+        </label>
         <PhoneInput
           value={form.phoneNumber}
           onChange={(val) => setForm(prev => ({ ...prev, phoneNumber: val }))}
@@ -118,6 +121,9 @@ export function StepPhotosContact({ form, updateField, setForm, error }: Props) 
           required
         />
         <p className="text-sm text-ink-400 mt-2">{t('create.photos.phoneDesc')}</p>
+        {form.phoneNumber && !isValidPhoneNumber(form.phoneNumber) && (
+          <p className="text-sm text-amber-600 mt-1">{t('create.photos.phoneInvalid')}</p>
+        )}
       </div>
 
       {error && (

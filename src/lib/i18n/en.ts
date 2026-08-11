@@ -186,6 +186,7 @@ export const en: Record<string, string> = {
   'create.type.categoryTitle': "What's this space great for?",
   'create.type.categorySubtitle': 'Select all that apply — helps guests find your listing',
   'create.type.categoryRequired': 'Select at least one category',
+  'create.type.phone': 'Your number (optional)',
   'create.location.title': 'Where is your property?',
   'create.location.subtitle': 'Help guests find you by adding your location',
   'create.location.region': 'Region',
@@ -235,6 +236,7 @@ export const en: Record<string, string> = {
   'create.photos.phone': 'Your WhatsApp / phone number',
   'create.photos.phonePlaceholder': 'Phone number',
   'create.photos.phoneDesc': 'So guests and our team can reach you about bookings',
+  'create.photos.phoneInvalid': 'Please enter a valid WhatsApp number',
 
   // Auth
   'auth.signIn': 'Sign In',

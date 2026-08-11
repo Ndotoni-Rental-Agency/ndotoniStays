@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { PROPERTY_TYPES } from '@/components/host/constants';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,6 +8,18 @@ import { StepProps } from './types';
 
 export function StepType({ form, updateField, setForm }: StepProps) {
   const { t } = useLanguage();
+  const phoneSectionRef = useRef<HTMLDivElement>(null);
+
+  function handleSelectType(value: string) {
+    updateField('propertyType', value);
+    // The phone field is below the fold on mobile until a type is picked —
+    // nudge it into view so it doesn't get skipped. A short delay lets the
+    // selection state render first; 'nearest' avoids over-scrolling past
+    // the sticky top bar.
+    setTimeout(() => {
+      phoneSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 150);
+  }
 
   return (
     <div>
@@ -17,7 +30,7 @@ export function StepType({ form, updateField, setForm }: StepProps) {
           <button
             key={pt.value}
             type="button"
-            onClick={() => updateField('propertyType', pt.value)}
+            onClick={() => handleSelectType(pt.value)}
             className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 sm:p-5 transition-all duration-200 active:scale-95 ${
               form.propertyType === pt.value
                 ? 'border-brand-500 bg-brand-50 shadow-md scale-[1.03]'
@@ -33,7 +46,7 @@ export function StepType({ form, updateField, setForm }: StepProps) {
       {/* Optional early phone capture — not required to advance. Lets us follow up
           with hosts who start a listing and drop off before reaching the mandatory
           phone field on the last step. See notifyListingStarted() in page.tsx. */}
-      <div className="mt-8 pt-6 border-t border-ink-100 max-w-md">
+      <div ref={phoneSectionRef} className="mt-8 pt-6 border-t border-ink-100 max-w-md">
         <label className="block text-sm font-medium text-ink-700 mb-2">{t('create.type.phone')}</label>
         <PhoneInput
           value={form.phoneNumber}

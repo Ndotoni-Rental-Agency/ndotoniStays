@@ -58,8 +58,11 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
 
       const result = response.initiatePayment;
 
-      if (result.status === 'PENDING') {
-        console.log('[PaymentFlow] Payment pending, polling reference:', result.reference);
+      // PROCESSING means the gateway accepted the request and the prompt is on
+      // the guest's phone — it's in-flight, not a failure. The webhook settles
+      // it to CAPTURED/FAILED later, which the poller below picks up.
+      if (result.status === 'PENDING' || result.status === 'PROCESSING') {
+        console.log('[PaymentFlow] Payment in flight, polling reference:', result.reference);
         pollPaymentStatus(result.reference);
       } else if (result.status === 'COMPLETED' || result.status === 'CAPTURED') {
         console.log('[PaymentFlow] Payment completed immediately');

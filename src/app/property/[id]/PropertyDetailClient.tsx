@@ -11,12 +11,16 @@ import { PropertyInfo } from '@/components/property/PropertyInfo';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
+import { PropertyGroupUnits } from '@/components/property/PropertyGroupUnits';
 import { usePropertyCoordinates } from '@/hooks/usePropertyCoordinates';
+
+// Not yet in the generated ShortTermProperty type — see queries.ts note on getShortTermProperty.
+type PropertyWithGroup = ShortTermProperty & { groupId?: string | null };
 
 export function PropertyDetailClient() {
   const { id } = useParams();
   const searchParams = useSearchParams();
-  const [property, setProperty] = useState<ShortTermProperty | null>(null);
+  const [property, setProperty] = useState<PropertyWithGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +36,7 @@ export function PropertyDetailClient() {
 
   async function fetchProperty() {
     try {
-      const data = await GraphQLClient.executePublic<{ getShortTermProperty: ShortTermProperty }>(
+      const data = await GraphQLClient.executePublic<{ getShortTermProperty: PropertyWithGroup }>(
         getShortTermProperty,
         { propertyId: id }
       );
@@ -94,6 +98,9 @@ export function PropertyDetailClient() {
         {/* Left: Property info */}
         <div className="lg:col-span-2">
           <PropertyInfo property={property} />
+          {property.groupId && (
+            <PropertyGroupUnits groupId={property.groupId} currentPropertyId={property.propertyId} />
+          )}
           <PropertyReviews
             propertyId={property.propertyId}
             ratingSummary={property.ratingSummary}

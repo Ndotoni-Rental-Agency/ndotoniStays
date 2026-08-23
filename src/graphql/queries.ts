@@ -1772,6 +1772,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     description
     district
     googleMapsUrl
+    groupId
     host {
       firstName
       lastName
@@ -1783,6 +1784,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     houseRules
     images
     instantBookEnabled
+    isPrimaryUnit
     maxAdults
     maxChildren
     maxGuests
@@ -1815,6 +1817,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     taxPercentage
     thumbnail
     title
+    unitLabel
     updatedAt
     videos
     __typename
@@ -1824,6 +1827,30 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
   APITypes.GetShortTermPropertyQueryVariables,
   APITypes.GetShortTermPropertyQuery
 >;
+// Hand-written pending `pnpm schema:update` (introspects the deployed AppSync schema —
+// can't be regenerated until getPropertyGroupUnits is deployed). Not typed against
+// APITypes for the same reason; GraphQLClient.executePublic accepts a plain string.
+export const getPropertyGroupUnits = /* GraphQL */ `query GetPropertyGroupUnits($groupId: ID!) {
+  getPropertyGroupUnits(groupId: $groupId) {
+    properties {
+      propertyId
+      groupId
+      isPrimaryUnit
+      unitLabel
+      title
+      thumbnail
+      nightlyRate
+      currency
+      maxGuests
+      bedrooms
+      bathrooms
+      status
+      __typename
+    }
+    __typename
+  }
+}
+`;
 export const getStreets = /* GraphQL */ `query GetStreets($wardId: ID!) {
   getStreets(wardId: $wardId) {
     id
@@ -3451,6 +3478,7 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       description
       district
       googleMapsUrl
+      groupId
       host {
         firstName
         lastName
@@ -3462,6 +3490,7 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       houseRules
       images
       instantBookEnabled
+      isPrimaryUnit
       maxAdults
       maxChildren
       maxGuests
@@ -3494,6 +3523,7 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       taxPercentage
       thumbnail
       title
+      unitLabel
       updatedAt
       videos
       __typename
@@ -4047,6 +4077,7 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       description
       district
       googleMapsUrl
+      groupId
       host {
         firstName
         lastName
@@ -4058,6 +4089,7 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       houseRules
       images
       instantBookEnabled
+      isPrimaryUnit
       maxAdults
       maxChildren
       maxGuests
@@ -4090,6 +4122,7 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       taxPercentage
       thumbnail
       title
+      unitLabel
       updatedAt
       videos
       __typename

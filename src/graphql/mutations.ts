@@ -1170,6 +1170,23 @@ export const deactivateShortTermProperty = /* GraphQL */ `mutation DeactivateSho
   APITypes.DeactivateShortTermPropertyMutationVariables,
   APITypes.DeactivateShortTermPropertyMutation
 >;
+// Hand-written pending `pnpm schema:update` (introspects the deployed AppSync schema —
+// can't be regenerated until addUnitToProperty is deployed). Not typed against APITypes
+// for the same reason; GraphQLClient.executeAuthenticated accepts a plain string.
+export const addUnitToProperty = /* GraphQL */ `mutation AddUnitToProperty(
+  $sourcePropertyId: ID!
+  $input: AddUnitToPropertyInput!
+) {
+  addUnitToProperty(sourcePropertyId: $sourcePropertyId, input: $input) {
+    isGuestUser
+    message
+    propertyId
+    status
+    success
+    __typename
+  }
+}
+`;
 export const declineBooking = /* GraphQL */ `mutation DeclineBooking($bookingId: ID!, $reason: String!, $token: String) {
   declineBooking(bookingId: $bookingId, reason: $reason, token: $token) {
     bookingId

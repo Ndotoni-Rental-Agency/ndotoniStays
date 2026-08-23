@@ -163,6 +163,10 @@ export const en: Record<string, string> = {
   'host.signInDashboard': 'Sign in to access your host dashboard',
   'host.addUnit': 'Add another unit here',
   'host.units': '{count} units',
+  'host.manageUnits': 'Manage units',
+  'host.unitsAtThisProperty': 'Units at this property',
+  'host.sameAddressUnits': 'All {count} units share this address — {location}',
+  'host.backToProperties': 'Back to properties',
 
   // Add Unit Page
   'addUnit.back': 'Back to properties',

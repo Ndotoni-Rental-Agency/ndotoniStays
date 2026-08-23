@@ -163,6 +163,10 @@ export const sw: Record<string, string> = {
   'host.signInDashboard': 'Ingia ili kufikia dashibodi yako ya mwenyeji',
   'host.addUnit': 'Ongeza kitengo kingine hapa',
   'host.units': 'Vitengo {count}',
+  'host.manageUnits': 'Simamia vitengo',
+  'host.unitsAtThisProperty': 'Vitengo katika eneo hili',
+  'host.sameAddressUnits': 'Vitengo vyote {count} vina anwani sawa — {location}',
+  'host.backToProperties': 'Rudi kwenye maeneo',
 
   // Add Unit Page
   'addUnit.back': 'Rudi kwenye maeneo',

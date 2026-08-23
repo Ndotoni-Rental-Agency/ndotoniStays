@@ -21,8 +21,8 @@ export function Footer() {
                 height={32}
                 className="object-contain"
               />
-              <span className="text-lg font-bold text-ink-900">
-                Stays
+              <span className="text-lg font-bold text-ink-900 leading-none">
+                <span className="text-brand-600">ndotoni</span> Stays
               </span>
             </div>
             <p className="text-ink-500 text-sm max-w-md">
@@ -32,7 +32,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.explore')}</h4>
+            <h3 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.explore')}</h3>
             <ul className="space-y-2 text-sm text-ink-500">
               <li>
                 <Link href="/search" className="hover:text-ink-900 transition-colors">
@@ -59,7 +59,7 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.support')}</h4>
+            <h3 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.support')}</h3>
             <ul className="space-y-2 text-sm text-ink-500">
               <li>
                 <a

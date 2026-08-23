@@ -59,7 +59,7 @@ export function HowItWorks() {
             <div key={step.number} className="flex items-start gap-3 p-3">
               <div className="relative shrink-0 h-10 w-10 rounded-xl bg-white shadow-sm border border-brand-100 text-brand-600 flex items-center justify-center">
                 {step.icon}
-                <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-brand-600 text-white text-[11px] font-bold flex items-center justify-center">
                   {step.number}
                 </span>
               </div>

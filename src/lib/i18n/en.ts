@@ -11,7 +11,6 @@ export const en: Record<string, string> = {
   'nav.searchPlaces': 'Search Places',
 
   // Hero
-  'hero.badge': 'Over 100+ places available now',
   'hero.title': 'Book a perfect place',
   'hero.titleFor': 'for',
   'hero.rotating.tonight': 'tonight',
@@ -28,6 +27,8 @@ export const en: Record<string, string> = {
   'hero.search.guests': 'Guests',
   'hero.search.button': 'Search',
   'hero.search.noLocations': 'No locations found',
+  'hero.search.popular': 'Popular',
+  'hero.search.allRegions': 'All regions',
   'hero.search.locationLabel': 'Where?',
   'hero.search.checkInLabel': 'Check in',
   'hero.search.checkOutLabel': 'Check out',
@@ -67,8 +68,8 @@ export const en: Record<string, string> = {
   'trust.verified.desc': 'Every listing is reviewed. Real photos, accurate descriptions.',
   'trust.whatsapp.title': 'WhatsApp Support',
   'trust.whatsapp.desc': 'Questions? Chat with us or your host directly on WhatsApp.',
-  'trust.pricing.title': 'Fair Pricing',
-  'trust.pricing.desc': 'All fees shown upfront. No hidden charges at check-in.',
+  'trust.pricing.title': 'Pay Your Way',
+  'trust.pricing.desc': 'Mobile money or card — Vodacom (M-Pesa), Airtel, Tigo, Halotel, or your bank card. All fees shown upfront, no hidden charges.',
 
   // How It Works
   'howItWorks.label': 'Simple as 1-2-3',

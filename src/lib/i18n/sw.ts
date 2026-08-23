@@ -11,7 +11,6 @@ export const sw: Record<string, string> = {
   'nav.searchPlaces': 'Tafuta Maeneo',
 
   // Hero
-  'hero.badge': 'Zaidi ya maeneo 100+ yanapatikana sasa',
   'hero.title': 'Book sehemu bora',
   'hero.titleFor': 'kwa',
   'hero.rotating.tonight': 'usiku mmoja',
@@ -28,6 +27,8 @@ export const sw: Record<string, string> = {
   'hero.search.guests': 'Wageni',
   'hero.search.button': 'Tafuta',
   'hero.search.noLocations': 'Hakuna maeneo yaliyopatikana',
+  'hero.search.popular': 'Maarufu',
+  'hero.search.allRegions': 'Mikoa Yote',
   'hero.search.locationLabel': 'Wapi?',
   'hero.search.checkInLabel': 'Kuingia',
   'hero.search.checkOutLabel': 'Kutoka',
@@ -67,8 +68,8 @@ export const sw: Record<string, string> = {
   'trust.verified.desc': 'Kila sehemu inakaguliwa. Picha halisi, maelezo sahihi.',
   'trust.whatsapp.title': 'Msaada wa WhatsApp',
   'trust.whatsapp.desc': 'Maswali? Ongea nasi au mwenyeji wako moja kwa moja kwenye WhatsApp.',
-  'trust.pricing.title': 'Bei ya Haki',
-  'trust.pricing.desc': 'Gharama zote zinaonyeshwa wazi. Hakuna malipo ya siri ukifika.',
+  'trust.pricing.title': 'Lipa Unavyotaka',
+  'trust.pricing.desc': 'Pesa za simu au kadi — Vodacom (M-Pesa), Airtel, Tigo, Halotel, au kadi yako ya benki. Gharama zote zinaonyeshwa wazi, hakuna malipo ya siri.',
 
   // How It Works
   'howItWorks.label': 'Rahisi kama 1-2-3',

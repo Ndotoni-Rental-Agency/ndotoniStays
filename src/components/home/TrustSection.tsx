@@ -1,13 +1,13 @@
 'use client';
 
-import { ShieldCheckIcon, BoltIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { ShieldCheckIcon, BoltIcon, ChatBubbleLeftRightIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const TRUST_POINTS = [
   { icon: BoltIcon, titleKey: 'trust.instant.title', descKey: 'trust.instant.desc' },
   { icon: ShieldCheckIcon, titleKey: 'trust.verified.title', descKey: 'trust.verified.desc' },
   { icon: ChatBubbleLeftRightIcon, titleKey: 'trust.whatsapp.title', descKey: 'trust.whatsapp.desc' },
-  { icon: CurrencyDollarIcon, titleKey: 'trust.pricing.title', descKey: 'trust.pricing.desc' },
+  { icon: DevicePhoneMobileIcon, titleKey: 'trust.pricing.title', descKey: 'trust.pricing.desc' },
 ];
 
 export function TrustSection() {

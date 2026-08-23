@@ -7,7 +7,7 @@ export function CTASection() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-16 sm:py-20">
+    <section id="host-cta" className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-hidden">
           {/* Background */}

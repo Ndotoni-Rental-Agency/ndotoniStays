@@ -30,7 +30,7 @@ export function HeroSection() {
   const [modalSearchQuery, setModalSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<FlattenedLocation | null>({
     type: 'region',
-    name: 'DAR ES SALAAM',
+    name: 'DAR-ES-SALAAM',
     displayName: 'Dar es Salaam',
   } as FlattenedLocation);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -43,6 +43,16 @@ export function HeroSection() {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const { results: filteredLocations } = useRegionSearch(modalSearchQuery, 8);
+
+  // Dar es Salaam is the flagship market — surface it above the alphabetical
+  // region list rather than making guests scan ~25 regions to find it.
+  const isBrowsingAll = !modalSearchQuery.trim();
+  const popularLocations = isBrowsingAll
+    ? filteredLocations.filter((loc) => loc.type === 'region' && loc.name === 'DAR-ES-SALAAM')
+    : [];
+  const remainingLocations = isBrowsingAll
+    ? filteredLocations.filter((loc) => !(loc.type === 'region' && loc.name === 'DAR-ES-SALAAM'))
+    : filteredLocations;
 
   useEffect(() => setMounted(true), []);
 
@@ -137,7 +147,7 @@ export function HeroSection() {
                     aria-label="Location"
                     readOnly
                   />
-                  <span className="absolute left-10 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+                  <span className="absolute left-10 top-1.5 text-[11px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
                     {t('hero.search.locationLabel')}
                   </span>
                 </div>
@@ -163,21 +173,48 @@ export function HeroSection() {
                         </div>
                         <div className="p-2">
                           {filteredLocations.length > 0 ? (
-                            filteredLocations.map((location, index) => (
-                              <button
-                                key={`${location.type}-${location.name}-${index}`}
-                                type="button"
-                                onClick={() => handleLocationSelect(location)}
-                                className="w-full px-4 py-3 text-left hover:bg-ink-50 rounded-xl transition-colors"
-                              >
-                                <div className="text-sm font-medium text-ink-900">
-                                  {toTitleCase(location.displayName)}
-                                </div>
-                                <div className="text-xs text-ink-500">
-                                  {location.type === 'region' ? t('common.region') : t('common.district')}
-                                </div>
-                              </button>
-                            ))
+                            <>
+                              {popularLocations.length > 0 && (
+                                <>
+                                  <div className="px-4 pt-2 pb-1 text-[11px] font-semibold text-ink-400 uppercase tracking-wide">
+                                    {t('hero.search.popular')}
+                                  </div>
+                                  {popularLocations.map((location, index) => (
+                                    <button
+                                      key={`popular-${location.type}-${location.name}-${index}`}
+                                      type="button"
+                                      onClick={() => handleLocationSelect(location)}
+                                      className="w-full px-4 py-3 text-left hover:bg-ink-50 rounded-xl transition-colors"
+                                    >
+                                      <div className="text-sm font-medium text-ink-900">
+                                        {toTitleCase(location.displayName)}
+                                      </div>
+                                      <div className="text-xs text-ink-500">
+                                        {location.type === 'region' ? t('common.region') : t('common.district')}
+                                      </div>
+                                    </button>
+                                  ))}
+                                  <div className="px-4 pt-3 pb-1 text-[11px] font-semibold text-ink-400 uppercase tracking-wide">
+                                    {t('hero.search.allRegions')}
+                                  </div>
+                                </>
+                              )}
+                              {remainingLocations.map((location, index) => (
+                                <button
+                                  key={`${location.type}-${location.name}-${index}`}
+                                  type="button"
+                                  onClick={() => handleLocationSelect(location)}
+                                  className="w-full px-4 py-3 text-left hover:bg-ink-50 rounded-xl transition-colors"
+                                >
+                                  <div className="text-sm font-medium text-ink-900">
+                                    {toTitleCase(location.displayName)}
+                                  </div>
+                                  <div className="text-xs text-ink-500">
+                                    {location.type === 'region' ? t('common.region') : t('common.district')}
+                                  </div>
+                                </button>
+                              ))}
+                            </>
                           ) : (
                             <div className="px-4 py-6 text-center text-sm text-ink-400">
                               {t('hero.search.noLocations')}

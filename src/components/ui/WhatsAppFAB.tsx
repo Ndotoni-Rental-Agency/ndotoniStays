@@ -1,11 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 export default function WhatsAppFAB() {
   const [hovered, setHovered] = useState(false);
+  const [nearOwnEntryPoint, setNearOwnEntryPoint] = useState(false);
   const pathname = usePathname();
+
+  // The homepage's own CTA section has its own "Chat with us" WhatsApp
+  // button — hide this floating duplicate while that's on screen so guests
+  // aren't shown two near-identical WhatsApp entry points at once.
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const target = document.getElementById('host-cta');
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setNearOwnEntryPoint(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [pathname]);
 
   // Only show on the home page
   if (pathname !== '/') {
@@ -21,6 +38,9 @@ export default function WhatsAppFAB() {
         right: '24px',
         zIndex: 9999,
         alignItems: 'center',
+        opacity: nearOwnEntryPoint ? 0 : 1,
+        pointerEvents: nearOwnEntryPoint ? 'none' : 'auto',
+        transition: 'opacity 0.2s',
       }}
     >
       {/* Button */}

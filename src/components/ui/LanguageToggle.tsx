@@ -16,8 +16,8 @@ export function LanguageToggle() {
       aria-label={`Switch language to ${language === 'en' ? 'Swahili' : 'English'}`}
       title={language === 'en' ? 'Badilisha kwa Kiswahili' : 'Switch to English'}
     >
-      <span className="text-base leading-none">{language === 'en' ? '🇹🇿' : '🇬🇧'}</span>
-      <span className="uppercase tracking-wide">{language === 'en' ? 'SW' : 'EN'}</span>
+      <span className="text-base leading-none">{language === 'en' ? '🇬🇧' : '🇹🇿'}</span>
+      <span className="uppercase tracking-wide">{language === 'en' ? 'EN' : 'SW'}</span>
     </button>
   );
 }

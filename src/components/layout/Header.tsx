@@ -33,8 +33,8 @@ export function Header() {
                 priority
                 className="object-contain"
               />
-              <span className="text-lg font-bold text-ink-900">
-                Stays
+              <span className="text-lg font-bold text-ink-900 leading-none">
+                <span className="text-brand-600">ndotoni</span> Stays
               </span>
             </Link>
 

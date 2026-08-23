@@ -203,7 +203,7 @@ export default function CalendarDatePicker({
         )}
       >
         {label && (
-          <span className="absolute left-4 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
+          <span className="absolute left-4 top-1.5 text-[11px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
             {label}
           </span>
         )}

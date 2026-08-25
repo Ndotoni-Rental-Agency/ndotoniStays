@@ -64,42 +64,62 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
       stripe={stripePromise}
       options={{
         clientSecret,
+        // Elements render in a separate iframe, so it can't see this page's
+        // var(--font-dm-sans) or its already-loaded font file — load it explicitly
+        // or Stripe silently falls back to a system font.
+        fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap' }],
         appearance: {
           theme: 'flat',
           variables: {
-            colorPrimary: '#2563eb',
+            colorPrimary: '#16a34a', // brand-600
             colorBackground: '#ffffff',
-            colorText: '#1f2937',
+            colorText: '#0f172a', // ink-900
+            colorTextSecondary: '#64748b', // ink-500
+            colorTextPlaceholder: '#94a3b8', // ink-400
             colorDanger: '#ef4444',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: '"DM Sans", system-ui, sans-serif',
             spacingUnit: '4px',
-            borderRadius: '12px',
+            borderRadius: '12px', // matches .input / rounded-xl elsewhere on the site
             fontSizeBase: '15px',
           },
           rules: {
             '.Input': {
-              border: '1.5px solid #e5e7eb',
+              border: '1px solid #e2e8f0', // ink-200
               boxShadow: 'none',
-              padding: '12px 14px',
+              padding: '12px 16px',
             },
             '.Input:focus': {
-              border: '1.5px solid #2563eb',
-              boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.1)',
+              border: '1px solid #22c55e', // brand-500
+              boxShadow: '0 0 0 3px rgba(34, 197, 94, 0.15)',
             },
             '.Label': {
               fontSize: '13px',
               fontWeight: '500',
-              color: '#6b7280',
+              color: '#334155', // ink-700
               marginBottom: '6px',
             },
             '.Tab': {
-              border: '1.5px solid #e5e7eb',
+              border: '1px solid #e2e8f0',
               borderRadius: '12px',
-              padding: '12px 16px',
+              padding: '10px 12px',
+              boxShadow: 'none',
+            },
+            '.Tab:hover': {
+              border: '1px solid #cbd5e1', // ink-300
             },
             '.Tab--selected': {
-              border: '1.5px solid #2563eb',
-              backgroundColor: '#eff6ff',
+              border: '1.5px solid #16a34a',
+              backgroundColor: '#f0fdf4', // brand-50
+              boxShadow: 'none',
+            },
+            '.TabIcon--selected': {
+              fill: '#16a34a',
+            },
+            '.TabLabel--selected': {
+              color: '#166534', // brand-800
+            },
+            '.Block': {
+              borderRadius: '12px',
             },
           },
         },

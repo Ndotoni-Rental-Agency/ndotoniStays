@@ -42,6 +42,7 @@ export function HostSettingsTab({ form, onUpdate, onSave, saving, propertyId, on
                 onChange={(e) => onUpdate('minimumStay', e.target.value)}
                 className="input text-base"
                 min="1"
+                max="365"
                 inputMode="numeric"
               />
             </div>
@@ -53,27 +54,8 @@ export function HostSettingsTab({ form, onUpdate, onSave, saving, propertyId, on
                 onChange={(e) => onUpdate('maximumStay', e.target.value)}
                 className="input text-base"
                 min="1"
+                max="365"
                 inputMode="numeric"
-              />
-            </div>
-          </div>
-          <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
-            <div>
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">Check-in time</label>
-              <input
-                type="time"
-                value={form.checkInTime}
-                onChange={(e) => onUpdate('checkInTime', e.target.value)}
-                className="input text-base"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-ink-700 mb-1.5">Check-out time</label>
-              <input
-                type="time"
-                value={form.checkOutTime}
-                onChange={(e) => onUpdate('checkOutTime', e.target.value)}
-                className="input text-base"
               />
             </div>
           </div>

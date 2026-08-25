@@ -7,6 +7,7 @@ import { HostSettingsTab } from '@/components/host/HostSettingsTab';
 import { HostCheckInTab } from '@/components/host/HostCheckInTab';
 import { MediaGrid } from '@/components/media/MediaGrid';
 import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { validatePropertyForm } from '@/lib/validation/property-form';
 import { ShortTermProperty } from '@/API';
 import { Home } from 'lucide-react';
 import {
@@ -221,6 +222,11 @@ function PropertyEditorFull({
   }
 
   async function handleSave() {
+    const validationError = validatePropertyForm(form);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
     setSaving(true);
     try {
       const input: Record<string, any> = {

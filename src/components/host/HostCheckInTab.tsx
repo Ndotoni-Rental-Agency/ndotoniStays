@@ -2,8 +2,10 @@
 
 import { useState, useRef } from 'react';
 import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 import { PropertyFormData, CheckInInstructionsForm } from './types';
 import { AIService } from '@/lib/ai/AIService';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 interface Props {
   form: PropertyFormData;
@@ -122,6 +124,31 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
         </div>
       )}
 
+      {/* Check-in / Check-out times */}
+      <section>
+        <h3 className="text-sm font-semibold text-ink-700 mb-3 uppercase tracking-wide">Check-In & Check-Out Times</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Check-in time</label>
+            <input
+              type="time"
+              value={form.checkInTime}
+              onChange={(e) => onUpdate('checkInTime', e.target.value)}
+              className="input text-base"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">Check-out time</label>
+            <input
+              type="time"
+              value={form.checkOutTime}
+              onChange={(e) => onUpdate('checkOutTime', e.target.value)}
+              className="input text-base"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Access & Entry */}
       <section ref={formStartRef}>
         <h3 className="text-sm font-semibold text-ink-700 mb-3 uppercase tracking-wide">Access & Entry</h3>
@@ -203,13 +230,14 @@ export function HostCheckInTab({ form, onUpdate, onSave, saving, otherPropertyIn
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Contact phone</label>
-            <input
-              type="tel"
+            <PhoneInput
               value={instructions.contactPhone}
-              onChange={(e) => updateInstruction('contactPhone', e.target.value)}
-              className="input text-base"
+              onChange={(v) => updateInstruction('contactPhone', v)}
               placeholder="e.g. +255 7XX XXX XXX"
             />
+            {instructions.contactPhone && !isValidPhoneNumber(instructions.contactPhone) && (
+              <p className="text-xs text-amber-600 mt-1">This doesn&apos;t look like a valid phone number.</p>
+            )}
           </div>
         </div>
       </section>

@@ -22,6 +22,7 @@ import { HostDetailsTab } from '@/components/host/HostDetailsTab';
 import { HostSettingsTab } from '@/components/host/HostSettingsTab';
 import { HostCheckInTab } from '@/components/host/HostCheckInTab';
 import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
+import { validatePropertyForm } from '@/lib/validation/property-form';
 import { ShortTermProperty } from '@/API';
 import toast from 'react-hot-toast';
 
@@ -189,6 +190,11 @@ export default function EditPropertyPage() {
   }
 
   async function handleSave() {
+    const validationError = validatePropertyForm(form);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
     setSaving(true);
     try {
       const input: Record<string, any> = {

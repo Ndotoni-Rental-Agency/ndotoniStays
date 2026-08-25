@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon, BoltIcon } from '@heroicons/react/24/solid';
-import { formatPrice, getCdnUrl } from '@/lib/utils';
+import { formatPrice, getCdnUrl, isImageUrl } from '@/lib/utils';
 
 // Tiny 1x1 SVG shimmer placeholder encoded as base64
 const BLUR_PLACEHOLDER =
@@ -32,7 +32,10 @@ interface Props {
 }
 
 export function PropertyCard({ property, checkIn, checkOut }: Props) {
-  const imageUrl = getCdnUrl(property.thumbnail || property.images?.[0]);
+  // thumbnail/images[0] can be a non-image file a host uploaded by mistake (e.g. a PDF) —
+  // fall through to the first URL that actually looks like an image, or the placeholder.
+  const firstImage = [property.thumbnail, ...(property.images || [])].find((url) => url && isImageUrl(url));
+  const imageUrl = getCdnUrl(firstImage || '');
   const rating = property.ratingSummary?.averageRating || property.averageRating;
   const reviewCount = property.ratingSummary?.totalReviews || 0;
 

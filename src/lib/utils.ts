@@ -48,6 +48,18 @@ export function getCdnUrl(path: string): string {
   return `${cdnBase}/${path}`;
 }
 
+const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|avif|heic|heif|bmp|svg)$/i;
+
+/**
+ * True if a stored media URL actually points at an image, judged by its file extension.
+ * Hosts can upload a non-image file (a PDF, a doc) through the property photo picker —
+ * next/image 400s on those, breaking the whole gallery/card for guests. Filter with this
+ * before handing a URL to next/image so one bad upload doesn't take down the page.
+ */
+export function isImageUrl(url: string): boolean {
+  return IMAGE_EXTENSIONS.test(url.split('?')[0]);
+}
+
 /**
  * Generate WhatsApp URL
  */

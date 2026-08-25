@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { getCdnUrl } from '@/lib/utils';
+import { getCdnUrl, isImageUrl } from '@/lib/utils';
 import { XMarkIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { PlayIcon } from '@heroicons/react/24/solid';
 
@@ -27,9 +27,11 @@ export function PropertyGallery({ images, videos = [], title }: Props) {
   const [touchDelta, setTouchDelta] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Combine images and videos into a unified media array
+  // Combine images and videos into a unified media array. Non-image URLs (e.g. a PDF a
+  // host uploaded through the photo picker by mistake) are dropped — next/image 400s on
+  // those and would otherwise break the whole gallery.
   const mediaItems: MediaItem[] = [
-    ...(images || []).map(url => ({ type: 'image' as const, url })),
+    ...(images || []).filter(isImageUrl).map(url => ({ type: 'image' as const, url })),
     ...(videos || []).map(url => ({ type: 'video' as const, url })),
   ];
 

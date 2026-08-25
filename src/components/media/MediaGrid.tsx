@@ -61,12 +61,18 @@ export function MediaGrid({ images, videos, onChange, maxMedia = 10 }: MediaGrid
       setUploadError(`Maximum ${maxMedia} files allowed`);
       return;
     }
-    setUploadError(null);
 
+    // MediaUpload already rejects non-image/video files before this fires, but classify
+    // explicitly here too rather than defaulting unknown types to "image" — a non-image
+    // slipping into the images array is exactly what broke a live listing's gallery before.
     if (contentType.startsWith('video/')) {
+      setUploadError(null);
       onChange(imagesRef.current, [...videosRef.current, fileUrl]);
-    } else {
+    } else if (contentType.startsWith('image/')) {
+      setUploadError(null);
       onChange([...imagesRef.current, fileUrl], videosRef.current);
+    } else {
+      setUploadError(`"${contentType}" isn't a supported photo or video type`);
     }
   }
 

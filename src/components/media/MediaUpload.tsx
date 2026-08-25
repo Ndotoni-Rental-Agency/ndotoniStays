@@ -36,13 +36,47 @@ function getContentType(file: File): string {
     png: 'image/png',
     gif: 'image/gif',
     webp: 'image/webp',
+    heic: 'image/heic',
+    heif: 'image/heif',
+    bmp: 'image/bmp',
     mp4: 'video/mp4',
     mov: 'video/quicktime',
     avi: 'video/x-msvideo',
     webm: 'video/webm',
-    pdf: 'application/pdf',
   };
   return mimeMap[ext || ''] || 'application/octet-stream';
+}
+
+/**
+ * Re-encode a real photo that's just in a web-awkward format (HEIC from iPhones, BMP)
+ * into a JPEG the backend/CDN/next-image pipeline already knows how to handle — entirely
+ * client-side, so the backend never has to see or trust anything but plain JPEG bytes.
+ * Anything else (including PDFs) passes through untouched and gets rejected below.
+ */
+async function normalizeImageFile(file: File): Promise<File> {
+  const contentType = getContentType(file).toLowerCase();
+  const jpegName = file.name.replace(/\.[^.]+$/, '.jpg');
+
+  if (contentType === 'image/heic' || contentType === 'image/heif') {
+    const heic2any = (await import('heic2any')).default;
+    const result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+    const blob = Array.isArray(result) ? result[0] : result;
+    return new File([blob], jpegName, { type: 'image/jpeg' });
+  }
+
+  if (contentType === 'image/bmp') {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    canvas.getContext('2d')!.drawImage(bitmap, 0, 0);
+    const blob = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('BMP conversion failed'))), 'image/jpeg', 0.9)
+    );
+    return new File([blob], jpegName, { type: 'image/jpeg' });
+  }
+
+  return file;
 }
 
 export default function MediaUpload({
@@ -105,37 +139,51 @@ export default function MediaUpload({
     setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
 
     for (let i = 0; i < fileArray.length; i++) {
-      const file = fileArray[i];
-      
+      const originalFile = fileArray[i];
+
       try {
+        // HEIC/BMP photos get quietly re-encoded to JPEG before any validation or upload
+        // — the rest of the pipeline (backend, CDN, next/image) only ever sees plain JPEG.
+        const file = await normalizeImageFile(originalFile);
+
         // Determine content type — fall back to extension if file.type is empty
         const contentType = getContentType(file);
         const isVideo = contentType.startsWith('video/');
+        const isImage = contentType.startsWith('image/');
+
+        // The `accept` attribute on the file input is only a UI hint — drag-and-drop and
+        // "All Files" bypass it. Reject anything that isn't actually an image/video here
+        // (e.g. a PDF a host exported photos to) so it never reaches the property gallery,
+        // where next/image 400s on non-image content and breaks the whole listing.
+        if (!isVideo && !isImage) {
+          throw new Error(`"${contentType}" files aren't supported — upload a photo (JPG/PNG) or video instead.`);
+        }
+
         const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
-        
+
         if (file.size > maxSize) {
           const maxSizeMB = isVideo ? '100MB' : '10MB';
           throw new Error(`File is too large (max ${maxSizeMB})`);
         }
 
-        setUploadingFiles(prev => 
-          prev.map(uf => uf.file === file ? { ...uf, progress: 50 } : uf)
+        setUploadingFiles(prev =>
+          prev.map(uf => uf.file === originalFile ? { ...uf, progress: 50 } : uf)
         );
 
         const result = await uploadFile(file, contentType);
-        
-        setUploadingFiles(prev => 
-          prev.map(uf => 
-            uf.file === file 
-              ? { ...uf, progress: 100, status: 'success', url: result.url } 
+
+        setUploadingFiles(prev =>
+          prev.map(uf =>
+            uf.file === originalFile
+              ? { ...uf, progress: 100, status: 'success', url: result.url }
               : uf
           )
         );
       } catch (error) {
-        setUploadingFiles(prev => 
-          prev.map(uf => 
-            uf.file === file 
-              ? { ...uf, progress: 100, status: 'error', error: error instanceof Error ? error.message : 'Upload failed' } 
+        setUploadingFiles(prev =>
+          prev.map(uf =>
+            uf.file === originalFile
+              ? { ...uf, progress: 100, status: 'error', error: error instanceof Error ? error.message : 'Upload failed' }
               : uf
           )
         );

@@ -22,6 +22,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description =
     property.description?.slice(0, 160) ||
     `Book ${property.title} in ${location}. ${property.currency} ${property.nightlyRate.toLocaleString()} per night on ndotoni Stays.`;
+  // Video-only listings (no images, empty thumbnail) would otherwise leave the OG/Twitter
+  // image unset entirely, so shared links (WhatsApp, etc.) show no preview thumbnail at all.
+  const previewImage = property.images?.[0] || property.thumbnail || '/placeholder.jpg';
 
   return {
     title,
@@ -29,11 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      images: property.images?.length > 0
-        ? [{ url: property.images[0], width: 1200, height: 630, alt: property.title }]
-        : property.thumbnail
-        ? [{ url: property.thumbnail, width: 1200, height: 630, alt: property.title }]
-        : undefined,
+      images: [{ url: previewImage, width: 1200, height: 630, alt: property.title }],
       type: 'website',
       url: `https://www.ndotonistays.com/property/${property.propertyId}`,
     },
@@ -41,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: 'summary_large_image',
       title,
       description,
-      images: property.images?.[0] || property.thumbnail || undefined,
+      images: previewImage,
     },
   };
 }

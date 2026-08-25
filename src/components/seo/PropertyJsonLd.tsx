@@ -5,12 +5,19 @@ interface PropertyJsonLdProps {
 }
 
 export function PropertyJsonLd({ property }: PropertyJsonLdProps) {
+  // Video-only listings (no images, empty thumbnail) would otherwise omit `image` entirely —
+  // Google's rich-result guidelines expect one, so fall back to a site placeholder rather
+  // than leaving the listing thumbnail-less in search results.
+  const previewImage = property.images?.length
+    ? property.images
+    : [property.thumbnail || 'https://www.ndotonistays.com/placeholder.jpg'];
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LodgingBusiness',
     name: property.title,
     description: property.description,
-    image: property.images?.length > 0 ? property.images : property.thumbnail ? [property.thumbnail] : undefined,
+    image: previewImage,
     address: property.address
       ? {
           '@type': 'PostalAddress',

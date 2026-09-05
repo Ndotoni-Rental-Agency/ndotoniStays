@@ -97,7 +97,7 @@ export const sw: Record<string, string> = {
   'footer.aboutUs': 'Kuhusu Sisi',
   'footer.support': 'Msaada',
   'footer.whatsapp': 'WhatsApp Sisi',
-  'footer.copyright': '© {year} ndotoni Stays. Haki zote zimehifadhiwa.',
+  'footer.copyright': '© {year} Ndotoni Technologies Limited. Haki zote zimehifadhiwa.',
 
   // Property
   'property.perNight': 'usiku',

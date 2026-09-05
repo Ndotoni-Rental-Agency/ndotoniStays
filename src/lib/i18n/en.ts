@@ -97,7 +97,7 @@ export const en: Record<string, string> = {
   'footer.aboutUs': 'About Us',
   'footer.support': 'Support',
   'footer.whatsapp': 'WhatsApp Us',
-  'footer.copyright': '© {year} ndotoni Stays. All rights reserved.',
+  'footer.copyright': '© {year} Ndotoni Technologies Limited. All rights reserved.',
 
   // Property
   'property.perNight': 'night',

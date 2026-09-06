@@ -439,6 +439,12 @@ export default function ListYourPlacePage() {
 
           {/* Navigation — sticky bottom on mobile */}
           <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-ink-100 -mx-4 sm:mx-0 px-4 sm:px-0 py-4 sm:py-0 sm:border-0 sm:bg-transparent sm:mt-6 sm:static">
+            {step === TOTAL_STEPS && (
+              <p className="text-center text-xs text-ink-400 max-w-5xl mx-auto mb-3 sm:mb-2">
+                By listing, you agree to ndotoni Stays&apos;{' '}
+                <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>.
+              </p>
+            )}
             <div className="flex items-center justify-between max-w-5xl mx-auto">
               {step > 1 ? (
                 <button

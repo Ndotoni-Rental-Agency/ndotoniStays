@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty, getPayment } from '@/graphql/queries';
 import { createBooking, initiatePayment } from '@/graphql/mutations';
@@ -621,7 +622,9 @@ export default function BookingPage() {
         )}
 
         <p className="text-center text-xs text-ink-400">
-          By booking, you agree to the host&apos;s cancellation policy ({property.cancellationPolicy?.toLowerCase() || 'flexible'}).
+          By booking, you agree to ndotoni Stays&apos;{' '}
+          <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>
+          {' '}and the host&apos;s cancellation policy ({property.cancellationPolicy?.toLowerCase() || 'flexible'}).
         </p>
       </div>
 

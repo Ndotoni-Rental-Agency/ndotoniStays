@@ -80,8 +80,11 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-ink-100 text-center text-sm text-ink-400">
-          {t('footer.copyright').replace('{year}', new Date().getFullYear().toString())}
+        <div className="mt-10 pt-6 border-t border-ink-100 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center text-sm text-ink-400">
+          <span>{t('footer.copyright').replace('{year}', new Date().getFullYear().toString())}</span>
+          <Link href="/terms" className="hover:text-ink-700 transition-colors underline-offset-2 hover:underline">
+            {t('footer.terms')}
+          </Link>
         </div>
       </div>
     </footer>

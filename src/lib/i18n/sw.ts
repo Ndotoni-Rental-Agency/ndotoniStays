@@ -98,6 +98,7 @@ export const sw: Record<string, string> = {
   'footer.support': 'Msaada',
   'footer.whatsapp': 'WhatsApp Sisi',
   'footer.copyright': '© {year} Ndotoni Technologies Limited. Haki zote zimehifadhiwa.',
+  'footer.terms': 'Vigezo na Masharti',
 
   // Property
   'property.perNight': 'usiku',

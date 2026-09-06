@@ -98,6 +98,7 @@ export const en: Record<string, string> = {
   'footer.support': 'Support',
   'footer.whatsapp': 'WhatsApp Us',
   'footer.copyright': '© {year} Ndotoni Technologies Limited. All rights reserved.',
+  'footer.terms': 'Terms of Service',
 
   // Property
   'property.perNight': 'night',

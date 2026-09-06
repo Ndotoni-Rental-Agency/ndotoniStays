@@ -130,6 +130,42 @@ export default function AboutPage() {
         </p>
       </section>
 
+      {/* Business Information */}
+      <section className="mb-16">
+        <h2 className="text-2xl font-semibold text-ink-900 mb-4">Business Registration Information</h2>
+        <p className="text-ink-700 leading-relaxed mb-6">
+          Ndotoni is operated by a legally registered company in Tanzania, operating with full
+          compliance to local regulations and business standards. Ndotoni Technologies Limited
+          operates both ndotonistays.com (short-term stays) and ndotoni.com (long-term rentals).
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+          <div className="rounded-xl border border-ink-100 p-6">
+            <h3 className="text-sm font-medium text-ink-500 mb-2">Legal Business Name</h3>
+            <p className="text-lg font-semibold text-ink-900">NDOTONI TECHNOLOGIES LIMITED</p>
+          </div>
+          <div className="rounded-xl border border-ink-100 p-6">
+            <h3 className="text-sm font-medium text-ink-500 mb-2">Company Type</h3>
+            <p className="text-lg font-semibold text-ink-900">Private Limited Company</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-ink-100 p-6 mb-6">
+          <h3 className="text-sm font-medium text-ink-500 mb-2">Principal Place of Business</h3>
+          <p className="text-ink-900 leading-relaxed">
+            Wazo Hill, Kunduchi Ward<br />
+            Kinondoni District, Dar es Salaam<br />
+            P.O. Box 14125<br />
+            Tanzania
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-ink-100 p-6">
+          <h3 className="text-sm font-medium text-ink-500 mb-2">Director</h3>
+          <p className="text-lg font-semibold text-ink-900">Adam Nzinza</p>
+        </div>
+      </section>
+
       {/* Contact */}
       <section className="rounded-xl bg-ink-50 p-8 text-center">
         <h2 className="text-2xl font-semibold text-ink-900 mb-2">Get in Touch</h2>

@@ -85,6 +85,9 @@ export function Footer() {
           <Link href="/terms" className="hover:text-ink-700 transition-colors underline-offset-2 hover:underline">
             {t('footer.terms')}
           </Link>
+          <Link href="/privacy" className="hover:text-ink-700 transition-colors underline-offset-2 hover:underline">
+            {t('footer.privacy')}
+          </Link>
         </div>
       </div>
     </footer>

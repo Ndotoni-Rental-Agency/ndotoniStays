@@ -99,6 +99,7 @@ export const en: Record<string, string> = {
   'footer.whatsapp': 'WhatsApp Us',
   'footer.copyright': '© {year} Ndotoni Technologies Limited. All rights reserved.',
   'footer.terms': 'Terms of Service',
+  'footer.privacy': 'Privacy Policy',
 
   // Property
   'property.perNight': 'night',

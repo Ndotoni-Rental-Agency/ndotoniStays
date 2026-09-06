@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { PhoneInput } from '@/components/ui/PhoneInput';
@@ -28,6 +29,12 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  // Always require a fresh, affirmative agreement each time the sign-up view is shown.
+  useEffect(() => {
+    if (view === 'signUp') setAgreedToTerms(false);
+  }, [view]);
 
   if (!isOpen) return null;
 
@@ -141,7 +148,13 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
         {view === 'signIn' && (
           <>
             <h2 className="text-2xl font-bold text-ink-900 mb-1">Welcome back</h2>
-            <p className="text-sm text-ink-500 mb-6">Sign in to book and manage your stays</p>
+            <p className="text-sm text-ink-500 mb-4">Sign in to book and manage your stays</p>
+            <p className="text-xs text-ink-400 mb-4">
+              By continuing, you agree to our{' '}
+              <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" target="_blank" className="text-brand-600 hover:underline">Privacy Policy</Link>.
+            </p>
 
             {/* Google */}
             <button
@@ -241,11 +254,27 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
         {view === 'signUp' && (
           <>
             <h2 className="text-2xl font-bold text-ink-900 mb-1">Create an account</h2>
-            <p className="text-sm text-ink-500 mb-6">Sign up to start booking stays</p>
+            <p className="text-sm text-ink-500 mb-4">Sign up to start booking stays</p>
+
+            <label className="mb-4 flex items-start gap-2.5 text-sm text-ink-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500 flex-shrink-0"
+              />
+              <span>
+                I agree to ndotoni Stays&apos;{' '}
+                <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>
+                {' '}and{' '}
+                <Link href="/privacy" target="_blank" className="text-brand-600 hover:underline">Privacy Policy</Link>.
+              </span>
+            </label>
 
             <button
               onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors mb-4"
+              disabled={!agreedToTerms}
+              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -258,7 +287,8 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
             <button
               onClick={handleAppleSignIn}
-              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors mb-4"
+              disabled={!agreedToTerms}
+              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
@@ -268,7 +298,8 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
             <button
               onClick={handleFacebookSignIn}
-              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors mb-4"
+              disabled={!agreedToTerms}
+              className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
               style={{ display: process.env.NEXT_PUBLIC_ENABLE_FACEBOOK_SIGNIN === 'true' ? undefined : 'none' }}
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
@@ -306,7 +337,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
               {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-              <button type="submit" disabled={loading} className="btn-primary w-full">
+              <button type="submit" disabled={loading || !agreedToTerms} className="btn-primary w-full">
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>

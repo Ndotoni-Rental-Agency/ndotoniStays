@@ -140,12 +140,14 @@ export default function TermsOfServicePage() {
               <h3 className="text-xl font-semibold text-ink-900 mb-3">6.1 Service Fees</h3>
               <p className="text-ink-700 mb-4">
                 Guests pay the nightly rate, any cleaning fee set by the host, and a service fee (shown
-                as a percentage of the subtotal before you confirm a booking). All fees are disclosed
-                upfront — nothing is added at check-in — and are quoted in Tanzanian Shillings (TZS)
-                unless stated otherwise. Ndotoni does not currently charge hosts a commission to list or
-                accept bookings, but we may introduce host-side fees in the future with prior notice.
-                Except where required by law or expressly stated in these Terms, service fees are
-                non-refundable once a booking has been confirmed.
+                as a percentage of the subtotal before you confirm a booking). Ndotoni also charges hosts
+                a commission, deducted from the payout for each completed booking. The applicable guest
+                service fee and host commission rates are shown before you confirm a booking (guests) or
+                in your host dashboard (hosts); rates may vary by listing and may change at any time with
+                notice. All fees are disclosed upfront — nothing is added at check-in — and are quoted in
+                Tanzanian Shillings (TZS) unless stated otherwise. Except where required by law or
+                expressly stated in these Terms, service fees are non-refundable once a booking has been
+                confirmed.
               </p>
 
               <h3 className="text-xl font-semibold text-ink-900 mb-3">6.2 Payment Processing</h3>
@@ -164,8 +166,9 @@ export default function TermsOfServicePage() {
 
               <h3 className="text-xl font-semibold text-ink-900 mb-3 mt-4">6.3 Host Payouts</h3>
               <p className="text-ink-700 mb-4">
-                Hosts receive payouts for completed bookings via the payout method they set up in their
-                host dashboard. Payout timing and method may vary and are subject to verification checks.
+                Hosts receive payouts for completed bookings, net of Ndotoni's commission, via the payout
+                method they set up in their host dashboard. Payout timing and method may vary and are
+                subject to verification checks.
               </p>
             </section>
 
@@ -475,7 +478,7 @@ export default function TermsOfServicePage() {
               <ul className="list-disc pl-6 space-y-2 text-ink-700 mb-4">
                 <li>Bookings on your listing are instant — a guest's booking is confirmed automatically, without a host approval step</li>
                 <li>You set your own nightly rate, cleaning fee, minimum stay, house rules, check-in instructions, and cancellation policy</li>
-                <li>Ndotoni earns revenue by charging guests a service fee. Hosts are not currently charged a commission to list or host</li>
+                <li>Ndotoni earns revenue by charging guests a service fee and by deducting a commission from your payout for each completed booking; the applicable rate is shown in your host dashboard and may change at any time with notice</li>
                 <li>You confirm that you are the legal owner or an authorized manager of the property being listed, and that you have the legal right to offer it for short-term accommodation</li>
                 <li>You agree to keep your listing's availability, pricing, and condition accurate and up to date</li>
                 <li>You are solely responsible for complying with any local permits, licensing, or tax obligations that apply to short-term rentals in your area</li>

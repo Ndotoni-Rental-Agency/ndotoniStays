@@ -12,6 +12,7 @@ import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { PropertyGroupUnits } from '@/components/property/PropertyGroupUnits';
+import { AdminContactCard } from '@/components/property/AdminContactCard';
 import { usePropertyCoordinates } from '@/hooks/usePropertyCoordinates';
 
 // Not yet in the generated ShortTermProperty type — see queries.ts note on getShortTermProperty.
@@ -98,6 +99,7 @@ export function PropertyDetailClient() {
         {/* Left: Property info */}
         <div className="lg:col-span-2">
           <PropertyInfo property={property} />
+          <AdminContactCard propertyId={property.propertyId} />
           {property.groupId && (
             <PropertyGroupUnits groupId={property.groupId} currentPropertyId={property.propertyId} />
           )}

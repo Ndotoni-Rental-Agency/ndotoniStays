@@ -274,6 +274,7 @@ export const en: Record<string, string> = {
   'create.location.ward': 'Ward / Neighbourhood',
   'create.location.wardPlaceholder': 'e.g., Msasani, Mikocheni, Masaki',
   'create.location.selectWard': 'Select Ward',
+  'create.location.selectStreet': 'Select Street',
   'create.location.typeManually': 'Type manually',
   'create.location.selectFromList': 'Select from list',
   'create.location.street': 'Street (mtaa)',

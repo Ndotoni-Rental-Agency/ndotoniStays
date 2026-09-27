@@ -303,22 +303,36 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">District / Area</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">District</label>
             <input
               type="text"
               value={form.district}
               onChange={(e) => onUpdate('district', e.target.value)}
-              placeholder="e.g. Msasani, Mikocheni"
+              placeholder="e.g. Kinondoni, Ubungo"
               className="input text-base"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">Street address</label>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">
+              Ward (Kata) <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={form.ward}
+              onChange={(e) => onUpdate('ward', e.target.value)}
+              placeholder="e.g. Sinza, Mikocheni"
+              className="input text-base"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-ink-700 mb-1.5">
+              Street (Mtaa) <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={form.street}
               onChange={(e) => onUpdate('street', e.target.value)}
-              placeholder="Street name and number"
+              placeholder="e.g. Mtaa wa Mori"
               className="input text-base"
             />
           </div>

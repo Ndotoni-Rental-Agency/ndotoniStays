@@ -326,6 +326,7 @@ export type ShortTermAddress = {
   postalCode?: string | null,
   region: string,
   street: string,
+  ward?: string | null,
 };
 
 export enum CancellationPolicy {
@@ -751,6 +752,8 @@ export type CreateShortTermPropertyDraftInput = {
   cleaningFee?: number | null,
   currency: string,
   district: string,
+  ward?: string | null,
+  street?: string | null,
   googleMapsLink?: string | null,
   guestEmail?: string | null,
   guestPhoneNumber?: string | null,

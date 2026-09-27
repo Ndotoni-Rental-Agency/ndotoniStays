@@ -549,6 +549,8 @@ export type CreateShortTermPropertyDraftInput = {
   region: Scalars['String']['input'];
   title: Scalars['String']['input'];
   videos?: InputMaybe<Array<Scalars['String']['input']>>;
+  street?: InputMaybe<Scalars['String']['input']>;
+  ward?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateShortTermPropertyInput = {
@@ -2364,6 +2366,7 @@ export type ShortTermAddress = {
   postalCode?: Maybe<Scalars['String']['output']>;
   region: Scalars['String']['output'];
   street: Scalars['String']['output'];
+  ward?: Maybe<Scalars['String']['output']>;
 };
 
 export type ShortTermAddressInput = {

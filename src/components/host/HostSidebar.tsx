@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { listMyShortTermProperties, listPropertyBookings } from '@/graphql/queries';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeModernIcon,
   ClipboardDocumentListIcon,
@@ -15,11 +16,14 @@ import {
   PlusIcon,
   ChatBubbleLeftRightIcon,
   BanknotesIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 
 export function HostSidebar() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const isAdmin = user?.userType === 'ADMIN';
   const [pendingCount, setPendingCount] = useState(0);
 
   const fetchPendingCount = useCallback(async () => {
@@ -70,6 +74,8 @@ export function HostSidebar() {
     { name: t('host.nav.reviews'), href: '/host/reviews', icon: StarIcon, badge: 0 },
     { name: t('host.nav.payouts'), href: '/host/payouts', icon: BanknotesIcon, badge: 0 },
     { name: t('host.nav.whatsapp'), href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
+    // Admin only: list a property on behalf of an owner with no account
+    ...(isAdmin ? [{ name: t('host.nav.listForOwner'), href: '/host/managed/new', icon: UserPlusIcon, badge: 0 }] : []),
   ];
 
   return (

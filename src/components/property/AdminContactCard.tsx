@@ -17,6 +17,9 @@ const getPropertyContacts = /* GraphQL */ `
       email
       phoneNumber
       whatsappNumber
+      managedBy
+      listedByAdminName
+      listedAt
     }
   }
 `;
@@ -29,6 +32,9 @@ interface PropertyContact {
   email?: string | null;
   phoneNumber?: string | null;
   whatsappNumber?: string | null;
+  managedBy?: string | null;
+  listedByAdminName?: string | null;
+  listedAt?: string | null;
 }
 
 export function AdminContactCard({ propertyId }: { propertyId: string }) {
@@ -86,6 +92,12 @@ export function AdminContactCard({ propertyId }: { propertyId: string }) {
               <EnvelopeIcon className="h-4 w-4 text-ink-500" />
               {contact.email}
             </a>
+          )}
+          {contact.managedBy && (
+            <p className="pt-2 mt-2 border-t border-amber-200 text-xs text-ink-600">
+              Managed listing · listed by {contact.listedByAdminName || 'an admin'}
+              {contact.listedAt && ` on ${new Date(contact.listedAt).toLocaleDateString()}`}
+            </p>
           )}
         </div>
       )}

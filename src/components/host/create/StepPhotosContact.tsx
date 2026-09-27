@@ -11,9 +11,11 @@ import { StepProps } from './types';
 
 interface Props extends StepProps {
   error: string | null;
+  /** Hide the lister's own phone field (admin managed listings collect owner contact separately) */
+  hideContact?: boolean;
 }
 
-export function StepPhotosContact({ form, updateField, setForm, error }: Props) {
+export function StepPhotosContact({ form, updateField, setForm, error, hideContact }: Props) {
   const { t, language } = useLanguage();
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const totalMedia = form.images.length + form.videos.length;
@@ -110,6 +112,7 @@ export function StepPhotosContact({ form, updateField, setForm, error }: Props) 
       </div>
 
       {/* Phone */}
+      {!hideContact && (
       <div className="border-t border-ink-100 pt-8 max-w-md">
         <label className="block text-sm font-medium text-ink-700 mb-2">
           {t('create.photos.phone')} <span className="text-red-500">*</span>
@@ -125,6 +128,7 @@ export function StepPhotosContact({ form, updateField, setForm, error }: Props) 
           <p className="text-sm text-amber-600 mt-1">{t('create.photos.phoneInvalid')}</p>
         )}
       </div>
+      )}
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-600">

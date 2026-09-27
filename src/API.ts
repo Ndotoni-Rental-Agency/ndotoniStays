@@ -9260,3 +9260,24 @@ export type OnPropertyUpdatedSubscription = {
     timestamp: string,
   } | null,
 };
+
+// ─── Trust & Safety: reports ───────────────────────────────────────────────
+
+export type ReportPropertyInput = {
+  details?: string | null,
+  propertyId: string,
+  propertyTitle?: string | null,
+  reason: string,
+};
+
+export type ReportPropertyMutationVariables = {
+  input: ReportPropertyInput,
+};
+
+export type ReportPropertyMutation = {
+  reportProperty:  {
+    __typename: "SuccessResponse",
+    message?: string | null,
+    success: boolean,
+  },
+};

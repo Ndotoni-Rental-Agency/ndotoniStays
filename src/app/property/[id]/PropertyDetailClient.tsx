@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { SearchX } from 'lucide-react';
+import { Flag, SearchX } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getShortTermProperty } from '@/graphql/queries';
 import { ShortTermProperty } from '@/API';
@@ -14,6 +14,10 @@ import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
 import { PropertyGroupUnits } from '@/components/property/PropertyGroupUnits';
 import { AdminContactCard } from '@/components/property/AdminContactCard';
 import { usePropertyCoordinates } from '@/hooks/usePropertyCoordinates';
+import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Not yet in the generated ShortTermProperty type — see queries.ts note on getShortTermProperty.
 type PropertyWithGroup = ShortTermProperty & { groupId?: string | null };
@@ -24,6 +28,11 @@ export function PropertyDetailClient() {
   const [property, setProperty] = useState<PropertyWithGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [reportAfterSignIn, setReportAfterSignIn] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { t } = useLanguage();
 
   const checkIn = searchParams.get('checkIn') || '';
   const checkOut = searchParams.get('checkOut') || '';
@@ -34,6 +43,24 @@ export function PropertyDetailClient() {
     if (!id) return;
     fetchProperty();
   }, [id]);
+
+  // Resume the report flow once a signed-out user finishes signing in
+  useEffect(() => {
+    if (isAuthenticated && reportAfterSignIn) {
+      setReportAfterSignIn(false);
+      setShowAuth(false);
+      setShowReport(true);
+    }
+  }, [isAuthenticated, reportAfterSignIn]);
+
+  function handleOpenReport() {
+    if (!isAuthenticated) {
+      setReportAfterSignIn(true);
+      setShowAuth(true);
+      return;
+    }
+    setShowReport(true);
+  }
 
   async function fetchProperty() {
     try {
@@ -112,6 +139,14 @@ export function PropertyDetailClient() {
             lng={coords?.lng || 0}
             title={property.title}
           />
+          <button
+            type="button"
+            onClick={handleOpenReport}
+            className="mt-8 inline-flex items-center gap-2 text-sm text-ink-500 hover:text-red-600 underline-offset-4 hover:underline transition-colors"
+          >
+            <Flag className="w-4 h-4" />
+            {t('property.report')}
+          </button>
         </div>
 
         {/* Right: Booking sidebar (sticky) - desktop only */}
@@ -123,6 +158,16 @@ export function PropertyDetailClient() {
           />
         </div>
       </div>
+
+      <ReportPropertyModal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        propertyId={property.propertyId}
+        propertyTitle={property.title}
+      />
+      {/* The pending report isn't cleared on close: AuthModal closes in the same tick it
+          signs the user in, so clearing here would drop the report before the effect sees auth. */}
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
 }

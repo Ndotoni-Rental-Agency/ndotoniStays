@@ -323,7 +323,7 @@ export function StepLocation({ form, setForm }: StepProps) {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-medium text-ink-700">
-                {t('create.location.ward')}
+                {t('create.location.ward')} <span className="text-red-500">*</span>
               </label>
               {wards.length > 0 && (
                 <button
@@ -366,7 +366,7 @@ export function StepLocation({ form, setForm }: StepProps) {
           {/* Street address */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              {t('create.location.street')}
+              {t('create.location.street')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"

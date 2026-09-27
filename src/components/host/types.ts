@@ -5,6 +5,7 @@ export interface PropertyFormData {
   stayCategories: string[];
   region: string;
   district: string;
+  ward: string;
   street: string;
   city: string;
   googleMapsUrl: string;

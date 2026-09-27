@@ -68,6 +68,7 @@ export default function EditPropertyPage() {
     stayCategories: ['NIGHTLY_STAY'],
     region: '',
     district: '',
+    ward: '',
     street: '',
     city: '',
     googleMapsUrl: '',
@@ -124,6 +125,7 @@ export default function EditPropertyPage() {
         stayCategories: p.stayCategories || ['NIGHTLY_STAY'],
         region: p.region || p.address?.region || '',
         district: p.district || p.address?.district || '',
+        ward: p.address?.ward || '',
         street: p.address?.street || '',
         city: p.address?.city || '',
         googleMapsUrl: p.googleMapsUrl || '',
@@ -206,6 +208,7 @@ export default function EditPropertyPage() {
         district: form.district,
         address: {
           street: form.street,
+          ward: form.ward,
           city: form.city,
           region: form.region,
           district: form.district,

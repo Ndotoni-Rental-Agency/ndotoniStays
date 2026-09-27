@@ -1111,6 +1111,7 @@ type ShortTermAddress @aws_api_key @aws_cognito_user_pools {
   postalCode: String @aws_api_key @aws_cognito_user_pools @aws_iam
   region: String! @aws_api_key @aws_cognito_user_pools @aws_iam
   street: String! @aws_api_key @aws_cognito_user_pools @aws_iam
+  ward: String @aws_api_key @aws_cognito_user_pools @aws_iam
 }
 
 type ShortTermProperty @aws_api_key @aws_cognito_user_pools {
@@ -1721,6 +1722,8 @@ input CreateShortTermPropertyDraftInput {
   cleaningFee: Float
   currency: String!
   district: String!
+  ward: String
+  street: String
   googleMapsLink: String
   guestEmail: String
   guestPhoneNumber: String

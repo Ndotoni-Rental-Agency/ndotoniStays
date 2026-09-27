@@ -1735,6 +1735,7 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
       postalCode
       region
       street
+      ward
       __typename
     }
     advanceBookingDays

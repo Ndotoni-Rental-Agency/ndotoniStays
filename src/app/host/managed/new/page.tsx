@@ -115,6 +115,8 @@ export default function ManagedListingPage() {
     !!form.propertyType &&
     form.stayCategories.length > 0 &&
     !!form.district &&
+    !!form.ward.trim() &&
+    !!form.street.trim() &&
     !!form.title &&
     parseFloat(form.nightlyRate) > 0 &&
     form.images.length + form.videos.length > 0;
@@ -157,6 +159,8 @@ export default function ManagedListingPage() {
             stayCategories: form.stayCategories,
             region: form.region,
             district: form.district || form.region,
+            ward: form.ward.trim(),
+            street: form.street.trim(),
             nightlyRate: parseFloat(form.nightlyRate),
             currency: form.currency,
             maxGuests: parseInt(form.maxGuests),

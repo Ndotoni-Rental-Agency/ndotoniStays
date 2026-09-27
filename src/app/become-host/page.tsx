@@ -179,7 +179,7 @@ export default function ListYourPlacePage() {
   function canAdvance(): boolean {
     if (step === 1) return !!form.propertyType;
     if (step === 2) return form.stayCategories.length > 0;
-    if (step === 3) return !!form.region && !!form.district;
+    if (step === 3) return !!form.region && !!form.district && !!form.ward.trim() && !!form.street.trim();
     if (step === 4) return !!form.nightlyRate && parseFloat(form.nightlyRate) > 0;
     return true;
   }
@@ -228,6 +228,8 @@ export default function ListYourPlacePage() {
           stayCategories: form.stayCategories,
           region: form.region,
           district: form.district || form.region,
+          ward: form.ward.trim(),
+          street: form.street.trim(),
           nightlyRate: parseFloat(form.nightlyRate),
           currency: form.currency,
           maxGuests: parseInt(form.maxGuests),

@@ -9,6 +9,10 @@ const MAPS_LINK_PATTERN = /^https?:\/\/.*(goo\.gl|google\.\w+\/maps|maps\.app)/i
  * free listing). Returns a user-facing error message, or null if the form is valid.
  */
 export function validatePropertyForm(form: PropertyFormData): string | null {
+  // People search by ward, and the street tells us exactly where the place is.
+  if (!form.ward?.trim()) return 'Please add the ward (kata) in the Location section.';
+  if (!form.street?.trim()) return 'Please add the street (mtaa) in the Location section.';
+
   const nightlyRate = parseFloat(form.nightlyRate);
   if (!nightlyRate || nightlyRate <= 0) return 'Nightly rate must be greater than 0.';
 

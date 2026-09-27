@@ -164,6 +164,7 @@ function PropertyEditorFull({
     stayCategories: property.stayCategories || ['NIGHTLY_STAY'],
     region: property.region || property.address?.region || '',
     district: property.district || property.address?.district || '',
+    ward: property.address?.ward || '',
     street: property.address?.street || '',
     city: property.address?.city || '',
     googleMapsUrl: property.googleMapsUrl || '',
@@ -238,6 +239,7 @@ function PropertyEditorFull({
         district: form.district,
         address: {
           street: form.street,
+          ward: form.ward,
           city: form.city,
           region: form.region,
           district: form.district,

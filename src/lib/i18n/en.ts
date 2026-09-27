@@ -110,6 +110,7 @@ export const en: Record<string, string> = {
   'property.amenities': 'Amenities',
   'property.description': 'Description',
   'property.location': 'Location',
+  'property.notLive': "This listing isn't live ({status}). It's hidden from search and can't be booked.",
   'property.report': 'Report this listing',
   'property.reportIntro': "Tell us what's wrong with this listing. Our team reviews every report.",
   'property.reportReason': 'Reason',

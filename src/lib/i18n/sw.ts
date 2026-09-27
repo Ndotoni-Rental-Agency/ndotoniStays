@@ -110,6 +110,7 @@ export const sw: Record<string, string> = {
   'property.amenities': 'Huduma',
   'property.description': 'Maelezo',
   'property.location': 'Mahali',
+  'property.notLive': 'Tangazo hili halipo hewani ({status}). Halionekani kwenye utafutaji na haliwezi kuwekewa booking.',
   'property.report': 'Ripoti tangazo hili',
   'property.reportIntro': 'Tuambie tatizo la tangazo hili. Timu yetu hukagua kila ripoti.',
   'property.reportReason': 'Sababu',

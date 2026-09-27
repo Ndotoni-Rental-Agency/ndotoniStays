@@ -107,6 +107,12 @@ export function PropertyDetailClient() {
 
   return (
     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
+      {property.status && property.status !== 'AVAILABLE' && (
+        <div className="mx-4 sm:mx-0 my-4 sm:mt-0 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {t('property.notLive').replace('{status}', property.status)}
+        </div>
+      )}
+
       {/* Gallery — full-bleed on mobile, padded on desktop */}
       <div className="sm:px-0">
         <PropertyGallery images={property.images ?? []} videos={property.videos ?? undefined} title={property.title} />

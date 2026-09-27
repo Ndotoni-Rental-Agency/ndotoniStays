@@ -5,6 +5,8 @@ import { PlusIcon, XMarkIcon, SparklesIcon, BanknotesIcon } from '@heroicons/rea
 import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
 import { PropertyFormData } from './types';
 import { AIService } from '@/lib/ai/AIService';
+import { WardStreetFields } from '@/components/location/WardStreetFields';
+import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
 
 async function reverseGeocodeFromUrl(url: string): Promise<{ region?: string; district?: string } | null> {
   if (!url || !url.startsWith('http')) return null;
@@ -55,7 +57,24 @@ interface Props {
   saving: boolean;
 }
 
+const slug = (s: string) => (s || '').trim().toLowerCase().replace(/[\s_]+/g, '-');
+const titleCase = (s: string) => s.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+const matchOption = (options: string[], value: string) => options.find((o) => slug(o) === slug(value)) ?? value;
+/** Keep a saved value that isn't in the list selectable, rather than showing a blank select. */
+const withSaved = (options: string[], value: string) =>
+  value && !options.some((o) => slug(o) === slug(value)) ? [value, ...options] : options;
+
 export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving }: Props) {
+  const [locations, setLocations] = useState<LocationData | null>(null);
+  useEffect(() => {
+    fetchLocations().then(setLocations).catch(() => setLocations(null));
+  }, []);
+
+  // Saved values may be slugs ('dar-es-salaam') while the lists use names ('DAR-ES-SALAAM').
+  const regionOptions = locations ? Object.keys(locations).sort() : REGIONS;
+  const regionOption = matchOption(regionOptions, form.region);
+  const districtOptions = (locations?.[regionOption] || []).slice().sort();
+  const districtOption = matchOption(districtOptions, form.district);
   const [customAmenity, setCustomAmenity] = useState('');
   const [generatingTitle, setGeneratingTitle] = useState(false);
   const [predictingPrice, setPredictingPrice] = useState(false);
@@ -292,50 +311,40 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Region</label>
             <select
-              value={form.region}
-              onChange={(e) => onUpdate('region', e.target.value)}
+              value={regionOption}
+              onChange={(e) => { onUpdate('region', e.target.value); onUpdate('district', ''); onUpdate('ward', ''); onUpdate('street', ''); }}
               className="input text-base"
             >
               <option value="">Select region</option>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>{r}</option>
+              {withSaved(regionOptions, form.region).map((r) => (
+                <option key={r} value={r}>{titleCase(r)}</option>
               ))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">District</label>
-            <input
-              type="text"
-              value={form.district}
-              onChange={(e) => onUpdate('district', e.target.value)}
-              placeholder="e.g. Kinondoni, Ubungo"
+            <select
+              value={districtOption}
+              onChange={(e) => { onUpdate('district', e.target.value); onUpdate('ward', ''); onUpdate('street', ''); }}
+              disabled={!form.region}
               className="input text-base"
-            />
+            >
+              <option value="">Select district</option>
+              {withSaved(districtOptions, form.district).map((d) => (
+                <option key={d} value={d}>{titleCase(d)}</option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              Ward (Kata) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.ward}
-              onChange={(e) => onUpdate('ward', e.target.value)}
-              placeholder="e.g. Sinza, Mikocheni"
-              className="input text-base"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              Street (Mtaa) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.street}
-              onChange={(e) => onUpdate('street', e.target.value)}
-              placeholder="e.g. Mtaa wa Mori"
-              className="input text-base"
-            />
-          </div>
+          <WardStreetFields
+            region={form.region}
+            district={form.district}
+            ward={form.ward}
+            street={form.street}
+            onChange={(patch) => {
+              if (patch.ward !== undefined) onUpdate('ward', patch.ward);
+              if (patch.street !== undefined) onUpdate('street', patch.street);
+            }}
+          />
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">City</label>
             <input

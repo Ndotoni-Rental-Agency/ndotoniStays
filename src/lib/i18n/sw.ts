@@ -274,6 +274,7 @@ export const sw: Record<string, string> = {
   'create.location.ward': 'Kata',
   'create.location.wardPlaceholder': 'mfano, Msasani, Mikocheni, Masaki',
   'create.location.selectWard': 'Chagua Kata',
+  'create.location.selectStreet': 'Chagua Mtaa',
   'create.location.typeManually': 'Andika mwenyewe',
   'create.location.selectFromList': 'Chagua kutoka orodha',
   'create.location.street': 'Mtaa',

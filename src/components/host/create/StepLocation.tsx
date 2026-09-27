@@ -3,9 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapPin } from 'lucide-react';
 import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
-import { GraphQLClient } from '@/lib/graphql-client';
-import { getWards } from '@/graphql/queries';
 import LocationMapPicker from '@/components/location/LocationMapPicker';
+import { WardStreetFields } from '@/components/location/WardStreetFields';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { StepProps } from './types';
 
@@ -14,11 +13,6 @@ function toTitleCase(str: string): string {
     .split(' ')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');
-}
-
-interface Ward {
-  id: string;
-  name: string;
 }
 
 interface ResolvedLocation {
@@ -142,9 +136,6 @@ export function StepLocation({ form, setForm }: StepProps) {
   const { t } = useLanguage();
   const [locations, setLocations] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [wards, setWards] = useState<Ward[]>([]);
-  const [loadingWards, setLoadingWards] = useState(false);
-  const [wardSearchMode, setWardSearchMode] = useState<'select' | 'custom'>('select');
   const [mapsCoords, setMapsCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [resolvingLink, setResolvingLink] = useState(false);
 
@@ -183,31 +174,6 @@ export function StepLocation({ form, setForm }: StepProps) {
       .finally(() => setLoading(false));
   }, []);
 
-  // Fetch wards when district changes
-  useEffect(() => {
-    if (!form.district) {
-      setWards([]);
-      return;
-    }
-
-    setLoadingWards(true);
-    // The districtId in the GraphQL is typically the district name slugified
-    const districtId = form.district.toLowerCase().replace(/\s+/g, '-');
-    GraphQLClient.executePublic<{ getWards: Ward[] }>(getWards, { districtId })
-      .then((data) => {
-        const fetched = data.getWards || [];
-        setWards(fetched.sort((a, b) => a.name.localeCompare(b.name)));
-        // If no wards found, switch to custom input
-        if (fetched.length === 0) setWardSearchMode('custom');
-        else setWardSearchMode('select');
-      })
-      .catch(() => {
-        setWards([]);
-        setWardSearchMode('custom');
-      })
-      .finally(() => setLoadingWards(false));
-  }, [form.district]);
-
   const regions = useMemo(() => {
     if (!locations) return [];
     return Object.keys(locations).sort();
@@ -224,10 +190,6 @@ export function StepLocation({ form, setForm }: StepProps) {
 
   function handleDistrictChange(district: string) {
     setForm((prev) => ({ ...prev, district, ward: '', street: '', lat: 0, lng: 0 }));
-  }
-
-  function handleWardChange(ward: string) {
-    setForm((prev) => ({ ...prev, ward }));
   }
 
   if (loading) {
@@ -319,63 +281,13 @@ export function StepLocation({ form, setForm }: StepProps) {
             </select>
           </div>
 
-          {/* Ward — dropdown from GraphQL or custom text input */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-medium text-ink-700">
-                {t('create.location.ward')} <span className="text-red-500">*</span>
-              </label>
-              {wards.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setWardSearchMode(wardSearchMode === 'select' ? 'custom' : 'select')}
-                  className="text-xs text-brand-600 hover:text-brand-700"
-                >
-                  {wardSearchMode === 'select' ? t('create.location.typeManually') : t('create.location.selectFromList')}
-                </button>
-              )}
-            </div>
-
-            {loadingWards ? (
-              <div className="h-11 bg-ink-100 rounded-xl animate-pulse" />
-            ) : wardSearchMode === 'select' && wards.length > 0 ? (
-              <select
-                value={form.ward}
-                onChange={(e) => handleWardChange(e.target.value)}
-                disabled={!form.district}
-                className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-base"
-              >
-                <option value="">{t('create.location.selectWard')}</option>
-                {wards.map((w) => (
-                  <option key={w.id} value={w.name}>
-                    {toTitleCase(w.name)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={form.ward}
-                onChange={(e) => handleWardChange(e.target.value)}
-                className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-                placeholder={t('create.location.wardPlaceholder')}
-              />
-            )}
-          </div>
-
-          {/* Street address */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-1.5">
-              {t('create.location.street')} <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={form.street}
-              onChange={(e) => setForm((prev) => ({ ...prev, street: e.target.value }))}
-              className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 placeholder-ink-400 text-base"
-              placeholder={t('create.location.streetPlaceholder')}
-            />
-          </div>
+          <WardStreetFields
+            region={form.region}
+            district={form.district}
+            ward={form.ward}
+            street={form.street}
+            onChange={(patch) => setForm((prev) => ({ ...prev, ...patch }))}
+          />
         </div>
       </div>
 

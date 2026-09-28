@@ -75,7 +75,7 @@ export function HostSidebar() {
     { name: t('host.nav.payouts'), href: '/host/payouts', icon: BanknotesIcon, badge: 0 },
     { name: t('host.nav.whatsapp'), href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
     // Admin only: list a property on behalf of an owner with no account
-    ...(isAdmin ? [{ name: t('host.nav.listForOwner'), href: '/host/managed/new', icon: UserPlusIcon, badge: 0 }] : []),
+    ...(isAdmin ? [{ name: t('host.nav.managed'), href: '/host/managed', icon: UserPlusIcon, badge: 0 }] : []),
   ];
 
   return (

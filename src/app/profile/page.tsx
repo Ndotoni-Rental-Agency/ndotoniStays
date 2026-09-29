@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeMediaType } from '@/lib/media-type';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth, UserProfile } from '@/contexts/AuthContext';
 import { useUpdateProfile } from '@/hooks/useUpdateProfile';
@@ -643,7 +644,7 @@ function ProfileImageUpload({
         getMediaUploadUrl: { uploadUrl: string; fileUrl: string };
       }>(getMediaUploadUrl, {
         fileName: `profile-${Date.now()}.${file.name.split('.').pop()}`,
-        contentType: file.type,
+        contentType: normalizeMediaType(file.type),
       });
 
       const { uploadUrl, fileUrl } = data.getMediaUploadUrl;
@@ -652,7 +653,7 @@ function ProfileImageUpload({
       const response = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': normalizeMediaType(file.type) },
       });
 
       if (!response.ok) throw new Error('Upload failed');

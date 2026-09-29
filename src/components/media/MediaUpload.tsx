@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeMediaType } from '@/lib/media-type';
 import { useState, useCallback, useRef } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getMediaUploadUrl } from '@/graphql/mutations';
@@ -27,7 +28,7 @@ interface UploadingFile {
  * Fall back to extension-based detection.
  */
 function getContentType(file: File): string {
-  if (file.type) return file.type;
+  if (file.type) return normalizeMediaType(file.type);
 
   const ext = file.name.split('.').pop()?.toLowerCase();
   const mimeMap: Record<string, string> = {

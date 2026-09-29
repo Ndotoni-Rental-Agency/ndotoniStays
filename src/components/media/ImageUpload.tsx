@@ -1,5 +1,6 @@
 'use client';
 
+import { normalizeMediaType } from '@/lib/media-type';
 import { useState, useCallback } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { PhotoIcon, XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
@@ -30,7 +31,7 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: Props) {
       // Use public API key — no auth required
       const data = await GraphQLClient.executePublic<{ getMediaUploadUrl: { uploadUrl: string; fileUrl: string } }>(
         getMediaUploadUrl,
-        { fileName: file.name, contentType: file.type }
+        { fileName: file.name, contentType: normalizeMediaType(file.type) }
       );
 
       const { uploadUrl, fileUrl } = data.getMediaUploadUrl;
@@ -39,7 +40,7 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: Props) {
       const response = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
-        headers: { 'Content-Type': file.type },
+        headers: { 'Content-Type': normalizeMediaType(file.type) }, // must match the signed type
       });
 
       if (!response.ok) throw new Error('Upload failed');

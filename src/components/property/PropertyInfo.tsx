@@ -5,6 +5,7 @@ import { ShieldCheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/ou
 import { ShortTermProperty } from '@/API';
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { locationLine } from '@/lib/location/format';
 
 interface Props {
   property: ShortTermProperty;
@@ -37,7 +38,7 @@ export function PropertyInfo({ property }: Props) {
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-ink-500">
           <span className="flex items-center gap-1">
             <MapPinIcon className="h-4 w-4" />
-            {property.district}, {property.region}
+            {locationLine({ street: property.address?.street, ward: property.address?.ward, district: property.district, region: property.region }, 'full')}
           </span>
           {property.maxGuests && (
             <span className="flex items-center gap-1">

@@ -23,6 +23,7 @@ interface ShortTermProperty {
   stayCategories: string[] | null;
   region: string;
   district: string;
+  address?: { ward?: string | null; street?: string | null } | null;
   thumbnail: string;
   images: string[];
   averageRating: number | null;

@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { HostProperty } from './types';
+import { locationLine } from '@/lib/location/format';
 
 interface Props {
   property: HostProperty;
@@ -58,7 +59,7 @@ export function UnitCard({ property, onDelete, deleting, label }: Props) {
         </Link>
         <p className="flex items-center gap-1 text-xs font-medium text-ink-500 mt-1">
           <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{property.district}, {property.region}</span>
+          <span className="truncate">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</span>
         </p>
         <p className="mt-2.5">
           <span className="text-xl font-extrabold text-ink-900 tracking-tight">

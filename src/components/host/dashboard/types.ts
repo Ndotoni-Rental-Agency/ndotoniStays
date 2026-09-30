@@ -3,6 +3,7 @@ export interface HostProperty {
   title: string;
   region: string;
   district: string;
+  address?: { ward?: string | null; street?: string | null } | null;
   nightlyRate: number;
   currency: string;
   thumbnail: string | null;

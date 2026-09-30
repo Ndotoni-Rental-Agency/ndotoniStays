@@ -5,6 +5,7 @@ import { PlusIcon, ArrowRightIcon, MapPinIcon, HomeModernIcon, Squares2X2Icon } 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { CardItem } from './types';
 import { UnitCard } from './UnitCard';
+import { locationLine } from '@/lib/location/format';
 
 interface Props {
   item: CardItem;
@@ -58,7 +59,7 @@ export function ListingCard({ item, onDelete, onAddUnit, deletingId }: Props) {
           <h3 className="text-lg font-bold text-ink-900 tracking-tight truncate">{primary.title}</h3>
           <p className="flex items-center gap-1 text-xs font-medium text-ink-500 mt-1">
             <MapPinIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="truncate">{primary.district}, {primary.region}</span>
+            <span className="truncate">{locationLine({ ward: primary.address?.ward, district: primary.district, region: primary.region })}</span>
           </p>
           <p className="flex items-center gap-1 text-xs font-bold text-brand-600 mt-2.5">
             {t('host.manageUnits')}

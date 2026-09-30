@@ -13,6 +13,7 @@ import { UnitCard } from '@/components/host/dashboard/UnitCard';
 import { AddUnitModal } from '@/components/host/dashboard/AddUnitModal';
 import { HostProperty } from '@/components/host/dashboard/types';
 import toast from 'react-hot-toast';
+import { locationLine } from '@/lib/location/format';
 
 export default function PropertyGroupPage() {
   const params = useParams();
@@ -84,7 +85,7 @@ export default function PropertyGroupPage() {
             <p className="text-sm text-ink-500 mt-0.5">
               {t('host.sameAddressUnits')
                 .replace('{count}', String(units.length))
-                .replace('{location}', `${primary.district}, ${primary.region}`)}
+                .replace('{location}', locationLine({ ward: primary.address?.ward, district: primary.district, region: primary.region }))}
             </p>
           </div>
         </div>

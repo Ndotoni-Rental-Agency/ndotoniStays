@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast, { Toaster } from 'react-hot-toast';
 import { getSafeErrorMessage } from '@/lib/error-utils';
+import { locationLine } from '@/lib/location/format';
 
 const API_BASE = process.env.NEXT_PUBLIC_WHATSAPP_API_URL || '';
 
@@ -116,7 +117,7 @@ export default function TokenEditPage() {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 truncate text-sm">{prop.title}</p>
-                    <p className="text-xs text-gray-500 truncate">{prop.district}, {prop.region}</p>
+                    <p className="text-xs text-gray-500 truncate">{locationLine({ ward: prop.address?.ward, district: prop.district, region: prop.region })}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
                         prop.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'

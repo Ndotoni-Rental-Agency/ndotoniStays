@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { StarIcon, BoltIcon } from '@heroicons/react/24/solid';
 import { formatPrice, getCdnUrl, isImageUrl } from '@/lib/utils';
+import { locationLine } from '@/lib/location/format';
 
 // Tiny 1x1 SVG shimmer placeholder encoded as base64
 const BLUR_PLACEHOLDER =
@@ -15,6 +16,7 @@ interface ShortTermProperty {
   propertyType: string;
   region: string;
   district: string;
+  address?: { ward?: string | null; street?: string | null } | null;
   thumbnail: string;
   images: string[];
   averageRating: number | null;
@@ -83,7 +85,7 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
         </div>
 
         <p className="text-xs text-ink-500 mt-1">
-          {property.district}, {property.region}
+          {locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}
           {property.bedrooms && ` · ${property.bedrooms} bed${property.bedrooms > 1 ? 's' : ''}`}
           {property.bathrooms && ` · ${property.bathrooms} bath`}
           {' · '}{property.maxGuests} guest{property.maxGuests > 1 ? 's' : ''}

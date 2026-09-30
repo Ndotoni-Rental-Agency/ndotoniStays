@@ -16,6 +16,7 @@ import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
 import { SERVICE_FEE_ENABLED } from '@/constants/pricing';
+import { locationLine } from '@/lib/location/format';
 
 type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
@@ -377,7 +378,7 @@ export default function BookingPage() {
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
-                <p className="text-xs text-ink-500 mt-0.5">{property.district}, {property.region}</p>
+                <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
                 <p className="text-xs text-ink-500 mt-1">
                   {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
                   {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -478,7 +479,7 @@ export default function BookingPage() {
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
-            <p className="text-xs text-ink-500 mt-0.5">{property.district}, {property.region}</p>
+            <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
             <p className="text-xs text-ink-500 mt-1">
               {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
               {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}

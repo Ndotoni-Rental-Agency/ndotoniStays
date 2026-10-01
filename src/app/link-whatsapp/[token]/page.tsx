@@ -18,10 +18,15 @@ const LINK_WHATSAPP = /* GraphQL */ `mutation LinkWhatsAppWithToken($token: Stri
   linkWhatsAppWithToken(token: $token) { success message }
 }`;
 
+const APP_STORE = 'https://apps.apple.com/us/app/ndotoni/id6767931205';
+const PLAY_STORE = 'https://play.google.com/store/apps/details?id=com.ndotoni.app';
+
 type Status = 'signin' | 'linking' | 'done' | 'error';
 
 const COPY = {
   en: {
+    appTitle: 'Prefer the app?',
+    appBody: 'Install the Ndotoni app, then tap the link in WhatsApp again: it opens in the app.',
     title: 'Link your WhatsApp',
     intro: 'Sign in or create an account to link this WhatsApp number. Your listing will appear in your account, and booking updates will come to you on WhatsApp.',
     signIn: 'Sign in',
@@ -35,6 +40,8 @@ const COPY = {
     home: 'Back to ndotoniStays',
   },
   sw: {
+    appTitle: 'Unapendelea app?',
+    appBody: 'Pakua app ya Ndotoni, kisha bonyeza kiungo kwenye WhatsApp tena: kitafunguka kwenye app.',
     title: 'Unganisha WhatsApp yako',
     intro: 'Ingia au fungua akaunti ili kuunganisha namba hii ya WhatsApp. Nyumba yako itaonekana kwenye akaunti yako, na taarifa za booking zitakuja kwako WhatsApp.',
     signIn: 'Ingia',
@@ -109,6 +116,15 @@ export default function LinkWhatsAppPage() {
             <div className="space-y-3">
               <button onClick={() => setAuthView('signIn')} className="btn-primary w-full">{c.signIn}</button>
               <button onClick={() => setAuthView('signUp')} className="w-full text-sm font-semibold text-brand-700 hover:underline">{c.signUp}</button>
+            </div>
+            {/* People without the app: install it, and the same WhatsApp link opens there next time */}
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <p className="text-sm font-semibold text-ink-900 mb-1">📱 {c.appTitle}</p>
+              <p className="text-xs text-ink-500 mb-3">{c.appBody}</p>
+              <div className="flex justify-center gap-3">
+                <a href={APP_STORE} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-ink-900 hover:bg-gray-50">App Store</a>
+                <a href={PLAY_STORE} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-ink-900 hover:bg-gray-50">Google Play</a>
+              </div>
             </div>
           </>
         )}

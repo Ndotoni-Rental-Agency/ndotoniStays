@@ -31,6 +31,10 @@ const COPY = {
     intro: 'Sign in or create an account to link this WhatsApp number. Your listing will appear in your account, and booking updates will come to you on WhatsApp.',
     signIn: 'Sign in',
     signUp: 'Create an account',
+    confirmTitle: 'Link this WhatsApp to your account?',
+    signedInAs: 'Signed in as',
+    confirm: 'Continue',
+    switchAccount: 'Use a different account',
     linking: 'Linking your WhatsApp…',
     done: 'WhatsApp linked',
     goToListings: 'Go to my listings',
@@ -46,6 +50,10 @@ const COPY = {
     intro: 'Ingia au fungua akaunti ili kuunganisha namba hii ya WhatsApp. Nyumba yako itaonekana kwenye akaunti yako, na taarifa za booking zitakuja kwako WhatsApp.',
     signIn: 'Ingia',
     signUp: 'Fungua akaunti',
+    confirmTitle: 'Unganisha WhatsApp hii na akaunti yako?',
+    signedInAs: 'Umeingia kama',
+    confirm: 'Endelea',
+    switchAccount: 'Tumia akaunti nyingine',
     linking: 'Tunaunganisha WhatsApp yako…',
     done: 'WhatsApp imeunganishwa',
     goToListings: 'Nenda kwenye nyumba zangu',
@@ -59,13 +67,34 @@ const COPY = {
 export default function LinkWhatsAppPage() {
   const { token } = useParams<{ token: string }>();
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user, signOut } = useAuth();
   const { language } = useLanguage();
   const c = COPY[language === 'sw' ? 'sw' : 'en'];
   const [status, setStatus] = useState<Status>('signin');
   const [message, setMessage] = useState('');
   const [authView, setAuthView] = useState<'signIn' | 'signUp' | null>(null);
   const started = useRef(false);
+  // Signed in when the link opened: ask before linking, it may be someone else's session (a shared
+  // computer). Signing in here, including coming back from Google/Apple, already picks the account.
+  const [needsConfirm, setNeedsConfirm] = useState<boolean | null>(null);
+  const freshSignInKey = `ndotoni_link_signin_${token}`;
+
+  useEffect(() => {
+    if (isLoading || needsConfirm !== null) return;
+    const fresh = sessionStorage.getItem(freshSignInKey) === '1';
+    sessionStorage.removeItem(freshSignInKey);
+    setNeedsConfirm(isAuthenticated && !fresh);
+  }, [isLoading, isAuthenticated, needsConfirm, freshSignInKey]);
+
+  const startSignIn = (view: 'signIn' | 'signUp') => {
+    sessionStorage.setItem(freshSignInKey, '1');
+    setAuthView(view);
+  };
+
+  const switchToOtherAccount = () => {
+    signOut();
+    setNeedsConfirm(false);
+  };
 
   // Sign-in with Google/Apple/Facebook leaves the page: come back here afterwards
   useEffect(() => {
@@ -74,9 +103,9 @@ export default function LinkWhatsAppPage() {
     }
   }, [isLoading, isAuthenticated]);
 
-  // Signed in: link once
+  // Signed in and the account is settled: link once
   useEffect(() => {
-    if (isLoading || !isAuthenticated || started.current) return;
+    if (isLoading || !isAuthenticated || needsConfirm !== false || started.current) return;
     started.current = true;
     setAuthView(null);
     setStatus('linking');
@@ -92,12 +121,15 @@ export default function LinkWhatsAppPage() {
       .finally(() => {
         if (typeof window !== 'undefined') localStorage.removeItem('ndotoni_booking_redirect');
       });
-  }, [isLoading, isAuthenticated, token]);
+  }, [isLoading, isAuthenticated, needsConfirm, token]);
+
+  const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(' ');
+  const accountContact = user?.email || user?.phoneNumber || '';
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-white">
       <div className="w-full max-w-md text-center">
-        {(isLoading || status === 'linking') && (
+        {(isLoading || status === 'linking' || (isAuthenticated && needsConfirm === null)) && (
           <>
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4 animate-pulse">
               <LinkIcon className="h-8 w-8 text-brand-600" />
@@ -114,8 +146,8 @@ export default function LinkWhatsAppPage() {
             <h1 className="text-xl font-bold text-ink-900 mb-2">{c.title}</h1>
             <p className="text-sm text-ink-500 mb-6">{c.intro}</p>
             <div className="space-y-3">
-              <button onClick={() => setAuthView('signIn')} className="btn-primary w-full">{c.signIn}</button>
-              <button onClick={() => setAuthView('signUp')} className="w-full text-sm font-semibold text-brand-700 hover:underline">{c.signUp}</button>
+              <button onClick={() => startSignIn('signIn')} className="btn-primary w-full">{c.signIn}</button>
+              <button onClick={() => startSignIn('signUp')} className="w-full text-sm font-semibold text-brand-700 hover:underline">{c.signUp}</button>
             </div>
             {/* People without the app: install it, and the same WhatsApp link opens there next time */}
             <div className="mt-8 pt-6 border-t border-gray-100">
@@ -125,6 +157,24 @@ export default function LinkWhatsAppPage() {
                 <a href={APP_STORE} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-ink-900 hover:bg-gray-50">App Store</a>
                 <a href={PLAY_STORE} target="_blank" rel="noopener noreferrer" className="px-3 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-ink-900 hover:bg-gray-50">Google Play</a>
               </div>
+            </div>
+          </>
+        )}
+
+        {!isLoading && isAuthenticated && needsConfirm === true && status === 'signin' && (
+          <>
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4">
+              <LinkIcon className="h-8 w-8 text-brand-600" />
+            </div>
+            <h1 className="text-xl font-bold text-ink-900 mb-4">{c.confirmTitle}</h1>
+            <div className="rounded-xl border border-gray-200 px-4 py-3 mb-6">
+              <p className="text-xs text-ink-500">{c.signedInAs}</p>
+              {accountName && <p className="text-sm font-semibold text-ink-900">{accountName}</p>}
+              {accountContact && <p className="text-sm text-ink-500 break-all">{accountContact}</p>}
+            </div>
+            <div className="space-y-3">
+              <button onClick={() => setNeedsConfirm(false)} className="btn-primary w-full">{c.confirm}</button>
+              <button onClick={switchToOtherAccount} className="w-full text-sm font-semibold text-brand-700 hover:underline">{c.switchAccount}</button>
             </div>
           </>
         )}

@@ -390,6 +390,11 @@ export const en: Record<string, string> = {
   'wa.link.invalidPhone': 'Please enter a valid phone number with country code (e.g. 255789123456)',
   'wa.link.invalidCode': 'Invalid or expired code. Please try again.',
   'wa.link.unavailable': 'This feature is not available yet. Please try again later.',
+  'wa.link.confirmSent': 'We sent a WhatsApp message to {phone}. Tap "Confirm number" in it, sign in with this account, then come back here.',
+  'wa.link.confirmed': "I've confirmed",
+  'wa.link.checking': 'Checking…',
+  'wa.link.notYet': 'Not linked yet. Tap "Confirm number" in the WhatsApp message first.',
+  'wa.link.success.linked': 'Your WhatsApp number is now linked to this account.',
 
   // Messages / Chat
   'messages.title': 'Messages',

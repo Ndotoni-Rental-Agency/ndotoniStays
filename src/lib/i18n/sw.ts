@@ -390,6 +390,11 @@ export const sw: Record<string, string> = {
   'wa.link.invalidPhone': 'Tafadhali weka nambari sahihi ya simu na nambari ya nchi (mf. 255789123456)',
   'wa.link.invalidCode': 'Msimbo si sahihi au umekwisha. Tafadhali jaribu tena.',
   'wa.link.unavailable': 'Huduma hii haipatikani kwa sasa. Tafadhali jaribu tena baadaye.',
+  'wa.link.confirmSent': 'Tumetuma ujumbe wa WhatsApp kwa {phone}. Bonyeza "Thibitisha namba" ndani yake, ingia kwa akaunti hii, kisha urudi hapa.',
+  'wa.link.confirmed': 'Nimethibitisha',
+  'wa.link.checking': 'Inakagua…',
+  'wa.link.notYet': 'Bado haijaunganishwa. Bonyeza kwanza "Thibitisha namba" kwenye ujumbe wa WhatsApp.',
+  'wa.link.success.linked': 'Namba yako ya WhatsApp sasa imeunganishwa na akaunti hii.',
 
   // Messages / Chat
   'messages.title': 'Ujumbe',

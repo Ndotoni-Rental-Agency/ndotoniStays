@@ -1,5 +1,7 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
+
 import { useState } from 'react';
 import { Smartphone } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
@@ -25,6 +27,7 @@ interface PaymentFlowProps {
  * Used by both /pay/[id] and /booking/[propertyId] pages.
  */
 export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }: PaymentFlowProps) {
+  const { copy, sw } = useStayCopy();
   const [method, setMethod] = useState<PaymentMethod>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -119,8 +122,8 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
     return (
       <div className="text-center py-8">
         <div className="animate-spin h-10 w-10 border-3 border-brand-600 border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-sm font-medium text-ink-900">Waiting for payment...</p>
-        <p className="text-xs text-ink-500 mt-1">Check your phone and confirm the payment prompt</p>
+        <p className="text-sm font-medium text-ink-900">{copy("Waiting for payment...")}</p>
+        <p className="text-xs text-ink-500 mt-1">{copy("Check your phone and confirm the payment prompt")}</p>
         <p className="text-xs text-ink-400 mt-1">Works with all Tanzanian networks: Vodacom (M-Pesa), Airtel, Tigo, Halotel & more</p>
       </div>
     );
@@ -136,8 +139,8 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         >
           <Smartphone className="w-7 h-7 text-ink-600" />
           <div className="flex-1">
-            <p className="font-semibold text-ink-900 group-hover:text-brand-700">Mobile Money</p>
-            <p className="text-xs text-ink-500">All networks: Vodacom, Airtel, Tigo, Halotel & more</p>
+            <p className="font-semibold text-ink-900 group-hover:text-brand-700">{copy("Mobile Money")}</p>
+            <p className="text-xs text-ink-500">{copy("All networks: Vodacom, Airtel, Tigo, Halotel & more")}</p>
           </div>
           <svg className="h-5 w-5 text-ink-300 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </button>
@@ -148,7 +151,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         >
           <span className="text-3xl">💳</span>
           <div className="flex-1">
-            <p className="font-semibold text-ink-900 group-hover:text-brand-700">Card / Apple Pay</p>
+            <p className="font-semibold text-ink-900 group-hover:text-brand-700">{copy("Card / Apple Pay")}</p>
             <p className="text-xs text-ink-500">Visa, Mastercard, Google Pay</p>
           </div>
           <svg className="h-5 w-5 text-ink-300 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
@@ -162,8 +165,9 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
     return (
       <div className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-ink-700 mb-2">Phone number</label>
+          <label htmlFor="payment-phone" className="block text-sm font-medium text-ink-700 mb-2">{copy("Phone number")}</label>
           <input
+            id="payment-phone" autoComplete="tel" inputMode="tel"
             type="tel"
             value={phoneNumber}
             onChange={handlePhoneChange}
@@ -172,7 +176,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
             autoFocus
           />
           {phoneNumber && !isValidPhone && (
-            <p className="text-xs text-red-500 mt-1.5 text-center">Enter a valid Tanzanian number</p>
+            <p className="text-xs text-red-500 mt-1.5 text-center">{copy("Enter a valid Tanzanian number")}</p>
           )}
         </div>
 
@@ -188,8 +192,8 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           className="btn-primary w-full text-base py-4 disabled:opacity-40"
         >
           {isValidPhone
-            ? `Send ${formatPrice(amount, currency)} request`
-            : 'Enter number to pay'
+            ? sw ? `Tuma ombi la ${formatPrice(amount, currency)}` : `Send ${formatPrice(amount, currency)} request`
+            : copy('Enter number to pay')
           }
         </button>
 
@@ -197,7 +201,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           onClick={() => setMethod(null)}
           className="w-full text-center text-sm text-ink-500 hover:text-brand-600 transition-colors py-1"
         >
-          ← Pay with card instead
+          {copy("\u2190 Pay with card instead")}
         </button>
       </div>
     );
@@ -218,7 +222,7 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         onClick={() => setMethod(null)}
         className="w-full text-center text-sm text-ink-500 hover:text-brand-600 transition-colors py-1"
       >
-        ← Pay with mobile money instead
+        {copy("\u2190 Pay with mobile money instead")}
       </button>
     </div>
   );

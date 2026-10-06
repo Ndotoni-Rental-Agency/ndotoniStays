@@ -1,5 +1,7 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
+
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -19,6 +21,7 @@ interface StripePaymentFormProps {
 }
 
 export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onError }: StripePaymentFormProps) {
+  const { copy, sw } = useStayCopy();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { isAuthenticated } = useAuth();
@@ -48,7 +51,7 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
   }, [bookingId, isAuthenticated]);
 
   if (!stripePromise) {
-    return <p role="status" className="rounded-xl bg-ink-50 p-4 text-sm text-ink-600">Card payments are currently unavailable. Please choose mobile money.</p>;
+    return <p role="status" className="rounded-xl bg-ink-50 p-4 text-sm text-ink-600">{copy("Card payments are currently unavailable. Please choose mobile money.")}</p>;
   }
 
   if (loading) {
@@ -147,6 +150,7 @@ function CheckoutForm({
   onSuccess: () => void;
   onError: (message: string) => void;
 }) {
+  const { copy } = useStayCopy();
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -197,7 +201,7 @@ function CheckoutForm({
         {isProcessing ? (
           <span className="flex items-center justify-center gap-2">
             <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-            Processing...
+            {copy("Processing...")}
           </span>
         ) : (
           `Pay ${currency} ${formattedAmount}`

@@ -8,6 +8,7 @@ import { getShortTermProperty } from '@/graphql/queries';
 import { ShortTermProperty } from '@/API';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
+import { MobileBookingBar } from '@/components/property/MobileBookingBar';
 import { BookingSidebar } from '@/components/property/BookingSidebar';
 import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PropertyLocationMap } from '@/components/property/PropertyLocationMap';
@@ -106,7 +107,7 @@ export function PropertyDetailClient() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
+    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8 pb-24 lg:pb-8">
       {property.status && property.status !== 'AVAILABLE' && (
         <div className="mx-4 sm:mx-0 my-4 sm:mt-0 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {t('property.notLive').replace('{status}', property.status)}
@@ -119,7 +120,7 @@ export function PropertyDetailClient() {
       </div>
 
       {/* Mobile booking card - shown above property details on small screens */}
-      <div className="mt-6 px-4 sm:px-0 lg:hidden">
+      <div id="mobile-booking" tabIndex={-1} className="scroll-mt-24 mt-6 px-4 sm:px-0 lg:hidden">
         <BookingSidebar
           property={property}
           initialCheckIn={checkIn}
@@ -165,6 +166,7 @@ export function PropertyDetailClient() {
         </div>
       </div>
 
+      <MobileBookingBar nightlyRate={property.nightlyRate} currency={property.currency} />
       <ReportPropertyModal
         isOpen={showReport}
         onClose={() => setShowReport(false)}

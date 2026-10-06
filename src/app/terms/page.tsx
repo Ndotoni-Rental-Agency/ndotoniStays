@@ -172,7 +172,7 @@ export default function TermsOfServicePage() {
               </p>
             </section>
 
-            <section className="mb-8">
+            <section id="cancellations" className="mb-8 scroll-mt-24">
               <h2 className="text-2xl font-semibold text-ink-900 mb-4">7. Cancellations and Refunds</h2>
               <p className="text-ink-700 mb-4">
                 Each listing has a cancellation policy set by the host — Flexible, Moderate, or Strict.

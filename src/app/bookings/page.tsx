@@ -1,5 +1,7 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -28,6 +30,7 @@ const getPropertyImages = /* GraphQL */ `
 import { CalendarDaysIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { AuthModal } from '@/components/auth/AuthModal';
 import { ReviewModal, ReviewFormData } from '@/components/booking/ReviewModal';
 
 interface BookingProperty {
@@ -73,19 +76,16 @@ const STATUS_BADGE: Record<string, { label: string; classes: string }> = {
 
 export default function MyBookingsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { copy, sw } = useStayCopy();
   const router = useRouter();
+  const [showAuth, setShowAuth] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('upcoming');
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
   const [reviewedBookingIds, setReviewedBookingIds] = useState<Set<string>>(new Set());
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.replace('/');
-    }
-  }, [authLoading, isAuthenticated, router]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -96,6 +96,7 @@ export default function MyBookingsPage() {
   async function fetchBookings() {
     try {
       setLoading(true);
+      setLoadError(false);
       const data = await GraphQLClient.executeAuthenticated<{
         listMyBookings: { bookings: Booking[]; count: number };
       }>(listMyBookings, { limit: 50 });
@@ -131,6 +132,7 @@ export default function MyBookingsPage() {
       setBookings(enriched);
     } catch (err) {
       console.error('Failed to load bookings:', err);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -188,7 +190,7 @@ export default function MyBookingsPage() {
 
   function formatDateShort(dateStr: string) {
     const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return new Date(y, m - 1, d).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' });
   }
 
   function formatPrice(amount: number, currency: string) {
@@ -203,7 +205,8 @@ export default function MyBookingsPage() {
     return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
   const filtered = bookings.filter((b) => {
     const isCancelled = b.status === 'CANCELLED' || b.status === 'DECLINED' || b.status === 'NO_SHOW';
@@ -229,10 +232,19 @@ export default function MyBookingsPage() {
     );
   }
 
+  if (!isAuthenticated) return <div className="mx-auto max-w-lg px-4 py-16 text-center">
+    <CalendarDaysIcon className="mx-auto mb-5 h-12 w-12 text-brand-700" />
+    <h1 className="text-3xl font-semibold tracking-tight text-ink-900">{copy("Your trips, in one place")}</h1>
+    <p className="mt-3 text-sm leading-6 text-ink-500">{copy("Sign in to see your reservations. Booked as a guest? Use the booking link in your email or WhatsApp.")}</p>
+    <button onClick={() => setShowAuth(true)} className="btn-primary mt-6">{copy("Sign in")}</button>
+    <Link href="/search" className="block mt-4 text-sm font-medium text-brand-700">{copy("Explore stays")}</Link>
+    <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+  </div>;
+
   return (
     <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-10">
-      <h1 className="text-2xl sm:text-3xl font-bold text-ink-900 mb-2">Trips</h1>
-      <p className="text-ink-500 text-sm mb-6">Your upcoming and past reservations</p>
+      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 mb-3">{copy("My trips")}</h1>
+      <p className="text-ink-500 text-sm mb-6">{copy("Reservations, payment status and what to do next")}</p>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-8 border-b border-ink-100 pb-0">
@@ -243,11 +255,11 @@ export default function MyBookingsPage() {
             className={cn(
               'px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap touch-manipulation',
               activeTab === tab
-                ? 'border-ink-900 text-ink-900'
+                ? 'border-brand-700 text-brand-800'
                 : 'border-transparent text-ink-500 hover:text-ink-700'
             )}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {copy(tab.charAt(0).toUpperCase() + tab.slice(1))}
           </button>
         ))}
       </div>
@@ -265,18 +277,20 @@ export default function MyBookingsPage() {
             </div>
           ))}
         </div>
+      ) : loadError ? (
+        <div role="alert" className="rounded-2xl border border-ink-200 p-8 text-center"><p className="text-sm text-ink-600">{copy("Your trips could not load. Please try again.")}</p><button onClick={fetchBookings} className="btn-primary mt-4">{copy("Try again")}</button></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-16 rounded-3xl border border-ink-200 bg-ink-50">
           <CalendarDaysIcon className="h-16 w-16 text-ink-200 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-ink-700 mb-2">
-            {activeTab === 'upcoming' ? 'No trips planned' : activeTab === 'past' ? 'No past trips' : 'No cancellations'}
+            {copy(activeTab === 'upcoming' ? 'No trips planned' : activeTab === 'past' ? 'No past trips' : 'No cancellations')}
           </h2>
           <p className="text-ink-400 text-sm mb-6">
-            {activeTab === 'upcoming' && 'Time to explore! Find a place to stay.'}
+            {activeTab === 'upcoming' && copy('Time to explore! Find a place to stay.')}
           </p>
           {activeTab === 'upcoming' && (
             <Link href="/search" className="btn-primary inline-flex items-center gap-2">
-              Start exploring
+              {copy("Start exploring")}
             </Link>
           )}
         </div>
@@ -285,7 +299,7 @@ export default function MyBookingsPage() {
           {filtered.map((booking) => {
             const isPaid = booking.paymentStatus === 'CAPTURED' || booking.paymentStatus === 'AUTHORIZED';
             const badge = booking.status === 'CONFIRMED' && !isPaid
-              ? { label: 'Confirmed — Pay now', classes: 'bg-blue-100 text-blue-700' }
+              ? { label: 'Confirmed — Pay now', classes: 'bg-brand-50 text-brand-800' }
               : booking.status === 'CONFIRMED' && isPaid
               ? { label: 'Confirmed & Paid', classes: 'bg-green-100 text-green-700' }
               : STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
@@ -298,7 +312,7 @@ export default function MyBookingsPage() {
             const days = daysUntil(booking.checkInDate);
 
             return (
-              <div key={booking.bookingId} className="rounded-2xl border border-ink-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+              <div key={booking.bookingId} className="rounded-2xl border border-ink-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                 {/* Property image — large, clickable */}
                 <Link href={`/property/${booking.propertyId}`} className="block relative">
                   <div className="relative aspect-[16/10] bg-ink-100">
@@ -319,14 +333,14 @@ export default function MyBookingsPage() {
                     {/* Status overlay */}
                     <div className="absolute top-4 left-4">
                       <span className={cn('text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm', badge.classes)}>
-                        {badge.label}
+                        {copy(badge.label)}
                       </span>
                     </div>
 
                     {/* Countdown for upcoming */}
                     {activeTab === 'upcoming' && days >= 0 && days <= 30 && (
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-ink-800 text-xs font-semibold px-3 py-1.5 rounded-full">
-                        {days === 0 ? 'Today!' : days === 1 ? 'Tomorrow' : `In ${days} days`}
+                        {days === 0 ? copy('Today!') : days === 1 ? copy('Tomorrow') : sw ? `Baada ya siku ${days}` : `In ${days} days`}
                       </div>
                     )}
 
@@ -358,11 +372,11 @@ export default function MyBookingsPage() {
                   <div className="flex items-center gap-3 mt-auto pt-3 text-xs text-ink-500">
                     <span className="flex items-center gap-1">
                       <CalendarDaysIcon className="h-3.5 w-3.5" />
-                      {booking.numberOfNights} night{booking.numberOfNights > 1 ? 's' : ''}
+                      {booking.numberOfNights} {copy(booking.numberOfNights > 1 ? 'nights' : 'night')}
                     </span>
                     <span className="flex items-center gap-1">
                       <UserGroupIcon className="h-3.5 w-3.5" />
-                      {booking.numberOfGuests} guest{booking.numberOfGuests > 1 ? 's' : ''}
+                      {booking.numberOfGuests} {copy(booking.numberOfGuests > 1 ? 'guests' : 'guest')}
                     </span>
                     <span className="ml-auto text-sm font-bold text-ink-900">
                       {formatPrice(booking.pricing.total, booking.pricing.currency)}
@@ -370,6 +384,14 @@ export default function MyBookingsPage() {
                   </div>
                 </div>
 
+                {activeTab === 'upcoming' && (booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+                  <div className="mx-4 sm:mx-5 mb-5 rounded-xl bg-ink-50 p-4">
+                    <p className="text-sm font-semibold text-ink-900">{copy(booking.status === 'PENDING' ? 'Waiting for your host' : isPaid ? 'Your stay is booked' : 'Complete your payment')}</p>
+                    <p className="mt-1 text-xs leading-5 text-ink-500">{copy(booking.status === 'PENDING' ? 'We will notify you when the host responds. Payment follows confirmation.' : isPaid ? 'Keep your booking reference handy and check your messages for arrival details.' : 'The host has confirmed your stay. Continue to payment to secure your dates.')}</p>
+                    <p className="mt-2 break-all text-[11px] text-ink-500">{copy("Booking reference:")} {booking.bookingId}</p>
+                    {booking.status === 'CONFIRMED' && !isPaid && <Link href={`/pay/${booking.bookingId}`} className="btn-primary mt-3 w-full text-sm">{copy("Continue to payment")}</Link>}
+                  </div>
+                )}
                 {/* Review CTA for completed bookings */}
                 {canReview && (
                   <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-0">
@@ -377,7 +399,7 @@ export default function MyBookingsPage() {
                       onClick={() => setReviewingBooking(booking)}
                       className="w-full py-2.5 rounded-xl border-2 border-ink-800 text-xs font-semibold text-ink-800 hover:bg-ink-800 hover:text-white transition-colors touch-manipulation"
                     >
-                      <Star className="w-3.5 h-3.5 inline mr-1" /> Write a review
+                      <Star className="w-3.5 h-3.5 inline mr-1" /> {copy("Write a review")}
                     </button>
                   </div>
                 )}
@@ -390,7 +412,7 @@ export default function MyBookingsPage() {
                       disabled={cancellingId === booking.bookingId}
                       className="w-full py-2.5 rounded-xl border-2 border-red-400 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white transition-colors touch-manipulation disabled:opacity-50"
                     >
-                      {cancellingId === booking.bookingId ? 'Cancelling...' : 'Cancel booking'}
+                      {copy(cancellingId === booking.bookingId ? 'Cancelling...' : 'Cancel booking')}
                     </button>
                   </div>
                 )}

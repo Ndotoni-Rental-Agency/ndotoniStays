@@ -1,6 +1,5 @@
 import { HomeProperties } from '@/components/home/HomeProperties';
 import { HeroSection } from '@/components/home/HeroSection';
-import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { LongTermBanner } from '@/components/home/LongTermBanner';
 import { TrustSection } from '@/components/home/TrustSection';
 import { HowItWorks } from '@/components/home/HowItWorks';
@@ -11,7 +10,6 @@ export default function HomePage() {
     <>
       <HeroSection />
       <HomeProperties />
-      <CategoryGrid />
       <TrustSection />
       <HowItWorks />
       <CTASection />

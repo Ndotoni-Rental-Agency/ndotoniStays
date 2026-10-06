@@ -1,5 +1,7 @@
 "use client";
 
+import { useStayCopy } from "@/hooks/useStayCopy";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BoltIcon } from "@heroicons/react/24/solid";
@@ -32,6 +34,7 @@ export function BookingSidebar({
   initialCheckIn,
   initialCheckOut,
 }: Props) {
+  const { copy, sw } = useStayCopy();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const executeGql = isAuthenticated
@@ -238,7 +241,7 @@ export function BookingSidebar({
           <span className="text-2xl font-bold text-ink-900">
             {formatPrice(property.nightlyRate, property.currency)}
           </span>
-          <span className="text-ink-500 text-sm">/ night</span>
+          <span className="text-ink-500 text-sm">/ {copy("night")}</span>
         </div>
 
         {/* Date & guest inputs */}
@@ -251,8 +254,8 @@ export function BookingSidebar({
                 if (checkOut && val >= checkOut) setCheckOut('');
               }}
               min={minDate}
-              label="Check-in"
-              placeholder="Add date"
+              label={copy("Check-in")}
+              placeholder={copy("Add date")}
               blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
@@ -264,8 +267,8 @@ export function BookingSidebar({
               onChange={setCheckOut}
               minExclusive={checkIn || undefined}
               min={minDate}
-              label="Check-out"
-              placeholder="Add date"
+              label={copy("Check-out")}
+              placeholder={copy("Add date")}
               blockedDates={blockedDates}
               rangeStart={checkIn}
               rangeEnd={checkOut}
@@ -290,7 +293,7 @@ export function BookingSidebar({
 
           <div>
             <label className="text-xs font-medium text-ink-500 block mb-1">
-              Guests
+              {copy("Guests")}
             </label>
             <select
               value={guests}
@@ -302,7 +305,7 @@ export function BookingSidebar({
                 (_, i) => i + 1
               ).map((n) => (
                 <option key={n} value={n}>
-                  {n} {n === 1 ? "guest" : "guests"}
+                  {n} {copy(n === 1 ? "guest" : "guests")}
                 </option>
               ))}
             </select>
@@ -312,7 +315,7 @@ export function BookingSidebar({
         {/* Minimum stay warning */}
         {nights > 0 && nights < minStay && (
           <p className="mt-3 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
-            Minimum stay: {minStay} {minStay === 1 ? "night" : "nights"}
+            {copy("Minimum stay:")} {minStay} {copy(minStay === 1 ? "night" : "nights")}
           </p>
         )}
 
@@ -322,13 +325,13 @@ export function BookingSidebar({
             <div className="flex justify-between text-ink-600">
               <span>
                 {formatPrice(pricing.nightlyRate, pricing.currency)} ×{" "}
-                {pricing.numberOfNights} nights
+                {pricing.numberOfNights} {copy("nights")}
               </span>
               <span>{formatPrice(pricing.subtotal, pricing.currency)}</span>
             </div>
             {pricing.cleaningFee > 0 && (
               <div className="flex justify-between text-ink-600">
-                <span>Cleaning fee</span>
+                <span>{copy("Cleaning fee")}</span>
                 <span>
                   {formatPrice(pricing.cleaningFee, pricing.currency)}
                 </span>
@@ -336,12 +339,12 @@ export function BookingSidebar({
             )}
             {pricing.serviceFee > 0 && (
               <div className="flex justify-between text-ink-600">
-                <span>Service fee</span>
+                <span>{copy("Service fee")}</span>
                 <span>{formatPrice(pricing.serviceFee, pricing.currency)}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
-              <span>Total</span>
+              <span>{copy("Total")}</span>
               <span>{formatPrice(pricing.total, pricing.currency)}</span>
             </div>
           </div>
@@ -363,12 +366,12 @@ export function BookingSidebar({
           className="btn-primary w-full mt-6 gap-2"
         >
           {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
-          {property.instantBookEnabled ? "Reserve & Pay" : "Request to Book"}
+          {copy(property.instantBookEnabled ? "Reserve & Pay" : "Request to Book")}
         </button>
 
         {/* Reassurance */}
         <p className="mt-3 text-center text-xs text-ink-400">
-          You won&apos;t be charged yet
+          {copy("You won't be charged yet")}
         </p>
       </div>
     </div>

@@ -1,5 +1,8 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
+
+import Link from 'next/link';
 import { StarIcon, MapPinIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { ShieldCheckIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { ShortTermProperty } from '@/API';
@@ -20,6 +23,7 @@ function capitalize(name: string): string {
 }
 
 export function PropertyInfo({ property }: Props) {
+  const { copy, sw } = useStayCopy();
   const { navigateToChat } = useChatNavigation();
   const { user } = useAuth();
   const hostName = property.host
@@ -43,7 +47,7 @@ export function PropertyInfo({ property }: Props) {
           {property.maxGuests && (
             <span className="flex items-center gap-1">
               <UserGroupIcon className="h-4 w-4" />
-              Up to {property.maxGuests} guests
+              {copy("Up to")} {property.maxGuests} {copy("guests")}
             </span>
           )}
           {property.bedrooms && (
@@ -58,7 +62,7 @@ export function PropertyInfo({ property }: Props) {
           {property.ratingSummary && property.ratingSummary.totalReviews > 0 && (
             <span className="flex items-center gap-1">
               <StarIcon className="h-4 w-4 text-amber-500" />
-              {property.ratingSummary.averageRating.toFixed(1)} ({property.ratingSummary.totalReviews} reviews)
+              {property.ratingSummary.averageRating.toFixed(1)} ({property.ratingSummary.totalReviews} {copy("reviews")})
             </span>
           )}
         </div>
@@ -78,11 +82,11 @@ export function PropertyInfo({ property }: Props) {
           </div>
         )}
         <div className="flex-1">
-          <p className="text-sm font-medium text-ink-900">Hosted by {hostName}</p>
+          <p className="text-sm font-medium text-ink-900">{copy("Hosted by")} {hostName}</p>
           {property.instantBookEnabled && (
             <p className="text-xs text-brand-600 flex items-center gap-1">
               <ShieldCheckIcon className="h-3.5 w-3.5" />
-              Instant booking available
+              {copy("Instant booking available")}
             </p>
           )}
         </div>
@@ -96,7 +100,7 @@ export function PropertyInfo({ property }: Props) {
             className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
           >
             <ChatBubbleLeftRightIcon className="h-4 w-4" />
-            Message
+            {copy("Message")}
           </button>
         )}
       </div>
@@ -104,7 +108,7 @@ export function PropertyInfo({ property }: Props) {
       {/* Description */}
       {property.description && (
         <div>
-          <h2 className="text-lg font-semibold text-ink-900 mb-2">About this place</h2>
+          <h2 className="text-lg font-semibold text-ink-900 mb-2">{copy("About this place")}</h2>
           <p className="text-ink-600 text-sm leading-relaxed whitespace-pre-line">
             {property.description}
           </p>
@@ -114,7 +118,7 @@ export function PropertyInfo({ property }: Props) {
       {/* Amenities */}
       {property.amenities && property.amenities.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-ink-900 mb-3">What&apos;s included</h2>
+          <h2 className="text-lg font-semibold text-ink-900 mb-3">{copy("What's included")}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {property.amenities.map((amenity) => (
               <span
@@ -131,25 +135,28 @@ export function PropertyInfo({ property }: Props) {
 
       {/* Check-in/out & policies */}
       <div>
-        <h2 className="text-lg font-semibold text-ink-900 mb-3">Things to know</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <h2 className="text-lg font-semibold text-ink-900 mb-3">{copy("Things to know")}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl border border-ink-200 p-5">
           {property.checkInTime && (
             <div className="flex items-start gap-3">
               <ClockIcon className="h-5 w-5 text-ink-400 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-ink-900">Check-in: {property.checkInTime}</p>
+                <p className="text-sm font-medium text-ink-900">{copy("Check-in")}: {property.checkInTime}</p>
                 {property.checkOutTime && (
-                  <p className="text-sm text-ink-500">Check-out: {property.checkOutTime}</p>
+                  <p className="text-sm text-ink-500">{copy("Check-out")}: {property.checkOutTime}</p>
                 )}
               </div>
             </div>
           )}
+          <div className="flex items-start gap-3"><UserGroupIcon className="h-5 w-5 text-ink-400 mt-0.5" /><div><p className="text-sm font-medium text-ink-900">{copy("Guest limit")}</p><p className="text-sm text-ink-500">{property.maxGuests || 1} {copy("guests")}</p></div></div>
+          {property.minimumStay && <div><p className="text-sm font-medium text-ink-900">{copy("Minimum stay")}</p><p className="text-sm text-ink-500">{property.minimumStay} {copy("nights")}</p></div>}
           {property.cancellationPolicy && (
             <div className="flex items-start gap-3">
               <ShieldCheckIcon className="h-5 w-5 text-ink-400 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-ink-900">Cancellation</p>
-                <p className="text-sm text-ink-500 capitalize">{property.cancellationPolicy.toLowerCase()}</p>
+                <p className="text-sm font-medium text-ink-900">{copy("Cancellation")}</p>
+                <p className="text-sm text-ink-500 capitalize">{copy(property.cancellationPolicy.charAt(0) + property.cancellationPolicy.slice(1).toLowerCase())}</p>
+                <Link href="/terms#cancellations" className="mt-1 inline-block text-xs font-medium text-brand-700 underline">{copy("Read cancellation terms")}</Link>
               </div>
             </div>
           )}
@@ -157,11 +164,11 @@ export function PropertyInfo({ property }: Props) {
       </div>
 
       {/* House Rules */}
-      {property.houseRules && property.houseRules.length > 0 && (
+      {((property.houseRules?.length || 0) > 0 || property.allowsPets === false || property.allowsSmoking === false) && (
         <div>
-          <h2 className="text-lg font-semibold text-ink-900 mb-3">House rules</h2>
+          <h2 className="text-lg font-semibold text-ink-900 mb-3">{copy("House rules")}</h2>
           <ul className="space-y-1.5">
-            {property.houseRules.map((rule, i) => (
+            {property.houseRules?.map((rule, i) => (
               <li key={i} className="text-sm text-ink-600 flex items-start gap-2">
                 <span className="text-ink-400">•</span>
                 {rule}
@@ -170,13 +177,13 @@ export function PropertyInfo({ property }: Props) {
             {property.allowsPets === false && (
               <li className="text-sm text-ink-600 flex items-start gap-2">
                 <span className="text-ink-400">•</span>
-                No pets allowed
+                {copy("No pets allowed")}
               </li>
             )}
             {property.allowsSmoking === false && (
               <li className="text-sm text-ink-600 flex items-start gap-2">
                 <span className="text-ink-400">•</span>
-                No smoking
+                {copy("No smoking")}
               </li>
             )}
           </ul>

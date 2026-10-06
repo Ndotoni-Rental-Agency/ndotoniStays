@@ -1,5 +1,9 @@
 'use client';
 
+import { stayCategoryLabel } from '@/lib/stay-categories';
+import { useStayCopy } from '@/hooks/useStayCopy';
+
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Home, SlidersHorizontal, ArrowRight } from 'lucide-react';
@@ -35,9 +39,12 @@ interface ShortTermProperty {
 }
 
 export function SearchContent() {
+  const { copy, sw } = useStayCopy();
   const searchParams = useSearchParams();
   const requestId = useRef(0);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  function revealFilters() {
+    document.getElementById("stay-search-filters")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
   const [properties, setProperties] = useState<ShortTermProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +128,9 @@ export function SearchContent() {
     }
   }
 
+  const allTypesParams = new URLSearchParams(searchParams.toString());
+  allTypesParams.delete("category");
+
   const displayRegion = regionParam
     ? regionParam.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
     : 'Tanzania';
@@ -128,17 +138,18 @@ export function SearchContent() {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-5">
-        <div><p className="text-xs uppercase tracking-[0.18em] font-semibold text-brand-700 mb-3">Find your next stay</p>
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900">A little escape in {displayRegion}.</h1>
-          <p className="mt-3 text-sm text-ink-500">{new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} – {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} · {guests} {guests === 1 ? 'guest' : 'guests'}</p>
+        <div><p className="text-xs uppercase tracking-[0.18em] font-semibold text-brand-700 mb-3">{copy("Find your next stay")}</p>
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900">{sw ? `Pata sehemu ya kukaa ${displayRegion}.` : `A little escape in ${displayRegion}.`}</h1>
+          <p className="mt-3 text-sm text-ink-500">{new Date(`${checkIn}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', {day:'numeric', month:'short'})} – {new Date(`${checkOut}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', {day:'numeric', month:'short'})} · {guests} {copy(guests === 1 ? 'guest' : 'guests')}</p>
         </div>
-        <button className="btn-secondary gap-2 min-h-[44px]" aria-expanded={filtersOpen} aria-controls="stay-search-filters" onClick={() => setFiltersOpen(!filtersOpen)}><SlidersHorizontal size={16} />{filtersOpen ? 'Hide filters' : 'Dates & filters'}</button>
+
       </div>
       <div className="flex flex-wrap gap-2 mb-5">
-        {[propertyType?.replace(/_/g, ' '), stayCategory?.replace(/_/g, ' '), minPrice !== undefined ? `From TSh ${minPrice.toLocaleString()}` : '', maxPrice !== undefined ? `Up to TSh ${maxPrice.toLocaleString()}` : '', bedrooms ? `${bedrooms}+ bedrooms` : '', instantBookOnly ? 'Instant booking' : ''].filter(Boolean).map(label => <button key={label} onClick={() => setFiltersOpen(true)} className="rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-medium text-brand-800">{label}</button>)}
+        {[propertyType?.replace(/_/g, ' '), stayCategory ? stayCategoryLabel(stayCategory) : undefined, minPrice !== undefined ? `From TSh ${minPrice.toLocaleString()}` : '', maxPrice !== undefined ? `Up to TSh ${maxPrice.toLocaleString()}` : '', bedrooms ? `${bedrooms}+ bedrooms` : '', instantBookOnly ? 'Instant booking' : ''].filter(Boolean).map(label => <button key={label} onClick={revealFilters} className="rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-medium text-brand-800">{copy(label || "")}</button>)}
       </div>
-      <div id="stay-search-filters" hidden={!filtersOpen} className="mb-8">
+      <div id="stay-search-filters"  className="mb-8">
       <SearchFilters
+        key={searchParams.toString()}
         region={regionParam || ''}
         checkIn={checkIn}
         checkOut={checkOut}
@@ -152,7 +163,7 @@ export function SearchContent() {
       {/* Results header */}
       <div className="mt-6 mb-4">
         <h2 className="text-sm font-medium text-ink-600" aria-live="polite">
-          {loading ? 'Searching...' : `${properties.length} places loaded · Prices per night`}
+          {loading ? copy('Searching...') : sw ? `${properties.length} sehemu zimepakia · Bei kwa usiku` : `${properties.length} places loaded · Prices per night`}
         </h2>
       </div>
 
@@ -160,7 +171,7 @@ export function SearchContent() {
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-center text-red-600">
           {error}
-          <button onClick={fetchProperties} className="block mx-auto mt-3 underline font-medium">Try again</button>
+          <button onClick={fetchProperties} className="block mx-auto mt-3 underline font-medium">{copy("Try again")}</button>
         </div>
       )}
 
@@ -168,11 +179,12 @@ export function SearchContent() {
       {!loading && !error && properties.length === 0 && (
         <div className="text-center py-16 px-5 rounded-3xl bg-ink-50 border border-ink-100">
           <Home className="w-6 h-6 text-ink-400 mx-auto mb-2" />
-          <h3 className="text-lg font-semibold text-ink-700">No places found</h3>
+          <h3 className="text-lg font-semibold text-ink-700">{copy("No places found")}</h3>
           <p className="text-ink-500 mt-1">
-            Try changing your dates or searching a different area.
+            {copy("Try changing your dates or searching a different area.")}
           </p>
-          <button onClick={() => setFiltersOpen(true)} className="btn-primary mt-6 gap-2">Change dates or area <ArrowRight size={16} /></button>
+          {stayCategory && <Link href={`/search?${allTypesParams}`} className="btn-primary mt-6 gap-2">{sw ? "Tafuta aina zote za sehemu" : "Search all stay types"}</Link>}
+          <button onClick={revealFilters} className="btn-secondary mt-6 gap-2">{copy("Change dates or area")} <ArrowRight size={16} /></button>
         </div>
       )}
 
@@ -209,11 +221,11 @@ export function SearchContent() {
 function getDefaultCheckIn(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().split('T')[0];
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
 function getDefaultCheckOut(): string {
   const d = new Date();
   d.setDate(d.getDate() + 2);
-  return d.toISOString().split('T')[0];
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }

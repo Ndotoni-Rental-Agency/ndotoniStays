@@ -1,5 +1,7 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
+
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -27,6 +29,7 @@ const DEPOSIT_PERCENTAGE = 30;
 export default function BookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const { copy, sw } = useStayCopy();
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -146,15 +149,15 @@ export default function BookingPage() {
   // ═══════════════════════════════════════════════
   async function handleCreateBooking() {
     if (!guestName.trim()) {
-      setError('Please enter your name');
+      setError(copy('Please enter your name'));
       return;
     }
     if (!guestEmail.trim() || !guestEmail.includes('@')) {
-      setError('Please enter a valid email');
+      setError(copy('Please enter a valid email'));
       return;
     }
     if (authChoice === 'guest' && !isValidGuestPhone) {
-      setError('Please enter a valid phone number');
+      setError(copy('Please enter a valid phone number'));
       return;
     }
 
@@ -293,12 +296,12 @@ export default function BookingPage() {
         <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-brand-50 mb-6">
           <CheckCircleIcon className="h-10 w-10 text-brand-600" />
         </div>
-        <h1 className="text-3xl font-bold text-ink-900 mb-3">Booking Confirmed!</h1>
+        <h1 className="text-3xl font-bold text-ink-900 mb-3">{copy("Booking Confirmed!")}</h1>
         <p className="text-ink-500 mb-2"><strong>{property.title}</strong></p>
         <p className="text-ink-500 mb-6">
-          {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-          {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
+          {new Date(`${checkIn}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' })} –{' '}
+          {new Date(`${checkOut}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {' · '}{nights} {copy(nights > 1 ? 'nights' : 'night')} · {guests} {copy(guests > 1 ? 'guests' : 'guest')}
         </p>
         {paymentOption === 'deposit' && (
           <p className="text-sm text-amber-600 bg-amber-50 rounded-xl px-4 py-2 mb-6">
@@ -306,10 +309,12 @@ export default function BookingPage() {
           </p>
         )}
         <p className="text-sm text-ink-400 mb-8">
-          The host will send you check-in details on WhatsApp.
+          {copy("Check your email or WhatsApp for booking and arrival updates.")}
         </p>
+        {bookingId && <div className="rounded-2xl border border-ink-200 bg-ink-50 p-5 mb-6"><p className="text-xs font-medium text-ink-500">{copy("Booking reference:")}</p><p className="mt-2 break-all text-sm font-semibold text-ink-900">{bookingId}</p></div>}
+        {isAuthenticated && <Link href="/bookings" className="btn-primary mb-3 w-full">{copy("View my trips")}</Link>}
         <button onClick={() => router.push('/')} className="btn-primary">
-          Back to Home
+          {copy("Back to Home")}
         </button>
       </div>
     );
@@ -324,10 +329,10 @@ export default function BookingPage() {
         <div className="inline-flex items-center justify-center h-20 w-20 rounded-full bg-red-50 mb-6">
           <ExclamationCircleIcon className="h-10 w-10 text-red-500" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-3">Payment Failed</h1>
+        <h1 className="text-2xl font-bold text-ink-900 mb-3">{copy("Payment Failed")}</h1>
         <p className="text-ink-500 mb-6">{error || 'Something went wrong with your payment.'}</p>
         <button onClick={() => { setStep('confirmation'); setError(''); }} className="btn-primary">
-          Try Again
+          {copy("Try Again")}
         </button>
       </div>
     );
@@ -340,7 +345,7 @@ export default function BookingPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <div className="animate-spin h-12 w-12 border-4 border-brand-600 border-t-transparent rounded-full mx-auto mb-6" />
-        <h2 className="text-xl font-bold text-ink-900 mb-2">Processing Payment</h2>
+        <h2 className="text-xl font-bold text-ink-900 mb-2">{copy("Processing Payment")}</h2>
         <p className="text-ink-500">{paymentMessage || 'Initiating payment...'}</p>
         {paymentMessage && (
           <p className="text-sm text-ink-400 mt-4">This page will update automatically once payment is confirmed.</p>
@@ -360,15 +365,16 @@ export default function BookingPage() {
             <CheckCircleIcon className="h-8 w-8 text-brand-600" />
           </div>
           <h1 className="text-2xl font-bold text-ink-900">
-            {bookingData?.status === 'CONFIRMED' ? 'Booking Confirmed!' : 'Booking Request Sent!'}
+            {copy(bookingData?.status === 'CONFIRMED' ? 'Dates confirmed' : 'Booking Request Sent!')}
           </h1>
           <p className="text-ink-500 mt-1 text-sm">
             {bookingData?.status === 'CONFIRMED'
-              ? 'Complete payment to secure your dates.'
-              : 'The host will confirm availability. You\'ll be notified once confirmed.'}
+              ? copy('Complete payment to secure your dates.')
+              : copy("The host will confirm availability. You'll be notified once confirmed.")}
           </p>
         </div>
 
+        {bookingId && <p className="mb-6 break-all text-center text-xs text-ink-500">{copy('Booking reference:')} {bookingId}</p>}
         <div className="grid grid-cols-1 gap-6">
           {/* Booking summary card */}
           <div className="rounded-3xl border border-ink-200 p-6">
@@ -380,32 +386,32 @@ export default function BookingPage() {
                 <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
                 <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
                 <p className="text-xs text-ink-500 mt-1">
-                  {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-                  {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
+                  {new Date(`${checkIn}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' })} –{' '}
+                  {new Date(`${checkOut}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' })}
+                  {' · '}{nights} {copy(nights > 1 ? 'nights' : 'night')} · {guests} {copy(guests > 1 ? 'guests' : 'guest')}
                 </p>
               </div>
             </div>
 
             <div className="border-t border-ink-100 pt-3 space-y-2 text-sm">
               <div className="flex justify-between text-ink-600">
-                <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} nights</span>
+                <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} {copy("nights")}</span>
                 <span>{formatPrice(subtotal, property.currency)}</span>
               </div>
               {cleaningFee > 0 && (
                 <div className="flex justify-between text-ink-600">
-                  <span>Cleaning fee</span>
+                  <span>{copy("Cleaning fee")}</span>
                   <span>{formatPrice(cleaningFee, property.currency)}</span>
                 </div>
               )}
               {serviceFee > 0 && (
                 <div className="flex justify-between text-ink-600">
-                  <span>Service fee</span>
+                  <span>{copy("Service fee")}</span>
                   <span>{formatPrice(serviceFee, property.currency)}</span>
                 </div>
               )}
               <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
-                <span>Total</span>
+                <span>{copy("Total")}</span>
                 <span>{formatPrice(total, property.currency)}</span>
               </div>
             </div>
@@ -416,7 +422,7 @@ export default function BookingPage() {
             <div className="mt-2">
               <div className="text-center mb-6">
                 <p className="text-2xl font-bold text-ink-900">{formatPrice(total, property.currency)}</p>
-                <p className="text-xs text-ink-500 mt-1">Pay now to secure your dates</p>
+                <p className="text-xs text-ink-500 mt-1">{copy("Pay now to secure your dates")}</p>
               </div>
 
               <PaymentFlow
@@ -445,13 +451,13 @@ export default function BookingPage() {
               <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-3">
                 <span className="text-xl">⏳</span>
               </div>
-              <p className="text-sm text-amber-800 font-semibold mb-2">Almost there! Awaiting host</p>
+              <p className="text-sm text-amber-800 font-semibold mb-2">{copy("Almost there! Awaiting host")}</p>
               <p className="text-xs text-amber-700 leading-relaxed">
-                The host will confirm availability within 1 hour. We&apos;ll notify you via WhatsApp and email when it&apos;s time to pay.
+                {copy("The host will review your request. We'll notify you via WhatsApp and email when it is confirmed and ready for payment.")}
               </p>
               <div className="mt-4 flex items-center justify-center gap-1 text-xs text-amber-600">
                 <span className="inline-block h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>Waiting for response...</span>
+                <span>{copy("Waiting for response...")}</span>
               </div>
             </div>
           )}
@@ -469,11 +475,11 @@ export default function BookingPage() {
   // ═══════════════════════════════════════════════
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-      <button onClick={() => router.push(`/property/${property.propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`)} className="text-sm text-ink-500 hover:text-brand-700 mb-6">← Back to your stay</button>
-      <p className="text-xs uppercase tracking-[0.18em] text-brand-700 font-semibold mb-3">Make it yours</p>
-      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 mb-3">Your next escape, almost booked.</h1>
-      <p className="text-ink-500 text-sm mb-7">Review your stay and add your details to continue.</p>
-      <ol aria-label="Booking steps" className="flex items-center gap-4 border-b border-ink-200 pb-5 mb-8 text-sm"><li className="text-brand-700 font-semibold" aria-current="step">1. Your details</li><li className="text-ink-500">2. Confirmation</li><li className="text-ink-500">3. Payment</li></ol>
+      <button onClick={() => router.push(`/property/${property.propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`)} className="text-sm text-ink-500 hover:text-brand-700 mb-6">{copy("\u2190 Back to your stay")}</button>
+      <p className="text-xs uppercase tracking-[0.18em] text-brand-700 font-semibold mb-3">{copy("Make it yours")}</p>
+      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 mb-3">{copy("Your next escape, almost booked.")}</h1>
+      <p className="text-ink-500 text-sm mb-7">{copy("Review your stay and add your details to continue.")}</p>
+      <ol aria-label="Booking steps" className="flex items-center gap-4 border-b border-ink-200 pb-5 mb-8 text-sm"><li className="text-brand-700 font-semibold" aria-current="step">{copy("1. Your details")}</li><li className="text-ink-500">{copy("2. Confirmation")}</li><li className="text-ink-500">{copy("3. Payment")}</li></ol>
 
       <div className="grid grid-cols-1 gap-6">
         {/* Property summary card */}
@@ -485,9 +491,9 @@ export default function BookingPage() {
             <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
             <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
             <p className="text-xs text-ink-500 mt-1">
-              {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-              {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
+              {new Date(`${checkIn}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' })} –{' '}
+              {new Date(`${checkOut}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'short', day: 'numeric' })}
+              {' · '}{nights} {copy(nights > 1 ? 'nights' : 'night')} · {guests} {copy(guests > 1 ? 'guests' : 'guest')}
             </p>
             {property.instantBookEnabled && (
               <span className="inline-flex items-center gap-1 text-xs text-brand-600 mt-1">
@@ -499,26 +505,26 @@ export default function BookingPage() {
 
         {/* Price breakdown */}
         <div className="rounded-3xl border border-ink-200 p-6">
-          <h3 className="font-semibold text-ink-900 mb-3">Price breakdown</h3>
+          <h3 className="font-semibold text-ink-900 mb-3">{copy("Price breakdown")}</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink-600">
-              <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} nights</span>
+              <span>{formatPrice(property.nightlyRate, property.currency)} × {nights} {copy("nights")}</span>
               <span>{formatPrice(subtotal, property.currency)}</span>
             </div>
             {cleaningFee > 0 && (
               <div className="flex justify-between text-ink-600">
-                <span>Cleaning fee</span>
+                <span>{copy("Cleaning fee")}</span>
                 <span>{formatPrice(cleaningFee, property.currency)}</span>
               </div>
             )}
             {serviceFee > 0 && (
               <div className="flex justify-between text-ink-600">
-                <span>Service fee</span>
+                <span>{copy("Service fee")}</span>
                 <span>{formatPrice(serviceFee, property.currency)}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold text-ink-900 pt-2 border-t border-ink-100">
-              <span>Total</span>
+              <span>{copy("Total")}</span>
               <span>{formatPrice(total, property.currency)}</span>
             </div>
           </div>
@@ -527,7 +533,7 @@ export default function BookingPage() {
         {/* Auth choice — sign in or continue as guest */}
         {authChoice === 'none' && !isAuthenticated && (
           <div className="rounded-3xl border border-ink-200 p-6">
-            <h3 className="font-semibold text-ink-900 mb-3">How would you like to book?</h3>
+            <h3 className="font-semibold text-ink-900 mb-3">{copy("How would you like to book?")}</h3>
             <div className="space-y-2">
               <button
                 onClick={handleSignIn}
@@ -537,8 +543,8 @@ export default function BookingPage() {
                   <svg className="h-5 w-5 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-ink-900">Sign in</p>
-                  <p className="text-xs text-ink-500">Track your bookings and earn rewards</p>
+                  <p className="text-sm font-medium text-ink-900">{copy("Sign in")}</p>
+                  <p className="text-xs text-ink-500">{copy("Track your bookings and earn rewards")}</p>
                 </div>
               </button>
               <button
@@ -549,8 +555,8 @@ export default function BookingPage() {
                   <svg className="h-5 w-5 text-ink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-ink-900">Continue as guest</p>
-                  <p className="text-xs text-ink-500">Just enter your details below</p>
+                  <p className="text-sm font-medium text-ink-900">{copy("Continue as guest")}</p>
+                  <p className="text-xs text-ink-500">{copy("Just enter your details below")}</p>
                 </div>
               </button>
             </div>
@@ -560,11 +566,12 @@ export default function BookingPage() {
         {/* Guest details form (shown after choice or if signed in) */}
         {authChoice !== 'none' && (
           <div className="rounded-3xl border border-ink-200 p-6">
-            <h3 className="font-semibold text-ink-900 mb-3">Your details</h3>
+            <h3 className="font-semibold text-ink-900 mb-3">{copy("Your details")}</h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-ink-500 mb-1">Full name</label>
+                <label htmlFor="booking-name" className="block text-xs font-medium text-ink-500 mb-1">{copy("Full name")}</label>
                 <input
+                  id="booking-name" autoComplete="name"
                   type="text"
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
@@ -574,8 +581,9 @@ export default function BookingPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink-500 mb-1">Email</label>
+                <label htmlFor="booking-email" className="block text-xs font-medium text-ink-500 mb-1">{copy("Email")}</label>
                 <input
+                  id="booking-email" autoComplete="email"
                   type="email"
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
@@ -585,23 +593,23 @@ export default function BookingPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-ink-500 mb-1">Phone number / WhatsApp <span className="text-ink-400 font-normal">(optional)</span></label>
+                <label className="block text-xs font-medium text-ink-500 mb-1">{copy("Phone number / WhatsApp")} <span className="text-ink-400 font-normal">{authChoice === "guest" ? "*" : copy("(optional)")}</span></label>
                 <PhoneInput
                   value={guestPhone}
                   onChange={setGuestPhone}
                   placeholder="712 345 678"
                 />
                 {guestPhone && !isValidGuestPhone && (
-                  <p className="text-xs text-red-500 mt-1">Enter a valid phone number</p>
+                  <p className="text-xs text-red-500 mt-1">{copy("Enter a valid phone number")}</p>
                 )}
-                <p className="text-xs text-ink-400 mt-1">Helps us send booking updates via WhatsApp in addition to email.</p>
+                <p className="text-xs text-ink-400 mt-1">{copy("Helps us send booking updates via WhatsApp in addition to email.")}</p>
               </div>
             </div>
             {authChoice === 'guest' && (
               <p className="text-xs text-ink-400 mt-3">
                 We&apos;ll send your booking confirmation via email and WhatsApp.{' '}
                 <button type="button" onClick={handleSignIn} className="text-brand-600 hover:underline font-medium">
-                  Sign in instead
+                  {copy("Sign in instead")}
                 </button>
               </p>
             )}
@@ -619,10 +627,10 @@ export default function BookingPage() {
         {authChoice !== 'none' && (
           <button
             onClick={handleCreateBooking}
-            disabled={isProcessing || !guestName.trim() || !guestEmail.includes('@')}
+            disabled={isProcessing || !guestName.trim() || !guestEmail.includes('@') || (authChoice === 'guest' && !isValidGuestPhone)}
             className="btn-primary w-full text-base py-4"
           >
-            {isProcessing ? 'Processing...' : property.instantBookEnabled ? 'Proceed to Pay' : 'Send Booking Request'}
+            {copy(isProcessing ? 'Processing...' : property.instantBookEnabled ? 'Proceed to Pay' : 'Send Booking Request')}
           </button>
         )}
 

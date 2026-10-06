@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Moon, Waves, Binoculars, PartyPopper, Camera, Briefcase, type LucideIcon } from 'lucide-react';
+import { StayCategory } from '@/API';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const CATEGORIES: {
@@ -11,7 +12,7 @@ const CATEGORIES: {
   descKey: string;
   icon: LucideIcon;
   image: string;
-  searchParams: string;
+  category: StayCategory;
 }[] = [
   {
     id: 'stays',
@@ -19,7 +20,7 @@ const CATEGORIES: {
     descKey: 'categories.nightlyStays.desc',
     icon: Moon,
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=NIGHTLY_STAY',
+    category: StayCategory.NIGHTLY_STAY,
   },
   {
     id: 'beach',
@@ -27,7 +28,7 @@ const CATEGORIES: {
     descKey: 'categories.beach.desc',
     icon: Waves,
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=BEACH',
+    category: StayCategory.BEACH,
   },
   {
     id: 'safari',
@@ -35,7 +36,7 @@ const CATEGORIES: {
     descKey: 'categories.safari.desc',
     icon: Binoculars,
     image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=SAFARI',
+    category: StayCategory.SAFARI,
   },
   {
     id: 'parties',
@@ -43,7 +44,7 @@ const CATEGORIES: {
     descKey: 'categories.parties.desc',
     icon: PartyPopper,
     image: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=PARTY',
+    category: StayCategory.PARTY,
   },
   {
     id: 'photoshoot',
@@ -51,7 +52,7 @@ const CATEGORIES: {
     descKey: 'categories.photoshoot.desc',
     icon: Camera,
     image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=PHOTOSHOOT',
+    category: StayCategory.PHOTOSHOOT,
   },
   {
     id: 'business',
@@ -59,12 +60,14 @@ const CATEGORIES: {
     descKey: 'categories.business.desc',
     icon: Briefcase,
     image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=600&auto=format&fit=crop',
-    searchParams: 'category=MEETING',
+    category: StayCategory.MEETING,
   },
 ];
 
-export function CategoryGrid() {
+export function CategoryGrid({ availableCategories, searchBase }: { availableCategories: Set<StayCategory>; searchBase: string }) {
   const { t } = useLanguage();
+  const visibleCategories = CATEGORIES.filter(category => availableCategories.has(category.category));
+  if (!visibleCategories.length) return null;
 
   return (
     <section className="py-10 sm:py-16">
@@ -79,10 +82,10 @@ export function CategoryGrid() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
-          {CATEGORIES.map((cat) => (
+          {visibleCategories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/search?${cat.searchParams}`}
+              href={`${searchBase}&category=${cat.category}`}
               className="group relative rounded-2xl overflow-hidden aspect-[4/5] sm:aspect-[3/2]"
             >
               <Image

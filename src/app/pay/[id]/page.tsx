@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { useStayCopy } from '@/hooks/useStayCopy';
+
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { GraphQLClient } from '@/lib/graphql-client';
@@ -14,6 +17,7 @@ type PageState = 'loading' | 'ready' | 'confirmed' | 'failed' | 'already_paid' |
 export default function PayBookingPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const { copy, sw } = useStayCopy();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
 
@@ -35,7 +39,6 @@ export default function PayBookingPage() {
     async function fetchBooking() {
       try {
         const data = await executeGql<{ getBooking: any }>(getBooking, { bookingId });
-        console.log('booking data', data);
         const b = data.getBooking;
 
         if (!b) {
@@ -85,12 +88,14 @@ export default function PayBookingPage() {
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4">
           <CheckCircleIcon className="h-8 w-8 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-2">Already Paid!</h1>
+        <h1 className="text-2xl font-bold text-ink-900 mb-2">{copy("Already Paid!")}</h1>
         <p className="text-ink-500 text-sm mb-6">
           The booking for <strong>{guestName}</strong> has already been paid. The host will share check-in details.
         </p>
+        <div className="mb-6 rounded-2xl border border-ink-200 bg-ink-50 p-5 text-left"><p className="text-xs text-ink-500">{copy('Booking reference:')}</p><p className="mt-2 break-all font-semibold text-ink-900">{bookingId}</p><p className="mt-2 text-sm text-ink-600">{booking?.property?.title || booking?.propertyTitle} · {booking?.checkInDate} – {booking?.checkOutDate}</p></div>
+        {isAuthenticated && <Link href="/bookings" className="btn-primary mb-3 w-full">{copy('View my trips')}</Link>}
         <button onClick={() => router.push('/')} className="btn-primary">
-          Back to Home
+          {copy("Back to Home")}
         </button>
       </div>
     );
@@ -103,16 +108,18 @@ export default function PayBookingPage() {
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-brand-50 mb-4">
           <CheckCircleIcon className="h-8 w-8 text-brand-600" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-2">Payment Confirmed!</h1>
+        <h1 className="text-2xl font-bold text-ink-900 mb-2">{copy("Payment Confirmed!")}</h1>
         <p className="text-ink-500 text-sm mb-2">
           Booking for <strong>{guestName}</strong>
         </p>
         <p className="text-ink-500 text-sm mb-6">
           {booking?.property?.title || booking?.propertyTitle} · {booking?.checkInDate} – {booking?.checkOutDate}
         </p>
-        <p className="text-sm text-ink-400 mb-8">The host will send check-in details via WhatsApp.</p>
+        <p className="text-sm text-ink-400 mb-8">{copy("Check your email or WhatsApp for booking and arrival updates.")}</p>
+        <div className="mb-6 rounded-2xl border border-ink-200 bg-ink-50 p-5 text-left"><p className="text-xs text-ink-500">{copy('Booking reference:')}</p><p className="mt-2 break-all font-semibold text-ink-900">{bookingId}</p><p className="mt-2 text-sm text-ink-600">{booking?.property?.title || booking?.propertyTitle} · {booking?.checkInDate} – {booking?.checkOutDate}</p></div>
+        {isAuthenticated && <Link href="/bookings" className="btn-primary mb-3 w-full">{copy('View my trips')}</Link>}
         <button onClick={() => router.push('/')} className="btn-primary">
-          Back to Home
+          {copy("Back to Home")}
         </button>
       </div>
     );
@@ -125,10 +132,10 @@ export default function PayBookingPage() {
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
           <ExclamationCircleIcon className="h-8 w-8 text-red-500" />
         </div>
-        <h1 className="text-2xl font-bold text-ink-900 mb-2">Payment Failed</h1>
+        <h1 className="text-2xl font-bold text-ink-900 mb-2">{copy("Payment Failed")}</h1>
         <p className="text-ink-500 text-sm mb-6">{error || 'Something went wrong.'}</p>
         <button onClick={() => { setState('ready'); setError(''); }} className="btn-primary">
-          Try Again
+          {copy("Try Again")}
         </button>
       </div>
     );
@@ -139,7 +146,7 @@ export default function PayBookingPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <ExclamationCircleIcon className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-ink-900 mb-2">Cannot process payment</h1>
+        <h1 className="text-xl font-bold text-ink-900 mb-2">{copy("Cannot process payment")}</h1>
         <p className="text-ink-500 text-sm">{error}</p>
       </div>
     );
@@ -148,6 +155,9 @@ export default function PayBookingPage() {
   // Ready — show payment form
   return (
     <div className="mx-auto max-w-sm px-4 py-10 sm:py-16">
+      <p className="text-xs uppercase tracking-[0.16em] font-semibold text-brand-700 mb-3">{copy('Dates confirmed')}</p>
+      <h1 className="text-3xl font-semibold tracking-tight text-ink-900 mb-2">{copy('Complete your payment')}</h1>
+      <p className="mb-6 text-sm text-ink-500">{copy('Complete payment to secure your dates.')}</p>
       {/* Property card */}
       {(booking?.property || booking?.propertyTitle) && (
         <div className="flex items-center gap-3 bg-ink-50 rounded-xl p-3 mb-6">

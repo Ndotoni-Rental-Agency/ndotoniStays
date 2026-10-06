@@ -1,5 +1,6 @@
 'use client';
 
+import { useStayCopy } from '@/hooks/useStayCopy';
 import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +41,8 @@ export default function CalendarDatePicker({
   rangePhaseStart = 'checkIn',
   onRangeComplete,
 }: CalendarDatePickerProps) {
+  const { copy, sw } = useStayCopy();
+  const weekdays = Array.from({length: 7}, (_, index) => new Date(2026, 0, 4 + index).toLocaleDateString(sw ? "sw-TZ" : "en-US", {weekday: "short"}));
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +75,7 @@ export default function CalendarDatePicker({
     // Parse as local date to avoid UTC timezone shift
     const [year, month, day] = dateString.split('-').map(Number);
     const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -232,11 +235,11 @@ export default function CalendarDatePicker({
             {rangeMode && (
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-ink-100 text-xs">
                 <span className={cn('px-3 py-1.5 rounded-lg font-medium', rangePhase === 'checkIn' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-ink-500')}>
-                  {tempCheckIn ? formatDisplayDate(tempCheckIn) : 'Check-in'}
+                  {tempCheckIn ? formatDisplayDate(tempCheckIn) : copy('Check-in')}
                 </span>
                 <span className="text-ink-300">→</span>
                 <span className={cn('px-3 py-1.5 rounded-lg font-medium', rangePhase === 'checkOut' ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-ink-500')}>
-                  {tempCheckOut ? formatDisplayDate(tempCheckOut) : 'Check-out'}
+                  {tempCheckOut ? formatDisplayDate(tempCheckOut) : copy('Check-out')}
                 </span>
               </div>
             )}
@@ -254,7 +257,7 @@ export default function CalendarDatePicker({
               </button>
               {!rangeMode && (
                 <h3 className="text-sm font-semibold text-ink-900">
-                  {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  {currentMonth.toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'long', year: 'numeric' })}
                 </h3>
               )}
               <button
@@ -276,10 +279,10 @@ export default function CalendarDatePicker({
                   return (
                     <div key={offset} className="w-full min-w-0 sm:min-w-[280px]">
                       <h4 className="text-sm font-semibold text-ink-900 text-center mb-3">
-                        {mDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        {mDate.toLocaleDateString(sw ? 'sw-TZ' : 'en-GB', { month: 'long', year: 'numeric' })}
                       </h4>
                       <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1">
-                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                        {weekdays.map(d => (
                           <div key={d} className="text-xs font-medium text-ink-400 text-center">{d}</div>
                         ))}
                       </div>
@@ -294,7 +297,7 @@ export default function CalendarDatePicker({
               /* Single month for non-range mode */
               <>
                 <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
-                  {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                  {weekdays.map(day => (
                     <div key={day} className="text-xs font-medium text-ink-400 text-center">{day}</div>
                   ))}
                 </div>
@@ -308,12 +311,12 @@ export default function CalendarDatePicker({
             <div className="mt-4 pt-3 border-t border-ink-100 flex flex-wrap gap-3 text-xs text-ink-500">
               <div className="flex items-center gap-1">
                 <div className="w-3 h-3 rounded bg-brand-600" />
-                <span>Selected</span>
+                <span>{copy("Selected")}</span>
               </div>
               {blockedDates.size > 0 && (
                 <div className="flex items-center gap-1">
                   <div className="w-3 h-3 rounded bg-red-50 border border-red-200" />
-                  <span>Unavailable</span>
+                  <span>{copy("Unavailable")}</span>
                 </div>
               )}
             </div>

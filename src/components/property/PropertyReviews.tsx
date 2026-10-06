@@ -141,7 +141,7 @@ export function PropertyReviews({ propertyId, ratingSummary }: Props) {
 
       {/* Category breakdown */}
       {ratingSummary && ratingSummary.totalReviews > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mb-8">
           {CATEGORY_LABELS.map(({ key, label, icon: Icon }) => {
             const score = ratingSummary[key as keyof PropertyRatingSummary] as number;
             return (

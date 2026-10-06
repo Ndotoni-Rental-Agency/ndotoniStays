@@ -296,8 +296,8 @@ export default function BookingPage() {
         <h1 className="text-3xl font-bold text-ink-900 mb-3">Booking Confirmed!</h1>
         <p className="text-ink-500 mb-2"><strong>{property.title}</strong></p>
         <p className="text-ink-500 mb-6">
-          {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-          {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+          {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
         </p>
         {paymentOption === 'deposit' && (
@@ -371,17 +371,17 @@ export default function BookingPage() {
 
         <div className="grid grid-cols-1 gap-6">
           {/* Booking summary card */}
-          <div className="rounded-2xl border border-ink-100 p-5">
+          <div className="rounded-3xl border border-ink-200 p-6">
             <div className="flex gap-4 mb-4">
-              <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0">
+              <div className="relative h-24 w-24 rounded-2xl overflow-hidden shrink-0">
                 <Image src={getCdnUrl(property.thumbnail)} alt={property.title} fill className="object-cover" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
                 <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
                 <p className="text-xs text-ink-500 mt-1">
-                  {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-                  {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+                  {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
                 </p>
               </div>
@@ -441,7 +441,7 @@ export default function BookingPage() {
 
           {/* For pending bookings — inform guest to wait */}
           {bookingData?.status === 'PENDING' && (
-            <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-6 text-center">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
               <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-3">
                 <span className="text-xl">⏳</span>
               </div>
@@ -469,20 +469,24 @@ export default function BookingPage() {
   // ═══════════════════════════════════════════════
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
-      <h1 className="text-2xl font-bold text-ink-900 mb-6">Complete your booking</h1>
+      <button onClick={() => router.push(`/property/${property.propertyId}?checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`)} className="text-sm text-ink-500 hover:text-brand-700 mb-6">← Back to your stay</button>
+      <p className="text-xs uppercase tracking-[0.18em] text-brand-700 font-semibold mb-3">Make it yours</p>
+      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900 mb-3">Your next escape, almost booked.</h1>
+      <p className="text-ink-500 text-sm mb-7">Review your stay and add your details to continue.</p>
+      <ol aria-label="Booking steps" className="flex items-center gap-4 border-b border-ink-200 pb-5 mb-8 text-sm"><li className="text-brand-700 font-semibold" aria-current="step">1. Your details</li><li className="text-ink-500">2. Confirmation</li><li className="text-ink-500">3. Payment</li></ol>
 
       <div className="grid grid-cols-1 gap-6">
         {/* Property summary card */}
-        <div className="flex gap-4 p-4 rounded-2xl border border-ink-100">
-          <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0">
+        <div className="flex gap-4 p-5 sm:p-6 rounded-3xl bg-ink-50 border border-ink-100">
+          <div className="relative h-24 w-24 rounded-2xl overflow-hidden shrink-0">
             <Image src={getCdnUrl(property.thumbnail)} alt={property.title} fill className="object-cover" />
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-ink-900 text-sm truncate">{property.title}</h3>
             <p className="text-xs text-ink-500 mt-0.5">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</p>
             <p className="text-xs text-ink-500 mt-1">
-              {new Date(checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-              {new Date(checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+              {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               {' · '}{nights} night{nights > 1 ? 's' : ''} · {guests} guest{guests > 1 ? 's' : ''}
             </p>
             {property.instantBookEnabled && (
@@ -494,7 +498,7 @@ export default function BookingPage() {
         </div>
 
         {/* Price breakdown */}
-        <div className="rounded-2xl border border-ink-100 p-5">
+        <div className="rounded-3xl border border-ink-200 p-6">
           <h3 className="font-semibold text-ink-900 mb-3">Price breakdown</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between text-ink-600">
@@ -522,7 +526,7 @@ export default function BookingPage() {
 
         {/* Auth choice — sign in or continue as guest */}
         {authChoice === 'none' && !isAuthenticated && (
-          <div className="rounded-2xl border border-ink-100 p-5">
+          <div className="rounded-3xl border border-ink-200 p-6">
             <h3 className="font-semibold text-ink-900 mb-3">How would you like to book?</h3>
             <div className="space-y-2">
               <button
@@ -555,7 +559,7 @@ export default function BookingPage() {
 
         {/* Guest details form (shown after choice or if signed in) */}
         {authChoice !== 'none' && (
-          <div className="rounded-2xl border border-ink-100 p-5">
+          <div className="rounded-3xl border border-ink-200 p-6">
             <h3 className="font-semibold text-ink-900 mb-3">Your details</h3>
             <div className="space-y-3">
               <div>

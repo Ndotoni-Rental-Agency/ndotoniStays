@@ -7,7 +7,8 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { createStripePaymentIntent } from '@/graphql/mutations';
 import { useAuth } from '@/contexts/AuthContext';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface StripePaymentFormProps {
   bookingId: string;
@@ -23,6 +24,7 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
+    if (!stripePromise) return;
     async function createIntent() {
       try {
         const executeGql = isAuthenticated
@@ -44,6 +46,10 @@ export function StripePaymentForm({ bookingId, amount, currency, onSuccess, onEr
 
     createIntent();
   }, [bookingId, isAuthenticated]);
+
+  if (!stripePromise) {
+    return <p role="status" className="rounded-xl bg-ink-50 p-4 text-sm text-ink-600">Card payments are currently unavailable. Please choose mobile money.</p>;
+  }
 
   if (loading) {
     return (

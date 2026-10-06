@@ -1,8 +1,8 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Home } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Home, SlidersHorizontal, ArrowRight } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { searchShortTermProperties } from '@/graphql/queries';
 import { PropertyCard } from '@/components/property/PropertyCard';
@@ -36,6 +36,8 @@ interface ShortTermProperty {
 
 export function SearchContent() {
   const searchParams = useSearchParams();
+  const requestId = useRef(0);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [properties, setProperties] = useState<ShortTermProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,9 +59,11 @@ export function SearchContent() {
 
   useEffect(() => {
     fetchProperties();
+    return () => { requestId.current += 1; };
   }, [regionParam, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
 
   async function fetchProperties() {
+    const currentRequest = ++requestId.current;
     setLoading(true);
     setError(null);
     try {
@@ -96,23 +100,24 @@ export function SearchContent() {
         );
 
         const allResults = await Promise.all(queries);
-        // Flatten, deduplicate by propertyId, and shuffle
+        // Keep a stable region order and deduplicate by propertyId.
         const seen = new Set<string>();
         results = allResults.flat().filter((p) => {
           if (seen.has(p.propertyId)) return false;
           seen.add(p.propertyId);
           return true;
         });
-        // Shuffle for variety
-        results.sort(() => Math.random() - 0.5);
+
       }
 
-      setProperties(results);
+      if (currentRequest !== requestId.current) return;
+      setProperties(results.filter(p => !/^HydraTest[-_]/i.test(p.title)));
     } catch (err: any) {
       console.error('Search error:', err);
+      if (currentRequest !== requestId.current) return;
       setError('Failed to load properties. Please try again.');
     } finally {
-      setLoading(false);
+      if (currentRequest === requestId.current) setLoading(false);
     }
   }
 
@@ -122,7 +127,17 @@ export function SearchContent() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-      {/* Filters */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+        <div><p className="text-xs uppercase tracking-[0.18em] font-semibold text-brand-700 mb-3">Find your next stay</p>
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-ink-900">A little escape in {displayRegion}.</h1>
+          <p className="mt-3 text-sm text-ink-500">{new Date(`${checkIn}T12:00:00`).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} – {new Date(`${checkOut}T12:00:00`).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} · {guests} {guests === 1 ? 'guest' : 'guests'}</p>
+        </div>
+        <button className="btn-secondary gap-2 min-h-[44px]" aria-expanded={filtersOpen} aria-controls="stay-search-filters" onClick={() => setFiltersOpen(!filtersOpen)}><SlidersHorizontal size={16} />{filtersOpen ? 'Hide filters' : 'Dates & filters'}</button>
+      </div>
+      <div className="flex flex-wrap gap-2 mb-5">
+        {[propertyType?.replace(/_/g, ' '), stayCategory?.replace(/_/g, ' '), minPrice !== undefined ? `From TSh ${minPrice.toLocaleString()}` : '', maxPrice !== undefined ? `Up to TSh ${maxPrice.toLocaleString()}` : '', bedrooms ? `${bedrooms}+ bedrooms` : '', instantBookOnly ? 'Instant booking' : ''].filter(Boolean).map(label => <button key={label} onClick={() => setFiltersOpen(true)} className="rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-medium text-brand-800">{label}</button>)}
+      </div>
+      <div id="stay-search-filters" hidden={!filtersOpen} className="mb-8">
       <SearchFilters
         region={regionParam || ''}
         checkIn={checkIn}
@@ -133,33 +148,36 @@ export function SearchContent() {
         bedrooms={bedrooms}
       />
 
+      </div>
       {/* Results header */}
       <div className="mt-6 mb-4">
-        <h1 className="text-xl font-semibold text-ink-900">
-          {loading ? 'Searching...' : `${properties.length} places in ${displayRegion}`}
-        </h1>
+        <h2 className="text-sm font-medium text-ink-600" aria-live="polite">
+          {loading ? 'Searching...' : `${properties.length} places loaded · Prices per night`}
+        </h2>
       </div>
 
       {/* Error state */}
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-center text-red-600">
           {error}
+          <button onClick={fetchProperties} className="block mx-auto mt-3 underline font-medium">Try again</button>
         </div>
       )}
 
       {/* Results grid */}
       {!loading && !error && properties.length === 0 && (
-        <div className="text-center py-16">
+        <div className="text-center py-16 px-5 rounded-3xl bg-ink-50 border border-ink-100">
           <Home className="w-6 h-6 text-ink-400 mx-auto mb-2" />
           <h3 className="text-lg font-semibold text-ink-700">No places found</h3>
           <p className="text-ink-500 mt-1">
             Try changing your dates or searching a different area.
           </p>
+          <button onClick={() => setFiltersOpen(true)} className="btn-primary mt-6 gap-2">Change dates or area <ArrowRight size={16} /></button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        {properties.map((property) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-9">
+        {!loading && !error && properties.map((property) => (
           <PropertyCard
             key={property.propertyId}
             property={property}
@@ -171,7 +189,7 @@ export function SearchContent() {
 
       {/* Loading skeleton */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-9">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="animate-pulse rounded-2xl overflow-hidden border border-ink-100">
               <div className="h-48 bg-ink-100" />

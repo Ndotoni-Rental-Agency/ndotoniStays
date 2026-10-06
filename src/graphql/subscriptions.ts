@@ -34,6 +34,7 @@ export const onNewMessage = /* GraphQL */ `subscription OnNewMessage($conversati
       __typename
     }
     readAt
+    isAutomated
     __typename
   }
 }

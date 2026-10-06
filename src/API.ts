@@ -1088,6 +1088,7 @@ export type ChatMessage = {
   replyToSenderName?: string | null,
   reactions?: Array<MessageReaction> | null,
   readAt?: string | null,
+  isAutomated?: boolean | null,
 };
 
 export type TypingIndicatorEvent = {
@@ -5706,6 +5707,7 @@ export type GetConversationMessagesQuery = {
       userIds: Array<string>,
     } > | null,
     readAt?: string | null,
+    isAutomated?: boolean | null,
   } >,
 };
 
@@ -9151,6 +9153,7 @@ export type OnNewMessageSubscription = {
       userIds: Array<string>,
     } > | null,
     readAt?: string | null,
+    isAutomated?: boolean | null,
   } | null,
 };
 

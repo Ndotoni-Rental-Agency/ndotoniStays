@@ -130,6 +130,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       )}
 
       <div className={`flex flex-col max-w-[75%] sm:max-w-[65%] ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+        {/* Replies the Ndotoni Assistant wrote on the owner's behalf */}
+        {!isOwnMessage && message.isAutomated && (
+          <span className="mb-1 px-1 text-xs text-gray-500">Ndotoni Assistant</span>
+        )}
         <div
           onClick={handleClick}
           onContextMenu={handleContextMenu}

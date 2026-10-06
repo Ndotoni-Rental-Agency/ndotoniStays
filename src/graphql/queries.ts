@@ -691,6 +691,7 @@ export const getConversationMessages = /* GraphQL */ `query GetConversationMessa
       __typename
     }
     readAt
+    isAutomated
     __typename
   }
 }

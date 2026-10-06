@@ -67,38 +67,38 @@ export function CategoryGrid() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-10 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-ink-900">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink-900">
             {t('categories.title')}
           </h2>
-          <p className="mt-3 text-lg text-ink-500 max-w-lg mx-auto">
+          <p className="text-sm text-ink-500 max-w-md">
             {t('categories.subtitle')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
           {CATEGORIES.map((cat) => (
             <Link
               key={cat.id}
               href={`/search?${cat.searchParams}`}
-              className="group relative rounded-2xl overflow-hidden aspect-[3/2] sm:aspect-[4/3]"
+              className="group relative rounded-2xl overflow-hidden aspect-[4/5] sm:aspect-[3/2]"
             >
               <Image
                 src={cat.image}
                 alt={t(cat.titleKey)}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6">
+              <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6">
                 <cat.icon className="w-6 h-6 text-white mb-1" />
-                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-brand-300 transition-colors">
+                <h3 className="text-base sm:text-xl font-bold text-white group-hover:text-brand-300 transition-colors">
                   {t(cat.titleKey)}
                 </h3>
-                <p className="text-sm text-white/75 mt-0.5">
+                <p className="text-xs sm:text-sm text-white/80 mt-0.5">
                   {t(cat.descKey)}
                 </p>
               </div>

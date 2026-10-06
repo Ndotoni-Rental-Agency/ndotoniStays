@@ -1,3 +1,4 @@
+import { HomeProperties } from '@/components/home/HomeProperties';
 import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { LongTermBanner } from '@/components/home/LongTermBanner';
@@ -9,11 +10,12 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
+      <HomeProperties />
       <CategoryGrid />
-      <LongTermBanner />
       <TrustSection />
       <HowItWorks />
       <CTASection />
+      <LongTermBanner />
     </>
   );
 }

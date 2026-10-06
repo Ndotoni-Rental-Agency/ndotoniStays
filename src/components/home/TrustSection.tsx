@@ -14,10 +14,10 @@ export function TrustSection() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-10 sm:py-20">
+    <section className="py-8 sm:py-14 border-y border-ink-100 bg-ink-50/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-6 sm:mb-12">
-          <h2 className="text-2xl sm:text-4xl font-bold text-ink-900">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink-900">
             {t('trust.title')}
           </h2>
         </div>
@@ -47,7 +47,7 @@ export function TrustSection() {
           {TRUST_POINTS.map((point) => (
             <div
               key={point.titleKey}
-              className="flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-ink-100 hover:border-brand-200 hover:shadow-lg hover:shadow-brand-50 transition-all"
+              className="flex flex-col items-start p-4 lg:p-6"
             >
               <div className="h-12 w-12 rounded-xl bg-brand-50 flex items-center justify-center mb-4">
                 <point.icon className="h-6 w-6 text-brand-600" />

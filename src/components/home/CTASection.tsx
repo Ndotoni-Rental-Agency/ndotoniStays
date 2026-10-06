@@ -7,7 +7,7 @@ export function CTASection() {
   const { t } = useLanguage();
 
   return (
-    <section id="host-cta" className="py-16 sm:py-20">
+    <section id="host-cta" className="py-8 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-hidden">
           {/* Background */}
@@ -17,18 +17,18 @@ export function CTASection() {
               alt=""
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-900/90 to-brand-700/80" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-900/95 to-brand-900/80" />
           </div>
 
           {/* Content */}
-          <div className="relative px-8 py-16 sm:px-16 sm:py-20 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+          <div className="relative px-6 py-10 sm:px-12 sm:py-14 text-left">
+            <h2 className="text-2xl sm:text-4xl font-semibold tracking-tight text-white leading-tight">
               {t('cta.title')}
             </h2>
-            <p className="mt-4 text-brand-100 text-lg max-w-xl mx-auto">
+            <p className="mt-4 text-brand-100 text-sm sm:text-base max-w-xl">
               {t('cta.description')}
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
                 href="/become-host"
                 className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-sm font-bold text-brand-700 hover:bg-brand-50 transition-colors shadow-lg"

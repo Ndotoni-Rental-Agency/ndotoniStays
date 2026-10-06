@@ -57,7 +57,14 @@ const IMAGE_EXTENSIONS = /\.(jpe?g|png|gif|webp|avif|heic|heif|bmp|svg)$/i;
  * before handing a URL to next/image so one bad upload doesn't take down the page.
  */
 export function isImageUrl(url: string): boolean {
-  return IMAGE_EXTENSIONS.test(url.split('?')[0]);
+  if (IMAGE_EXTENSIONS.test(url.split('?')[0])) return true;
+  // Unsplash serves image IDs without a file extension. Keep other opaque URLs
+  // excluded so uploaded documents still cannot enter property photo galleries.
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' && parsed.hostname === 'images.unsplash.com'
+      && /^\/photo-[a-zA-Z0-9-]+$/.test(parsed.pathname);
+  } catch { return false; }
 }
 
 /**

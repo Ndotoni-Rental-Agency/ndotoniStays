@@ -22,7 +22,7 @@ export function Header() {
     <>
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-ink-100">
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
+          <div className="flex h-16 sm:h-20 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-1.5">
               <Image
@@ -40,6 +40,7 @@ export function Header() {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-5">
+              <Link href="/search" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-900">{t('hero.search.button')}</Link>
               <LanguageToggle />
 
               {isAuthenticated && (user?.userType === 'LANDLORD' || user?.hasProperties) ? (

@@ -111,7 +111,7 @@ export function HeroSection() {
       </div>
 
       {/* Content */}
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-28">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
         <div className="text-center max-w-4xl mx-auto">
 
 
@@ -133,9 +133,9 @@ export function HeroSection() {
         {/* Search Card */}
         <form onSubmit={handleSearch} className="mt-8 max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-2xl p-3 sm:p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
               {/* Location — fuzzy search modal */}
-              <div className="relative lg:col-span-1">
+              <div className="relative col-span-2 lg:col-span-1">
                 <div className="relative">
                   <MapPinIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400 pointer-events-none" />
                   <input

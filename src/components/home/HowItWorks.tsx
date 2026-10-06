@@ -39,13 +39,13 @@ export function HowItWorks() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-10 sm:py-24 bg-ink-50/60">
+    <section className="py-10 sm:py-16 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-14">
           <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-brand-600 mb-1 sm:mb-2">
             {t('howItWorks.label')}
           </p>
-          <h2 className="text-2xl sm:text-4xl font-bold text-ink-900">
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink-900">
             {t('howItWorks.title')}
           </h2>
           <p className="mt-1 sm:mt-3 text-sm sm:text-lg text-ink-500">
@@ -80,7 +80,7 @@ export function HowItWorks() {
               {idx < STEPS.length - 1 && (
                 <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-[2px] bg-gradient-to-r from-brand-200 to-brand-100" />
               )}
-              <div className="relative inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-white shadow-lg shadow-brand-100/50 border border-brand-100 text-brand-600 mb-5 group-hover:shadow-xl group-hover:scale-105 transition-all">
+              <div className="relative inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-white shadow-sm border border-brand-100 text-brand-600 mb-5 group-hover:border-brand-300 transition-all">
                 {step.icon}
                 <span className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">
                   {step.number}

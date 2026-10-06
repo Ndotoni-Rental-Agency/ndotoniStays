@@ -17,7 +17,7 @@ const QUERY = `query HomeStays($input: ShortTermSearchInput!) {
     }
   }
 }`;
-const REGIONS = ['Dar es Salaam', 'Zanzibar', 'Arusha'];
+const REGIONS = ['Dar es Salaam', 'Zanzibar', 'Arusha', 'Dodoma', 'Mwanza'];
 function upcomingDates() {
   const date = new Date();
   const format = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;

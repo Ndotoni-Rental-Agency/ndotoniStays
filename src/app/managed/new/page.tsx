@@ -7,8 +7,10 @@ import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, CheckCircleIcon } from '@hero
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
+import { publishShortTermProperty } from '@/graphql/mutations';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { AddUnitModal } from '@/components/host/dashboard/AddUnitModal';
 import { generateVideoThumbnail } from '@/lib/video-thumbnail';
 import {
   StepType,
@@ -123,7 +125,10 @@ export default function NewManagedStayPage() {
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [created, setCreated] = useState<{ propertyId: string; ownerName: string; ownerCreated: boolean } | null>(null);
+  const [created, setCreated] = useState<{ propertyId: string; ownerName: string; ownerCreated: boolean; draft: boolean; hasMedia: boolean } | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [addingUnit, setAddingUnit] = useState(false);
+  const [unitsAdded, setUnitsAdded] = useState(0);
 
   const { step, owner, form } = draft;
 
@@ -178,7 +183,8 @@ export default function NewManagedStayPage() {
       case 3: return form.stayCategories.length > 0;
       case 4: return !!form.region && !!form.district && !!form.ward.trim() && !!form.street.trim();
       case 5: return parseFloat(form.nightlyRate) > 0;
-      case 6: return !!form.title.trim() && form.images.length + form.videos.length > 0;
+      // Photos can wait for a draft; listing it now needs them (see hasMedia).
+      case 6: return !!form.title.trim();
       default: return true;
     }
   }
@@ -190,9 +196,13 @@ export default function NewManagedStayPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async function submit() {
+  const hasMedia = form.images.length + form.videos.length > 0;
+
+  /** Lists the stay now, or saves it as a draft to publish later from Managed listings. */
+  async function submit(publish: boolean) {
     const incomplete = STEPS.find((s) => !stepComplete(s.id));
     if (incomplete) return goTo(incomplete.id);
+    if (publish && !hasMedia) return goTo(6);
     setLoading(true);
     setError(null);
 
@@ -237,6 +247,7 @@ export default function NewManagedStayPage() {
             googleMapsLink: form.googleMapsLink || undefined,
             ...(form.lat && form.lng && { latitude: form.lat, longitude: form.lng }),
           },
+          publish,
         },
       });
 
@@ -246,6 +257,8 @@ export default function NewManagedStayPage() {
         propertyId: result.property.propertyId,
         ownerName: `${owner.firstName} ${owner.lastName}`.trim(),
         ownerCreated: result.ownerCreated,
+        draft: !publish,
+        hasMedia,
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
@@ -256,10 +269,25 @@ export default function NewManagedStayPage() {
     }
   }
 
+  async function publishCreated() {
+    if (!created) return;
+    setPublishing(true);
+    setError(null);
+    try {
+      await GraphQLClient.executeAuthenticated(publishShortTermProperty, { propertyId: created.propertyId });
+      setCreated({ ...created, draft: false });
+    } catch (err: any) {
+      setError(err?.errors?.[0]?.message || err?.message || t('managed.publishError'));
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   function startOver() {
     saveDraft(null);
     setDraft(EMPTY_DRAFT);
     setCreated(null);
+    setUnitsAdded(0);
     setError(null);
     setResumed(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -271,11 +299,27 @@ export default function NewManagedStayPage() {
     return (
       <div className="max-w-md mx-auto text-center py-16 px-4">
         <CheckCircleIcon className="h-14 w-14 text-brand-600 mx-auto mb-4" />
-        <h1 className="text-2xl font-semibold text-ink-900">{t('managed.successTitle')}</h1>
+        <h1 className="text-2xl font-semibold text-ink-900">{t(created.draft ? 'managed.draftSavedTitle' : 'managed.successTitle')}</h1>
         <p className="text-ink-500 mt-3 leading-relaxed">{message}</p>
+        {created.draft && (
+          <p className="text-ink-500 mt-2 leading-relaxed">
+            {t(created.hasMedia ? 'managed.draftSavedDesc' : 'managed.draftNeedsPhotos')}
+          </p>
+        )}
+        {error && <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 mt-4">{error}</div>}
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-          <Link href={`/host/property/${created.propertyId}/edit`} className="btn-primary">
-            {t('managed.addDetails')}
+          {created.draft && created.hasMedia && (
+            <button type="button" onClick={publishCreated} disabled={publishing} className="btn-primary disabled:opacity-50">
+              {publishing ? t('managed.publishing') : t('managed.publishNow')}
+            </button>
+          )}
+          <Link
+            href={`/host/property/${created.propertyId}/edit`}
+            className={created.draft && created.hasMedia
+              ? 'px-5 py-2.5 rounded-xl text-sm font-medium border border-ink-200 text-ink-700 hover:bg-ink-50 transition-colors'
+              : 'btn-primary'}
+          >
+            {t(created.draft && !created.hasMedia ? 'managed.addPhotos' : 'managed.addDetails')}
           </Link>
           <Link
             href={`/property/${created.propertyId}`}
@@ -291,9 +335,24 @@ export default function NewManagedStayPage() {
             {t('managed.another')}
           </button>
         </div>
-        <Link href="/host/managed" className="inline-block mt-6 text-sm text-ink-500 hover:underline">
+        <button
+          type="button"
+          onClick={() => setAddingUnit(true)}
+          className="inline-flex items-center gap-1.5 mt-6 text-sm font-semibold text-brand-700 hover:text-brand-800"
+        >
+          {t('managed.addUnit')}
+        </button>
+        {unitsAdded > 0 && (
+          <p className="text-sm text-ink-500 mt-1">{t('managed.unitsAdded').replace('{count}', String(unitsAdded))}</p>
+        )}
+        <Link href="/host/managed" className="block mt-4 text-sm text-ink-500 hover:underline">
           {t('managed.backToList')}
         </Link>
+        <AddUnitModal
+          sourcePropertyId={addingUnit ? created.propertyId : null}
+          onClose={() => setAddingUnit(false)}
+          onSuccess={() => { setAddingUnit(false); setUnitsAdded((n) => n + 1); }}
+        />
       </div>
     );
   }
@@ -440,7 +499,11 @@ export default function NewManagedStayPage() {
                     )}
                   </div>
                 </ReviewRow>
-                <p className="text-xs text-ink-400">{t('managed.reviewNote')}</p>
+                {hasMedia ? (
+                  <p className="text-xs text-ink-400">{t('managed.reviewNote')}</p>
+                ) : (
+                  <p className="text-sm text-amber-700 bg-amber-50 rounded-xl p-3">{t('managed.reviewNoPhotos')}</p>
+                )}
               </div>
             )}
           </div>
@@ -471,14 +534,25 @@ export default function NewManagedStayPage() {
                 <ArrowRightIcon className="h-4 w-4" />
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={submit}
-                disabled={loading}
-                className="btn-primary inline-flex items-center gap-2 px-6 sm:px-10 py-3 text-sm sm:text-base font-semibold disabled:opacity-40"
-              >
-                {loading ? t('managed.submitting') : (<><CheckIcon className="h-5 w-5" />{t('managed.submit')}</>)}
-              </button>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => submit(false)}
+                  disabled={loading}
+                  className="px-4 sm:px-6 py-3 rounded-xl text-sm sm:text-base font-medium border border-ink-200 text-ink-700 bg-white hover:bg-ink-50 transition-colors disabled:opacity-40"
+                >
+                  {t('managed.saveDraft')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => submit(true)}
+                  disabled={loading || !hasMedia}
+                  title={hasMedia ? undefined : t('managed.reviewNoPhotos')}
+                  className="btn-primary inline-flex items-center gap-2 px-5 sm:px-10 py-3 text-sm sm:text-base font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {loading ? t('managed.submitting') : (<><CheckIcon className="h-5 w-5" />{t('managed.submit')}</>)}
+                </button>
+              </div>
             )}
           </div>
         </div>

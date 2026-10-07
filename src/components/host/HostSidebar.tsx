@@ -17,7 +17,6 @@ import {
   ChatBubbleLeftRightIcon,
   BanknotesIcon,
   UserPlusIcon,
-  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 export function HostSidebar() {
@@ -77,8 +76,6 @@ export function HostSidebar() {
     { name: t('host.nav.whatsapp'), href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
     // Admin only: list a property on behalf of an owner with no account
     ...(isAdmin ? [{ name: t('host.nav.managed'), href: '/host/managed', icon: UserPlusIcon, badge: 0 }] : []),
-    // Admin only: every stay on Ndotoni, whoever owns it
-    ...(isAdmin ? [{ name: t('host.nav.allStays'), href: '/host/all-stays', icon: Squares2X2Icon, badge: 0 }] : []),
   ];
 
   return (

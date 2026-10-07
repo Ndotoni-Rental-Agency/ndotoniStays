@@ -186,6 +186,7 @@ export const en: Record<string, string> = {
   'host.nav.managed': 'Managed listings',
   // All stays (admins)
   'host.nav.allStays': "All stays",
+  'managed.viewManaged': "Managed stays",
   'allStays.title': "All stays",
   'allStays.subtitle': "Every stay on Ndotoni, whoever owns it. Open one to change details, price, photos or the calendar. The owner stays the owner.",
   'allStays.adminOnly': "Only admins can see every stay.",

@@ -186,6 +186,7 @@ export const sw: Record<string, string> = {
   'host.nav.managed': 'Matangazo tunayosimamia',
   // All stays (admins)
   'host.nav.allStays': "Nyumba zote",
+  'managed.viewManaged': "Tunazosimamia",
   'allStays.title': "Nyumba zote",
   'allStays.subtitle': "Kila nyumba iliyo Ndotoni, ya mwenye nyumba yeyote. Ifungue ubadili maelezo, bei, picha au kalenda. Mwenye nyumba anabaki kuwa yeye yule.",
   'allStays.adminOnly': "Wasimamizi tu ndio wanaoweza kuona nyumba zote.",

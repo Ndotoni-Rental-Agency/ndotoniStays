@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { publishShortTermProperty } from '@/graphql/mutations';
 import { AddUnitModal } from '@/components/host/dashboard/AddUnitModal';
+import { AllStaysList } from '@/components/host/admin/AllStaysList';
 
 const listManagedListings = /* GraphQL */ `
   query ListManagedListings($kind: String) {
@@ -88,6 +89,20 @@ export default function ManagedStaysPage() {
   const [publishingKey, setPublishingKey] = useState<string | null>(null);
   const [addUnitSourceId, setAddUnitSourceId] = useState<string | null>(null);
   const isAdmin = user?.userType === 'ADMIN';
+  const [view, setView] = useState<'managed' | 'all'>('managed');
+
+  // ?view=all opens the "All stays" view (read on the client: no Suspense needed for the static build)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('view') === 'all') setView('all');
+  }, []);
+
+  function changeView(next: 'managed' | 'all') {
+    setView(next);
+    const url = new URL(window.location.href);
+    if (next === 'all') url.searchParams.set('view', 'all');
+    else url.searchParams.delete('view');
+    window.history.replaceState(null, '', url.toString());
+  }
 
   const load = useCallback(() => {
     GraphQLClient.executeAuthenticated<{ listManagedListings: ManagedStay[] }>(listManagedListings, { kind: 'SHORT_TERM' })
@@ -152,6 +167,24 @@ export default function ManagedStaysPage() {
           <PlusIcon className="h-4 w-4" /> {t('managed.listNew')}
         </Link>
       </div>
+
+      {/* Managed stays, or every stay on Ndotoni (admins can edit any stay) */}
+      <div className="inline-flex rounded-xl border border-ink-200 bg-white p-1" role="tablist">
+        {(['managed', 'all'] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => changeView(v)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${view === v ? 'bg-brand-600 text-white' : 'text-ink-600 hover:text-ink-900'}`}
+          >
+            {v === 'managed' ? t('managed.viewManaged') : t('host.nav.allStays')}
+          </button>
+        ))}
+      </div>
+
+      {view === 'all' ? <AllStaysList /> : (<>
 
       <label className="relative block">
         <MagnifyingGlassIcon className="h-4 w-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -308,6 +341,8 @@ export default function ManagedStaysPage() {
           })}
         </ul>
       )}
+
+      </>)}
 
       <AddUnitModal
         sourcePropertyId={addUnitSourceId}

@@ -19,7 +19,6 @@ import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { EducationImpact } from '@/components/home/EducationImpact';
 
 // Not yet in the generated ShortTermProperty type — see queries.ts note on getShortTermProperty.
 type PropertyWithGroup = ShortTermProperty & { groupId?: string | null };
@@ -165,10 +164,6 @@ export function PropertyDetailClient() {
             initialCheckOut={checkOut}
           />
         </div>
-      </div>
-
-      <div className="px-4 sm:px-0">
-        <EducationImpact />
       </div>
 
       <MobileBookingBar nightlyRate={property.nightlyRate} currency={property.currency} />

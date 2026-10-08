@@ -1,4 +1,3 @@
-import { EducationImpact } from '@/components/home/EducationImpact';
 import { HomeProperties } from '@/components/home/HomeProperties';
 import { HeroSection } from '@/components/home/HeroSection';
 import { LongTermBanner } from '@/components/home/LongTermBanner';
@@ -15,7 +14,6 @@ export default function HomePage() {
       <HowItWorks />
       <CTASection />
       <LongTermBanner />
-      <EducationImpact />
     </>
   );
 }

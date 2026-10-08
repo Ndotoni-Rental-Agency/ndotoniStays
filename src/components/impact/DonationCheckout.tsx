@@ -76,7 +76,7 @@ export default function DonationCheckout() {
   const field = 'mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-gray-900';
   const button = 'rounded-lg bg-green-700 px-5 py-3 font-semibold text-white disabled:opacity-50';
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12 text-gray-900 dark:text-gray-100">
+    <main className="mx-auto max-w-2xl bg-white px-6 py-12 text-gray-900">
       <Link href="/impact" className="text-green-700 underline">{sw ? 'Dhamira yetu ya elimu' : 'Our education mission'}</Link>
       <h1 className="mt-6 text-3xl font-bold">{sw ? 'Saidia mwanafunzi kupata elimu' : 'Help a student access education'}</h1>
       <p className="mt-4 leading-relaxed">{sw ? 'Michango ya wateja ni nyongeza ya ahadi ya Ndotoni ya kutoa 15% ya faida yake ya mwaka.' : 'Customer donations are additional to Ndotoni’s commitment to contribute 15% of its annual profit.'}</p>

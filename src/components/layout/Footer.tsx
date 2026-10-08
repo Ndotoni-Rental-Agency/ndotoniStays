@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <footer className="bg-white border-t border-ink-100">
@@ -47,6 +47,11 @@ export function Footer() {
               <li>
                 <Link href="/invest" className="hover:text-ink-900 transition-colors">
                   {t('footer.invest')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/impact" className="hover:text-ink-900 transition-colors">
+                  {language === 'sw' ? 'Dhamira yetu ya elimu' : 'Our education mission'}
                 </Link>
               </li>
               <li>

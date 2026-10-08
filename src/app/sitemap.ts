@@ -85,6 +85,7 @@ async function fetchPropertyIds(): Promise<PropertyResult[]> {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/impact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     {
       url: BASE_URL,
       lastModified: new Date(),

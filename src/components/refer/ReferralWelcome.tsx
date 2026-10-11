@@ -28,8 +28,12 @@ export function ReferralWelcome({ code }: { code: string }) {
       const firstCode = rememberReferral(code) || code;
       setAttributionCode(firstCode);
       if (isAuthenticated) {
-        await GraphQLClient.executeAuthenticated(CLAIM_REFERRAL, { code: firstCode });
-        clearPendingReferral();
+        try {
+          await GraphQLClient.executeAuthenticated(CLAIM_REFERRAL, { code: firstCode });
+          clearPendingReferral();
+        } catch {
+          // Keep the validated invitation available and retain its code for a later claim.
+        }
       }
       if (active) setState('ready');
     }).catch(() => { if (active) setState('error'); });

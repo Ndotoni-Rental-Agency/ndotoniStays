@@ -1,3 +1,4 @@
+import { pendingReferral } from '@/lib/referral/attribution';
 /**
  * Authentication Bridge for ndotoniStays
  * Same pattern as ndotoniWeb — uses same Cognito User Pool
@@ -72,7 +73,7 @@ export class AuthBridge {
   }) {
     const data = await GraphQLClient.executePublic<{ signUp: { success: boolean; message: string } }>(
       signUpMutation,
-      { input: { ...input, platform: 'ndotonistays' } }
+      { input: { ...input, platform: 'ndotonistays', referralCode: pendingReferral() } }
     );
 
     if (!data.signUp?.success) {

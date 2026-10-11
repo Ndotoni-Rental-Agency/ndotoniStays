@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
+import { syncReferral } from '@/lib/referral/attribution';
 import { getMe } from '@/graphql/queries';
 import { AuthBridge } from '@/lib/auth-bridge';
 
@@ -56,6 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     initializeAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) syncReferral((query, variables) => GraphQLClient.executeAuthenticated(query, variables)).catch(() => { /* Retry before listing. */ });
+  }, [user?.userId]);
 
   async function initializeAuth() {
     try {

@@ -37,7 +37,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
 ];
 
 export default function EditPropertyPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const propertyId = params.id as string;
@@ -56,6 +56,13 @@ export default function EditPropertyPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [hostId, setHostId] = useState('');
+  const [hostReward, setHostReward] = useState<{ rewardStatus: string; amount?: number } | null>(null);
+  const [rewardAmount, setRewardAmount] = useState('');
+  const [reviewNote, setReviewNote] = useState('');
+  const [reviewingReward, setReviewingReward] = useState(false);
   const [status, setStatus] = useState('DRAFT');
   const [images, setImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
@@ -115,6 +122,13 @@ export default function EditPropertyPage() {
         return;
       }
 
+      setHostId(p.hostId);
+      if (user?.userType === 'ADMIN') {
+        GraphQLClient.executeAuthenticated<{ getReferralHostReward: { rewardStatus: string; amount?: number } | null }>(
+          'query GetReferralHostReward($hostId: ID!) { getReferralHostReward(hostId: $hostId) { rewardStatus amount } }', { hostId: p.hostId }
+        ).then(result => setHostReward(result.getReferralHostReward)).catch(() => {});
+      }
+      setVerified((p as ShortTermProperty & { verified?: boolean }).verified === true);
       setStatus(p.status);
       setImages(p.images || []);
       setVideos(p.videos || []);
@@ -324,6 +338,41 @@ export default function EditPropertyPage() {
           </button>
         )}
       </div>
+
+      {user?.userType === 'ADMIN' && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-y border-ink-100 py-4">
+          <div><p className="text-sm font-semibold">Listing verification</p><p className="mt-1 text-xs text-ink-500">Verify after checking the owner and property. Verified listings can be reviewed for a host referral reward of up to TZS 5,000.</p></div>
+          <button disabled={verifying || verified} className="btn-primary text-sm" onClick={async () => {
+            setVerifying(true);
+            try {
+              await GraphQLClient.executeAuthenticated(updateShortTermProperty, { propertyId, input: { verified: true } });
+              setVerified(true);
+              toast.success('Listing verified');
+            } catch { toast.error('Verification failed. Please try again.'); }
+            finally { setVerifying(false); }
+          }}>{verified ? 'Verified' : verifying ? 'Verifying…' : 'Verify listing'}</button>
+        </div>
+      )}
+
+      {user?.userType === 'ADMIN' && verified && (
+        <section className="mb-6 border border-ink-100 p-4">
+          <h2 className="text-sm font-semibold">Host referral reward</h2>
+          <p className="mt-1 text-xs text-ink-500">One reward per host across all units and platforms. Review location and eligibility. Maximum TZS 5,000; five rewarded hosts per referrer.</p>
+          {hostReward && hostReward.rewardStatus !== 'PENDING_REVIEW' ? <p className="mt-3 text-sm">{hostReward.rewardStatus} · TZS {hostReward.amount?.toLocaleString() || '—'}</p> : <div className="mt-3 space-y-3">
+            <label className="block text-xs font-medium">Reward amount (TZS)<input type="number" min="1" max="5000" step="1" value={rewardAmount} onChange={e => setRewardAmount(e.target.value)} className="mt-1 block w-full rounded border border-ink-200 p-2" placeholder="e.g. 3000" /></label>
+            <label className="block text-xs font-medium">Internal location and eligibility review<textarea value={reviewNote} onChange={e => setReviewNote(e.target.value)} className="mt-1 block w-full rounded border border-ink-200 p-2" /></label>
+            <button className="btn-primary text-sm" disabled={reviewingReward || !rewardAmount || !reviewNote.trim()} onClick={async () => {
+              setReviewingReward(true);
+              try {
+                await GraphQLClient.executeAuthenticated('mutation ApproveReferralHostReward($hostId: ID!, $amount: Int!, $locationReviewNote: String!) { approveReferralHostReward(hostId: $hostId, amount: $amount, locationReviewNote: $locationReviewNote) { success message } }', { hostId, amount: Number(rewardAmount), locationReviewNote: reviewNote });
+                setHostReward({ rewardStatus: 'ELIGIBLE', amount: Number(rewardAmount) });
+                toast.success('Host reward approved for payment review');
+              } catch (err: any) { toast.error(err?.errors?.[0]?.message || err?.message || 'No pending referral, reward cap reached, or review failed. Please retry.'); }
+              finally { setReviewingReward(false); }
+            }}>{reviewingReward ? 'Approving…' : 'Approve host reward'}</button>
+          </div>}
+        </section>
+      )}
 
       {/* Tabs — scrollable on mobile, no visible scrollbar */}
       <div className="border-b border-ink-100 mb-6 sm:mb-8">

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
+import { pendingReferral } from '@/lib/referral/attribution';
 import { createShortTermPropertyDraft, submitContactInquiry } from '@/graphql/mutations';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { PartyPopper, Zap } from 'lucide-react';
@@ -223,6 +224,7 @@ export default function ListYourPlacePage() {
         createShortTermPropertyDraft: { propertyId: string; success: boolean; message: string };
       }>(createShortTermPropertyDraft, {
         input: {
+          referralCode: pendingReferral() || new URLSearchParams(window.location.search).get('referralCode') || undefined,
           title: form.title,
           propertyType: form.propertyType,
           stayCategories: form.stayCategories,
@@ -252,6 +254,7 @@ export default function ListYourPlacePage() {
         await refreshUser();
         setCreatedPropertyId(propertyId);
         setShowSuccess(true);
+        window.dispatchEvent(new Event('ndotoni:listing-completed'));
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
           document.documentElement.scrollTop = 0;

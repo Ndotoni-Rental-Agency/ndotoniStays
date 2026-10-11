@@ -1,5 +1,6 @@
 'use client';
 
+import { ReferralPrompt } from '@/components/refer/ReferralPrompt';
 import { ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
@@ -12,7 +13,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <ChatProvider>{children}</ChatProvider>
+        <ChatProvider>{children}<ReferralPrompt /></ChatProvider>
       </AuthProvider>
     </LanguageProvider>
   );

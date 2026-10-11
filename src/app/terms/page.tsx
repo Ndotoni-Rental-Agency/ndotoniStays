@@ -11,7 +11,7 @@ export default function TermsOfServicePage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-2xl shadow-sm border border-ink-100 p-8 md:p-12">
           <h1 className="text-4xl font-bold text-ink-900 mb-4">Terms of Service</h1>
-          <p className="text-sm text-ink-500 mb-2">Last updated: September 5, 2026</p>
+          <p className="text-sm text-ink-500 mb-2">Last updated: October 11, 2026</p>
           <p className="text-sm font-semibold text-ink-800 mb-8">
             Please read these Terms carefully. They include limitations on Ndotoni's liability, an
             assumption-of-risk provision for interactions with other users, and a waiver of class or
@@ -307,7 +307,7 @@ export default function TermsOfServicePage() {
                 <li>Service interruptions or delays, including those caused by events described in Section 17 (Force Majeure)</li>
               </ul>
               <p className="text-ink-700 mt-4">
-                Our total liability shall not exceed the amount you paid to Ndotoni in the 12 months
+                Subject to rights and liabilities that cannot lawfully be excluded, our total liability shall not exceed the amount you paid to Ndotoni in the 12 months
                 preceding the claim.
               </p>
             </section>
@@ -488,15 +488,22 @@ export default function TermsOfServicePage() {
               </ul>
             </section>
 
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-ink-900 mb-4">26. Promotions and Referral Programs</h2>
-              <p className="text-ink-700 mb-4">
-                We may from time to time run promotions, discounts, or referral programs on ndotoni
-                Stays. Any such program is voluntary, does not create an employment, agency, or
-                partnership relationship between you and Ndotoni, and is governed by its own specific
-                terms published at the time it runs. We may modify or discontinue any promotion or
-                referral program at any time without liability to you.
-              </p>
+            <section id="referral-programme" className="mb-8 scroll-mt-24">
+              <h2 className="text-2xl font-semibold text-ink-900 mb-4">26. Referral Programme and Promotions</h2>
+              <p className="text-ink-700 mb-4">Introduce new hosts and earn up to TZS 25,000. These terms explain how personal-Link referral rewards work across Ndotoni and Ndotoni Stays.</p>
+              <ol className="list-decimal pl-6 space-y-4 text-ink-700 mb-4">
+                <li><strong>Who can participate.</strong> You must be at least 18, have a valid Ndotoni account or use your WhatsApp number with our bot, and provide accurate identity and payment details. The referred host must be a genuine new owner or authorized manager who has not previously listed on Ndotoni or Ndotoni Stays. Creating another account does not make an existing host new.</li>
+                <li><strong>Share freely; five rewarded hosts.</strong> You may share your personal Link with as many people as you wish. Cash rewards apply only to your first five eligible new hosts approved by Ndotoni under this programme, in approval order, with a maximum total of TZS 25,000. Further referrals may join the platform but do not earn cash rewards. This is one combined limit across the website, app, WhatsApp, Ndotoni, and Ndotoni Stays; it does not reset through additional accounts or units.</li>
+                <li><strong>One host, one reward.</strong> A host can generate only one referral reward, even if they list multiple rooms, apartments, properties, or units, or use multiple accounts or channels. Duplicate submissions, repeat owners, and attempts to split the same host into several identities do not qualify.</li>
+                <li><strong>Amounts are confirmed after review.</strong> Up to TZS 5,000 is the maximum reward per approved host, not a fixed or guaranteed payment. The approved amount may be lower and is determined by Ndotoni after reviewing eligibility, listing suitability, and programme requirements. Signup, a draft, publication, or verification alone does not guarantee a reward. Ndotoni will confirm the approved amount before payment. Referrers must not promise others guaranteed payments, bookings, or income.</li>
+                <li><strong>Attribution and eligibility.</strong> The first valid referral accepted and recorded for the host is used. The host must use your Link or referral code before their first listing, and at least one genuine listing must be verified and published. Opening a Link alone is not approval. Browser restrictions, switching devices, and installing the app can interrupt tracking; reopen the Link or enter the referral code to continue. If attribution is missing or disputed, contact us with supporting evidence. We review records and evidence reasonably; attribution cannot be retrospectively added to an existing host simply to claim a reward.</li>
+                <li><strong>Verification and payment.</strong> We may request reasonable evidence of identity, authority to list, ownership, and accurate contact or payout information. Rewards remain pending until review and express approval. Approved payments are sent to a verified mobile money account; you must ensure its details are correct. There is no promise of instant payment or a fixed processing time. We will process approved rewards within a reasonable period after required checks are complete, subject to lawful holds and payment-provider delays. Any legally required withholding will be explained.</li>
+                <li><strong>Fair use and consent.</strong> Self-referrals, fabricated hosts, duplicate accounts, false documents, impersonation, unauthorized sharing of personal data, unsolicited bulk messaging, and manipulation of tracking or reward limits are prohibited. Obtain permission before sharing another person’s details. Do not present yourself as an employee or agent of Ndotoni, bind us to promises, charge people on our behalf, or misrepresent these terms.</li>
+                <li><strong>Suspension, rejection, and recovery.</strong> Where reasonably necessary to investigate suspected abuse, conflicting ownership, incomplete verification, or payment errors, we may pause review or payment and request evidence. We may reject ineligible referrals, suspend programme access, correct mistakes, or seek lawful recovery of payments obtained through fraud, duplication, or material error. We will explain the relevant reason where lawful and appropriate and allow you to raise a dispute. These rights do not permit us to arbitrarily cancel a valid approved reward.</li>
+                <li><strong>Programme changes.</strong> We may change, pause, or end this programme by publishing updated terms or notifying participants as appropriate. Changes ordinarily apply prospectively and do not reduce rewards already expressly approved, except for fraud, duplication, material error, or a legal requirement. A referral not yet approved is not a guarantee of payment. Separate promotions and earlier written reward or profit-share agreements remain governed by their own agreed terms; this programme does not automatically include rental profit sharing.</li>
+                <li><strong>Independent participation.</strong> Participation does not create employment, agency, partnership, or an entitlement to salary or guaranteed income. You are responsible for your own lawful referral activity and applicable taxes. To the extent permitted by law, you are responsible for losses directly caused by your fraud, unlawful disclosure, or material breach, rather than losses caused by Ndotoni’s own fault.</li>
+                <li><strong>Questions, disputes, and legal rights.</strong> For an attribution, eligibility, or payment question, contact info@ndotoni.com with the referral code and relevant information. We will review your complaint in good faith. These programme terms operate with the general Terms of Service, but do not exclude mandatory consumer rights, lawful access to regulators or courts, liability that cannot lawfully be excluded, or payment of valid approved rewards. Ndotoni’s review discretion must be exercised reasonably and in accordance with applicable law.</li>
+              </ol>
             </section>
 
             <section className="mb-8">

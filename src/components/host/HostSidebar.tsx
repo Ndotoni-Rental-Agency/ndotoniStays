@@ -21,7 +21,7 @@ import {
 
 export function HostSidebar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.userType === 'ADMIN';
   const [pendingCount, setPendingCount] = useState(0);
@@ -68,6 +68,7 @@ export function HostSidebar() {
   }
 
   const NAV_ITEMS = [
+    { name: language === 'sw' ? 'Rufaa · Hadi TZS 25,000' : 'Refer · Up to TZS 25,000', href: '/refer', icon: UserPlusIcon, badge: 0 },
     { name: t('host.nav.properties'), href: '/host', icon: HomeModernIcon, exact: true, badge: 0 },
     { name: t('host.nav.bookings'), href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
     { name: t('host.nav.calendar'), href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },

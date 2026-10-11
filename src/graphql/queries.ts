@@ -1776,6 +1776,7 @@ export const getRelatedProperties = /* GraphQL */ `query GetRelatedProperties(
 >;
 export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($propertyId: ID!) {
   getShortTermProperty(propertyId: $propertyId) {
+    verified
     address {
       city
       country

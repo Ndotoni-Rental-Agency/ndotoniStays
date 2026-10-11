@@ -1,14 +1,16 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Check, ChevronDown, Copy, RotateCw } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Check, Copy, MessageCircle, RotateCw, Smartphone, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { CLAIM_REFERRAL, clearPendingReferral, rememberReferral } from '@/lib/referral/attribution';
 import { useAuth } from '@/contexts/AuthContext';
 import { WhatsAppIcon } from './WhatsAppIcon';
+import { StoreButtons } from './StoreButtons';
 
-const button = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.98]';
+const HERO = 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=75&auto=format&fit=crop';
+const pill = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.98]';
 
 export function ReferralWelcome({ code }: { code: string }) {
   const { language } = useLanguage();
@@ -41,6 +43,11 @@ export function ReferralWelcome({ code }: { code: string }) {
     }).catch(() => { if (active) setState('error'); });
     return () => { active = false; };
   }, [code, isAuthenticated, retry]);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2500);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   const invited = state === 'ready' || state === 'error';
   const listHref = invited ? `/become-host?referralCode=${attributionCode}` : '/become-host';
@@ -49,109 +56,104 @@ export function ReferralWelcome({ code }: { code: string }) {
     try { await navigator.clipboard.writeText(attributionCode); setCopied(true); setCopyError(false); }
     catch { setCopyError(true); }
   }
+  const trust = [
+    { icon: Sparkles, label: sw ? 'Bure kutangaza' : 'Free to list' },
+    { icon: BadgeCheck, label: sw ? 'Nyumba zinathibitishwa' : 'Verified listings' },
+    { icon: MessageCircle, label: sw ? 'Msaada WhatsApp' : 'Help on WhatsApp' },
+  ];
 
   return (
     <main className="bg-white text-ink-900">
-      <div className="mx-auto max-w-6xl px-4 pb-14 pt-4 sm:px-6 sm:pb-20 sm:pt-8">
-        <section className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
-          <div className="relative flex min-h-[18rem] overflow-hidden rounded-2xl sm:min-h-[22rem]">
+      <div className="mx-auto max-w-6xl px-3 pb-14 pt-3 sm:px-6 sm:pb-20 sm:pt-6">
+        <section className="relative">
+          <div className="relative h-[340px] overflow-hidden rounded-[28px] sm:h-[440px] lg:h-[540px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/property-hero.jpeg" alt="" className="absolute inset-0 h-full w-full object-cover object-[35%_center]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/75" />
-            <div className="relative mt-auto p-6 sm:p-8">
-              <h1 className="max-w-md text-balance text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
-                {sw ? 'Karibisha wageni kwenye nyumba yako.' : 'Welcome guests to your place.'}
+            <img src={`${HERO}&w=1600`} srcSet={`${HERO}&w=800 800w, ${HERO}&w=1600 1600w, ${HERO}&w=2200 2200w`} sizes="(min-width: 1152px) 1152px, 100vw" alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/40 lg:to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-5 pb-16 sm:p-10 sm:pb-20 lg:inset-y-0 lg:flex lg:max-w-xl lg:flex-col lg:justify-center lg:pb-10">
+              <h1 className="text-balance text-[2.3rem] font-bold leading-[0.95] tracking-[-0.035em] text-white sm:text-6xl">
+                {sw ? 'Tangaza nyumba yako ' : 'List your place '}<span className="text-brand-400">{sw ? 'bure.' : 'for free.'}</span>
               </h1>
-              <p className="mt-3 max-w-md text-base leading-relaxed text-white/90">
-                {sw ? 'Rafiki amekualika kwenye Ndotoni Stays. Kutangaza ni bure.' : 'A friend invited you to Ndotoni Stays. Listing is free.'}
-              </p>
+              <p className="mt-3 text-base font-medium text-white/85 sm:text-lg">{state === 'invalid' ? (sw ? 'Karibu Ndotoni Stays.' : 'Welcome to Ndotoni Stays.') : (sw ? 'Rafiki amekualika kwenye Ndotoni Stays.' : 'A friend invited you to Ndotoni Stays.')}</p>
             </div>
           </div>
 
-          <div className="flex flex-col justify-center rounded-2xl border border-ink-100 bg-ink-50 p-5 sm:p-8" aria-live="polite">
-            <h2 className="text-xl font-semibold tracking-tight">{sw ? 'Anza na nyumba yako' : 'Start with your place'}</h2>
-            <p className="mt-1 text-sm text-ink-600">{sw ? 'Picha chache na taarifa za msingi. Hakuna haja ya kupakua app.' : 'A few photos and the basics. No download needed.'}</p>
+          <div aria-live="polite" className="relative z-10 mx-2 -mt-10 rounded-3xl bg-white p-5 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 sm:mx-auto sm:max-w-lg sm:p-6 lg:absolute lg:bottom-10 lg:right-10 lg:mt-0 lg:w-[420px]">
             {state === 'loading' ? (
-              <div role="status" aria-label={sw ? 'Tunafungua mwaliko wako' : 'Opening your invitation'} className="mt-5 space-y-2.5">
-                <div className="h-12 animate-pulse rounded-xl bg-ink-200" />
-                <div className="h-12 animate-pulse rounded-xl bg-ink-100" />
+              <div role="status" aria-label={sw ? 'Tunafungua mwaliko wako' : 'Opening your invitation'} className="space-y-3">
+                <div className="h-12 animate-pulse rounded-full bg-ink-100" />
+                <div className="h-12 animate-pulse rounded-full bg-ink-100" />
               </div>
             ) : (
               <>
                 {state !== 'ready' && (
-                  <div role="alert" className="mt-5 rounded-xl border border-ink-200 bg-white p-4 text-sm text-ink-700">
-                    <p className="font-semibold text-ink-900">
-                      {state === 'invalid' ? (sw ? 'Link hii ya mwaliko haipo' : 'This invitation Link isn’t valid') : (sw ? 'Hatukuweza kuthibitisha mwaliko' : 'We couldn’t check your invitation')}
-                    </p>
-                    <p className="mt-1">
-                      {state === 'invalid'
-                        ? (sw ? 'Mwombe rafiki yako akutumie Link yake tena. Bado unaweza kutangaza nyumba yako.' : 'Ask your friend to send their Link again. You can still list your place.')
-                        : (sw ? 'Unaweza kuendelea; tutathibitisha mwaliko ukitangaza.' : 'You can carry on; we’ll check the invitation when you list.')}
-                    </p>
+                  <div role="alert" className="mb-4 rounded-2xl bg-ink-50 p-4 text-sm text-ink-700">
+                    <p className="font-bold text-ink-900">{state === 'invalid' ? (sw ? 'Link hii ya mwaliko haipo' : 'This invitation Link isn’t valid') : (sw ? 'Hatukuweza kuthibitisha mwaliko' : 'We couldn’t check your invitation')}</p>
+                    <p className="mt-1">{state === 'invalid' ? (sw ? 'Bado unaweza kutangaza nyumba yako.' : 'You can still list your place.') : (sw ? 'Endelea; tutauthibitisha ukitangaza.' : 'Carry on; we’ll check it when you list.')}</p>
                     {state === 'error' && (
-                      <button type="button" onClick={() => setRetry(n => n + 1)} className="mt-2 inline-flex min-h-10 items-center gap-1.5 font-semibold text-brand-700 underline underline-offset-4">
+                      <button type="button" onClick={() => setRetry(n => n + 1)} className="mt-1 inline-flex min-h-10 items-center gap-1.5 font-bold text-ink-900 underline underline-offset-4">
                         <RotateCw size={15} aria-hidden="true" />{sw ? 'Jaribu tena' : 'Try again'}
                       </button>
                     )}
                   </div>
                 )}
-                <div className="mt-5 grid gap-2.5">
-                  <Link href={listHref} className={`${button} bg-brand-600 text-base text-white hover:bg-brand-700`}>
+                <div className="grid gap-2.5">
+                  <Link href={listHref} className={`${pill} bg-brand-600 text-base text-white hover:bg-brand-700`}>
                     {sw ? 'Tangaza nyumba yangu' : 'List my place'}<ArrowRight size={18} aria-hidden="true" />
                   </Link>
-                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={`${button} border border-ink-200 bg-white text-ink-700 hover:bg-ink-50`}>
-                    <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Nisaidie kupitia WhatsApp' : 'Get help on WhatsApp'}
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={`${pill} border border-ink-200 text-ink-900 hover:bg-ink-50`}>
+                    <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Tuma WhatsApp badala yake' : 'Use WhatsApp instead'}
                   </a>
                 </div>
+                <ul className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs font-semibold text-ink-500">
+                  {trust.map(({ icon: Icon, label }) => (
+                    <li key={label} className="inline-flex items-center gap-1.5"><Icon size={14} className="text-brand-600" aria-hidden="true" />{label}</li>
+                  ))}
+                </ul>
               </>
             )}
           </div>
         </section>
 
-        <section className="mt-10 grid gap-8 sm:mt-14 lg:grid-cols-2 lg:gap-4">
-          <div className="space-y-3">
-            <a href={invited ? `https://www.ndotoni.com/r/${attributionCode}` : 'https://www.ndotoni.com/property/create'} className="group flex items-center justify-between gap-4 rounded-xl border border-ink-100 p-5 transition-colors hover:border-brand-300 hover:bg-brand-50/50">
-              <span>
-                <span className="block text-base font-semibold">{sw ? 'Ni nyumba ya kupangisha kwa muda mrefu?' : 'Renting out long-term?'}</span>
-                <span className="mt-0.5 block text-sm text-ink-500">{sw ? 'Kwa wapangaji wa kila mwezi, endelea kwenye Ndotoni.' : 'For monthly tenants, continue on Ndotoni.'}</span>
-              </span>
-              <ArrowRight size={18} className="shrink-0 text-ink-500 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-            </a>
-
+        <section className="mx-auto mt-8 grid max-w-5xl gap-3 sm:mt-12 lg:grid-cols-2 lg:gap-4">
+          <div className="rounded-3xl bg-ink-50 p-5 sm:p-6">
+            <div className="flex items-start gap-3.5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-ink-900 shadow-sm"><Smartphone size={20} aria-hidden="true" /></span>
+              <div>
+                <h2 className="text-lg font-bold tracking-tight">{sw ? 'Au tumia app' : 'Or use the app'}</h2>
+                <p className="mt-0.5 text-sm text-ink-500">{sw ? 'Simamia nafasi na ujibu wageni popote.' : 'Manage bookings and reply to guests on the go.'}</p>
+              </div>
+            </div>
+            <div className="mt-5"><StoreButtons sw={sw} /></div>
             {invited && (
-              <details className="group rounded-xl border border-ink-100">
-                <summary className="flex min-h-[4.25rem] cursor-pointer list-none items-center justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden">
-                  <span>
-                    <span className="block text-base font-semibold">{sw ? 'Unapendelea app?' : 'Prefer the app?'}</span>
-                    <span className="mt-0.5 block text-sm text-ink-500">{sw ? 'Hiari. Mwaliko wako unaenda nawe.' : 'Optional. Your invitation comes with you.'}</span>
-                  </span>
-                  <ChevronDown size={18} className="shrink-0 text-ink-500 transition-transform group-open:rotate-180" aria-hidden="true" />
-                </summary>
-                <div className="space-y-4 border-t border-ink-100 p-5">
-                  <div className="flex flex-wrap gap-2">
-                    <a href={`ndotoniapp://r/${attributionCode}`} className={`${button} min-h-11 bg-brand-600 text-white hover:bg-brand-700`}>{sw ? 'Fungua app' : 'Open the app'}</a>
-                    <a href="https://apps.apple.com/us/app/ndotoni/id6767931205" className={`${button} min-h-11 border border-ink-200 text-ink-700 hover:bg-ink-50`}>App Store</a>
-                    <a href="https://play.google.com/store/apps/details?id=com.ndotoni.app" className={`${button} min-h-11 border border-ink-200 text-ink-700 hover:bg-ink-50`}>Google Play</a>
-                  </div>
-                  <p className="text-sm leading-relaxed text-ink-500">{sw ? 'Ukishapakua, rudi hapa ubonyeze “Fungua app”, au weka msimbo huu kwenye ukurasa wa rufaa ndani ya app.' : 'After installing, come back and tap “Open the app”, or enter this code on the app’s referral screen.'}</p>
-                  <button type="button" onClick={copyCode} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-ink-200 bg-ink-50 pl-4 pr-1.5 text-sm">
-                    <code className="select-all font-semibold tracking-wide">{attributionCode}</code>
-                    <span className={`inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold ${copied ? 'bg-brand-50 text-brand-800' : 'bg-white text-ink-900 shadow-sm'}`}>
-                      {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}{copied ? (sw ? 'Imenakiliwa' : 'Copied') : (sw ? 'Nakili msimbo' : 'Copy code')}
-                    </span>
-                  </button>
-                  {copyError && <p role="status" className="text-xs text-ink-500">{sw ? 'Bonyeza msimbo kwa muda kuunakili.' : 'Press and hold the code to copy it.'}</p>}
-                </div>
-              </details>
+              <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white p-2 pl-4">
+                <span className="min-w-0 text-xs text-ink-500">
+                  {sw ? 'Msimbo wako wa mwaliko' : 'Your invitation code'}
+                  <code className="block select-all truncate text-sm font-bold tracking-wide text-ink-900">{attributionCode}</code>
+                </span>
+                <button type="button" onClick={copyCode} className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-colors ${copied ? 'bg-brand-100 text-brand-800' : 'bg-ink-100 text-ink-900 hover:bg-ink-200'}`}>
+                  {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}{copied ? (sw ? 'Imenakiliwa' : 'Copied') : (sw ? 'Nakili' : 'Copy')}
+                </button>
+              </div>
             )}
+            {invited && <p role="status" className="mt-2 text-xs text-ink-500">{copyError ? (sw ? 'Bonyeza msimbo kwa muda kuunakili.' : 'Press and hold the code to copy it.') : (sw ? 'Uweke kwenye “Rufaa” ndani ya app.' : 'Enter it under “Refer” in the app.')}</p>}
           </div>
-          {state === 'ready' && (
-            <p className="text-sm leading-relaxed text-ink-500 lg:pl-4">
-              {sw ? 'Mwaliko wako umehifadhiwa kwa siku 30. Rafiki aliyekualika anaweza kupata zawadi nyumba yako ikithibitishwa na kuchapishwa. ' : 'Your invitation is saved for 30 days. The friend who invited you may be rewarded once your place is verified and published. '}
-              <Link href="/terms#referral-programme" className="font-semibold text-ink-700 underline underline-offset-4">{sw ? 'Masharti' : 'Terms'}</Link>
-            </p>
-          )}
+
+          <a href={invited ? `https://www.ndotoni.com/r/${attributionCode}` : 'https://www.ndotoni.com/property/create'} className="group flex items-center justify-between gap-4 rounded-3xl border border-ink-200 p-5 transition-colors hover:border-ink-900 sm:p-6">
+            <span>
+              <span className="block text-lg font-bold tracking-tight">{sw ? 'Unapangisha kwa muda mrefu?' : 'Renting out long-term?'}</span>
+              <span className="mt-0.5 block text-sm text-ink-500">{sw ? 'Endelea kwenye Ndotoni.' : 'Continue on Ndotoni.'}</span>
+            </span>
+            <ArrowRight size={20} className="shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+          </a>
         </section>
+
+        {state === 'ready' && (
+          <p className="mx-auto mt-6 max-w-5xl px-2 text-center text-xs text-ink-500">
+            {sw ? 'Mwaliko umehifadhiwa kwa siku 30. ' : 'Your invitation is saved for 30 days. '}
+            <Link href="/terms#referral-programme" className="font-semibold underline underline-offset-4">{sw ? 'Masharti' : 'Terms'}</Link>
+          </p>
+        )}
       </div>
     </main>
   );

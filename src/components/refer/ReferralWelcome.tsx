@@ -51,7 +51,7 @@ export function ReferralWelcome({ code }: { code: string }) {
 
   const invited = state === 'ready' || state === 'error';
   const listHref = invited ? `/become-host?referralCode=${attributionCode}` : '/become-host';
-  const whatsapp = `https://wa.me/255790720329?text=${encodeURIComponent(`${sw ? 'Nataka kutangaza nyumba yangu ya muda mfupi.' : 'I want to list my short-term stay.'}${invited ? `\nReferral: ${attributionCode}` : ''}`)}`;
+  const whatsapp = `https://wa.me/255790720329?text=${encodeURIComponent(`${sw ? 'Habari! Nimealikwa na rafiki.' : 'Hi! A friend invited me.'}${invited ? `\nReferral: ${attributionCode}` : ''}`)}`;
   async function copyCode() {
     try { await navigator.clipboard.writeText(attributionCode); setCopied(true); setCopyError(false); }
     catch { setCopyError(true); }

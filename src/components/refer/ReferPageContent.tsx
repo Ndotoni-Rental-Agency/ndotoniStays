@@ -52,7 +52,7 @@ export function ReferPageContent() {
     ? `Pata malazi mazuri, au tangaza nyumba yako bure, kwenye Ndotoni Stays: ${url}`
     : `Find a great place to stay, or list yours free, on Ndotoni Stays: ${url}`;
   const shareHref = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  const whatsappChat = `https://wa.me/255790720329?text=${encodeURIComponent(sw ? 'Pata pesa' : 'Referral')}`;
+  const whatsappChat = `https://wa.me/255790720329?text=${encodeURIComponent(sw ? 'Pata pesa' : 'My referral Link')}`;
 
   async function copy() {
     try {

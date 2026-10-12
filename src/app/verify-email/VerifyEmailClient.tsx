@@ -7,11 +7,19 @@ import { AuthBridge } from '@/lib/auth-bridge';
 
 type Status = 'confirming' | 'success' | 'error' | 'missing-params';
 
+/** The page to return to after confirming, if it's a safe same-site path. */
+function safeNext(value: string | null): string | undefined {
+  if (!value || value.length > 200 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return undefined;
+  return /^\/(verify-email|reset-password|auth)\b/.test(value) ? undefined : value;
+}
+
+
 function VerifyEmail() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const code = searchParams.get('code');
+  const next = safeNext(searchParams.get('next'));
 
   const [status, setStatus] = useState<Status>(email && code ? 'confirming' : 'missing-params');
   const [error, setError] = useState('');
@@ -53,9 +61,9 @@ function VerifyEmail() {
           <CheckCircleIcon className="h-8 w-8 text-brand-600" />
         </div>
         <h1 className="text-xl font-bold text-ink-900 mb-2">Email confirmed</h1>
-        <p className="text-sm text-ink-500 mb-6">Your account is ready. Sign in to get started.</p>
-        <button onClick={() => router.push('/')} className="btn-primary w-full">
-          Go to ndotoniStays
+        <p className="text-sm text-ink-500 mb-6">Your account is ready. Sign in to {next ? 'carry on where you left off' : 'get started'}.</p>
+        <button onClick={() => router.push(`${next || '/'}${(next || '/').includes('?') ? '&' : '?'}signin=1`)} className="btn-primary w-full">
+          {next ? 'Continue' : 'Go to ndotoniStays'}
         </button>
       </div>
     );

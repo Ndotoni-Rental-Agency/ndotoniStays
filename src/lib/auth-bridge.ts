@@ -73,7 +73,7 @@ export class AuthBridge {
   }) {
     const data = await GraphQLClient.executePublic<{ signUp: { success: boolean; message: string } }>(
       signUpMutation,
-      { input: { ...input, platform: 'ndotonistays', referralCode: pendingReferral() } }
+      { input: { ...input, platform: 'ndotonistays', referralCode: pendingReferral(), returnPath: window.location.pathname + window.location.search } }
     );
 
     if (!data.signUp?.success) {

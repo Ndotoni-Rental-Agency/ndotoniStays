@@ -3,6 +3,7 @@
 import { ReferralPrompt } from '@/components/refer/ReferralPrompt';
 import { ReactNode, Suspense } from 'react';
 import { ReferralCapture } from '@/components/refer/ReferralCapture';
+import { SignInOnLanding } from '@/components/auth/SignInOnLanding';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ChatProvider } from '@/contexts/ChatContext';
@@ -14,7 +15,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <ChatProvider>{children}<ReferralPrompt /><Suspense fallback={null}><ReferralCapture /></Suspense></ChatProvider>
+        <ChatProvider>{children}<ReferralPrompt /><Suspense fallback={null}><ReferralCapture /><SignInOnLanding /></Suspense></ChatProvider>
       </AuthProvider>
     </LanguageProvider>
   );

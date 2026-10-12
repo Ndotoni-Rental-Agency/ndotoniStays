@@ -119,15 +119,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // After signup, user needs to verify email
   }
 
+  // Social sign-in leaves the site; come back to the page it started from.
+  function rememberReturnPage() {
+    try { localStorage.setItem('ndotoni_booking_redirect', window.location.href); } catch { /* Falls back to home. */ }
+  }
+
   async function signInWithGoogle() {
+    rememberReturnPage();
     await AuthBridge.signInWithGoogle();
   }
 
   async function signInWithApple() {
+    rememberReturnPage();
     await AuthBridge.signInWithApple();
   }
 
   async function signInWithFacebook() {
+    rememberReturnPage();
     await AuthBridge.signInWithFacebook();
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,12 +29,6 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  // Always require a fresh, affirmative agreement each time the sign-up view is shown.
-  useEffect(() => {
-    if (view === 'signUp') setAgreedToTerms(false);
-  }, [view]);
 
   if (!isOpen) return null;
 
@@ -256,24 +250,16 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
             <h2 className="text-2xl font-bold text-ink-900 mb-1">Create an account</h2>
             <p className="text-sm text-ink-500 mb-4">Sign up to start booking stays</p>
 
-            <label className="mb-4 flex items-start gap-2.5 text-sm text-ink-600 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-ink-300 text-brand-600 focus:ring-brand-500 flex-shrink-0"
-              />
-              <span>
-                I agree to ndotoni Stays&apos;{' '}
-                <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>
-                {' '}and{' '}
-                <Link href="/privacy" target="_blank" className="text-brand-600 hover:underline">Privacy Policy</Link>.
-              </span>
-            </label>
+            <p className="mb-4 text-xs leading-relaxed text-ink-500">
+              By continuing, you agree to our{' '}
+              <Link href="/terms" target="_blank" className="text-brand-600 hover:underline">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" target="_blank" className="text-brand-600 hover:underline">Privacy Policy</Link>.
+            </p>
 
             <button
               onClick={handleGoogleSignIn}
-              disabled={!agreedToTerms}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -287,7 +273,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
             <button
               onClick={handleAppleSignIn}
-              disabled={!agreedToTerms}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -298,7 +284,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
             <button
               onClick={handleFacebookSignIn}
-              disabled={!agreedToTerms}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-3 rounded-xl border border-ink-200 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-4"
               style={{ display: process.env.NEXT_PUBLIC_ENABLE_FACEBOOK_SIGNIN === 'true' ? undefined : 'none' }}
             >
@@ -337,7 +323,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'signIn' }: Props) {
 
               {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-              <button type="submit" disabled={loading || !agreedToTerms} className="btn-primary w-full">
+              <button type="submit" disabled={loading} className="btn-primary w-full">
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>

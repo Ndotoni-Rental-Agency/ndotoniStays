@@ -18,6 +18,7 @@ import {
   BanknotesIcon,
   UserPlusIcon,
   GiftIcon,
+  InboxArrowDownIcon,
 } from '@heroicons/react/24/outline';
 
 export function HostSidebar() {
@@ -79,6 +80,7 @@ export function HostSidebar() {
     // Admin only: list a property on behalf of an owner with no account
     ...(isAdmin ? [{ name: t('host.nav.managed'), href: '/host/managed', icon: UserPlusIcon, badge: 0 }] : []),
     ...(isAdmin ? [{ name: 'Referral rewards', href: '/host/referral-rewards', icon: GiftIcon, badge: 0 }] : []),
+    ...(isAdmin ? [{ name: 'Group imports', href: '/host/group-imports', icon: InboxArrowDownIcon, badge: 0 }] : []),
   ];
 
   return (

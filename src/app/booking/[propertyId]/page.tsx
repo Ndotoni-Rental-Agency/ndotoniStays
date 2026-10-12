@@ -19,6 +19,7 @@ import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
 import { SERVICE_FEE_ENABLED } from '@/constants/pricing';
 import { locationLine } from '@/lib/location/format';
+import { pendingReferral } from '@/lib/referral/attribution';
 
 type PaymentMethod = 'mobile_money' | 'card';
 type PaymentOption = 'full' | 'deposit';
@@ -184,6 +185,7 @@ export default function BookingPage() {
             guestName: guestName.trim(),
             guestEmail: guestEmail.trim(),
             guestPhone: fullGuestPhone || undefined,
+            referralCode: pendingReferral(),
           },
         }
       );

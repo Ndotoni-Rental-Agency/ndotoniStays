@@ -90,7 +90,7 @@ export function Footer() {
           <Link href="/terms" className="hover:text-ink-700 transition-colors underline-offset-2 hover:underline">
             {t('footer.terms')}
           </Link>
-          <Link href="/refer" className="hover:text-ink-700">Refer & earn up to TZS 25,000</Link>
+          <Link href="/refer" className="hover:text-ink-700">Refer & earn</Link>
           <Link href="/privacy" className="hover:text-ink-700 transition-colors underline-offset-2 hover:underline">
             {t('footer.privacy')}
           </Link>

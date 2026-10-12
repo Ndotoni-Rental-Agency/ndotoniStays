@@ -49,8 +49,8 @@ export function ReferPageContent() {
   }, [copied]);
 
   const message = sw
-    ? `Una nyumba ya kukaribisha wageni? Itangaze bure kwenye Ndotoni Stays: ${url}`
-    : `Have a place guests would love? List it free on Ndotoni Stays: ${url}`;
+    ? `Pata malazi mazuri, au tangaza nyumba yako bure, kwenye Ndotoni Stays: ${url}`
+    : `Find a great place to stay, or list yours free, on Ndotoni Stays: ${url}`;
   const shareHref = `https://wa.me/?text=${encodeURIComponent(message)}`;
   const whatsappChat = `https://wa.me/255790720329?text=${encodeURIComponent(sw ? 'Pata pesa' : 'Referral')}`;
 
@@ -70,13 +70,13 @@ export function ReferPageContent() {
 
   const steps = [
     { icon: Share2, label: sw ? 'Tuma Link yako' : 'Share your Link' },
-    { icon: Home, label: sw ? 'Wanatangaza nyumba' : 'They list their place' },
-    { icon: Gift, label: sw ? 'Unapata zawadi' : 'You get rewarded' },
+    { icon: Home, label: sw ? 'Wanabook au kutangaza' : 'Friends book or host' },
+    { icon: Gift, label: sw ? 'Unalipwa' : 'You get paid' },
   ];
   const trust = [
-    { icon: Users, title: sw ? 'Wenyeji 5 wa kwanza' : 'First 5 hosts', text: sw ? 'Kwenye Ndotoni, Stays na app' : 'Across Stays, Ndotoni and the app' },
-    { icon: BadgeCheck, title: sw ? 'Zawadi moja kwa mwenyeji' : 'One reward per host', text: sw ? 'Hata akiwa na nyumba nyingi' : 'However many places they list' },
-    { icon: ShieldCheck, title: sw ? 'Inakaguliwa na timu yetu' : 'Reviewed by our team', text: sw ? 'Kiasi kinathibitishwa nyumba ikichapishwa' : 'Amount confirmed once their place is live' },
+    { icon: BadgeCheck, title: sw ? 'Kila booking kwa mwaka mmoja' : 'Every booking for a year', text: sw ? 'Rafiki akibook tena, unapata tena' : 'Earn again each time a friend books' },
+    { icon: Users, title: sw ? 'Wageni 10 · wenyeji 5' : 'Up to 10 guests · 5 hosts', text: sw ? 'Kwenye Stays, Ndotoni na app' : 'Across Stays, Ndotoni and the app' },
+    { icon: ShieldCheck, title: sw ? 'Inakaguliwa na timu yetu' : 'Reviewed by our team', text: sw ? 'Baada ya safari au nyumba ikichapishwa' : 'After the stay, or once their place is live' },
   ];
   const linkReady = isAuthenticated && !!url;
 
@@ -85,18 +85,25 @@ export function ReferPageContent() {
       <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} initialView="signUp" />
       <div className="mx-auto max-w-6xl px-3 pt-3 sm:px-6 sm:pt-6">
         <section className="relative">
-          <div className="relative h-[360px] overflow-hidden rounded-[28px] sm:h-[440px] lg:h-[540px]">
+          <div className="relative h-[400px] overflow-hidden rounded-[28px] sm:h-[460px] lg:h-[540px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`${HERO}&w=1600`} srcSet={`${HERO}&w=800 800w, ${HERO}&w=1600 1600w, ${HERO}&w=2200 2200w`} sizes="(min-width: 1152px) 1152px, 100vw" alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/40 lg:to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 pb-16 sm:p-10 sm:pb-20 lg:inset-y-0 lg:flex lg:max-w-xl lg:flex-col lg:justify-center lg:pb-10">
               <h1 className="text-balance text-[2.3rem] font-bold leading-[0.95] tracking-[-0.035em] text-white sm:text-6xl">
-                {sw ? 'Alika wenyeji.' : 'Invite hosts.'}<br />
-                <span className="text-brand-400">{sw ? 'Pata hadi TZS 25,000.' : 'Earn up to TZS 25,000.'}</span>
+                {sw ? 'Shiriki Link yako.' : 'Share your Link.'}<br />
+                <span className="text-brand-400">{sw ? 'Pata pesa.' : 'Get paid.'}</span>
               </h1>
-              <p className="mt-4 max-w-sm text-base font-medium leading-snug text-white/85 sm:text-lg">
-                {sw ? 'Hadi TZS 5,000 kwa kila mmoja wa wenyeji wako wapya 5 wa kwanza.' : 'Up to TZS 5,000 for each of your first 5 new hosts.'}
-              </p>
+              <dl className="mt-5 max-w-sm divide-y divide-white/20 border-y border-white/20 text-white">
+                <div className="flex items-baseline justify-between gap-4 py-2.5">
+                  <dt className="text-sm text-white/80">{sw ? 'Rafiki akibook' : 'A friend books'}</dt>
+                  <dd className="text-base font-bold">{sw ? 'hadi TZS 10,000' : 'up to TZS 10,000'}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-4 py-2.5">
+                  <dt className="text-sm text-white/80">{sw ? 'Rafiki akiwa mwenyeji' : 'A friend starts hosting'}</dt>
+                  <dd className="text-base font-bold">{sw ? 'hadi TZS 5,000' : 'up to TZS 5,000'}</dd>
+                </div>
+              </dl>
             </div>
           </div>
 
@@ -183,7 +190,7 @@ export function ReferPageContent() {
             ))}
           </ul>
           <p className="mt-6 border-t border-ink-200 pt-5 text-sm text-ink-500">
-            {sw ? 'Unaweza kuendelea kushiriki baada ya wenyeji 5, bila zawadi ya fedha. ' : 'Keep sharing after 5 hosts; further referrals don’t earn cash. '}
+            {sw ? 'Kidokezo: bonyeza “Shiriki” kwenye nyumba yoyote, Link yako itaongezwa. ' : 'Tip: tap “Share” on any stay and your Link is added. '}
             <Link href="/terms#referral-programme" className="font-semibold text-ink-900 underline underline-offset-4">{sw ? 'Masharti' : 'Terms'}</Link>
           </p>
         </section>

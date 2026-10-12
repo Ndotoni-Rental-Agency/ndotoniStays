@@ -17,6 +17,7 @@ import {
   ChatBubbleLeftRightIcon,
   BanknotesIcon,
   UserPlusIcon,
+  GiftIcon,
 } from '@heroicons/react/24/outline';
 
 export function HostSidebar() {
@@ -68,7 +69,7 @@ export function HostSidebar() {
   }
 
   const NAV_ITEMS = [
-    { name: language === 'sw' ? 'Rufaa · Hadi TZS 25,000' : 'Refer · Up to TZS 25,000', href: '/refer', icon: UserPlusIcon, badge: 0 },
+    { name: language === 'sw' ? 'Rufaa na zawadi' : 'Refer & earn', href: '/refer', icon: UserPlusIcon, badge: 0 },
     { name: t('host.nav.properties'), href: '/host', icon: HomeModernIcon, exact: true, badge: 0 },
     { name: t('host.nav.bookings'), href: '/host/bookings', icon: ClipboardDocumentListIcon, badge: pendingCount },
     { name: t('host.nav.calendar'), href: '/host/calendar', icon: CalendarDaysIcon, badge: 0 },
@@ -77,6 +78,7 @@ export function HostSidebar() {
     { name: t('host.nav.whatsapp'), href: '/host/whatsapp', icon: ChatBubbleLeftRightIcon, badge: 0 },
     // Admin only: list a property on behalf of an owner with no account
     ...(isAdmin ? [{ name: t('host.nav.managed'), href: '/host/managed', icon: UserPlusIcon, badge: 0 }] : []),
+    ...(isAdmin ? [{ name: 'Referral rewards', href: '/host/referral-rewards', icon: GiftIcon, badge: 0 }] : []),
   ];
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, Check, Copy, MessageCircle, RotateCw, Smartphone, Sparkles } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Check, Copy, Home, MessageCircle, RotateCw, Search, Smartphone, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { CLAIM_REFERRAL, clearPendingReferral, rememberReferral } from '@/lib/referral/attribution';
@@ -57,8 +57,8 @@ export function ReferralWelcome({ code }: { code: string }) {
     catch { setCopyError(true); }
   }
   const trust = [
-    { icon: Sparkles, label: sw ? 'Bure kutangaza' : 'Free to list' },
     { icon: BadgeCheck, label: sw ? 'Nyumba zinathibitishwa' : 'Verified listings' },
+    { icon: Sparkles, label: sw ? 'Bure kutangaza' : 'Free to list' },
     { icon: MessageCircle, label: sw ? 'Msaada WhatsApp' : 'Help on WhatsApp' },
   ];
 
@@ -72,9 +72,9 @@ export function ReferralWelcome({ code }: { code: string }) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/40 lg:to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5 pb-16 sm:p-10 sm:pb-20 lg:inset-y-0 lg:flex lg:max-w-xl lg:flex-col lg:justify-center lg:pb-10">
               <h1 className="text-balance text-[2.3rem] font-bold leading-[0.95] tracking-[-0.035em] text-white sm:text-6xl">
-                {sw ? 'Tangaza nyumba yako ' : 'List your place '}<span className="text-brand-400">{sw ? 'bure.' : 'for free.'}</span>
+                {sw ? 'Karibu ' : 'Welcome to '}<span className="text-brand-400">Ndotoni Stays.</span>
               </h1>
-              <p className="mt-3 text-base font-medium text-white/85 sm:text-lg">{state === 'invalid' ? (sw ? 'Karibu Ndotoni Stays.' : 'Welcome to Ndotoni Stays.') : (sw ? 'Rafiki amekualika kwenye Ndotoni Stays.' : 'A friend invited you to Ndotoni Stays.')}</p>
+              <p className="mt-3 text-base font-medium text-white/85 sm:text-lg">{state === 'invalid' ? (sw ? 'Malazi mazuri kote Tanzania.' : 'Great places to stay across Tanzania.') : (sw ? 'Rafiki amekualika. Book malazi, au tangaza nyumba yako bure.' : 'A friend invited you. Book a stay, or list your place for free.')}</p>
             </div>
           </div>
 
@@ -98,13 +98,16 @@ export function ReferralWelcome({ code }: { code: string }) {
                   </div>
                 )}
                 <div className="grid gap-2.5">
-                  <Link href={listHref} className={`${pill} bg-brand-600 text-base text-white hover:bg-brand-700`}>
-                    {sw ? 'Tangaza nyumba yangu' : 'List my place'}<ArrowRight size={18} aria-hidden="true" />
+                  <Link href="/search" className={`${pill} bg-brand-600 text-base text-white hover:bg-brand-700`}>
+                    <Search size={18} aria-hidden="true" />{sw ? 'Tafuta malazi' : 'Find a place to stay'}
                   </Link>
-                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={`${pill} border border-ink-200 text-ink-900 hover:bg-ink-50`}>
-                    <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Tuma WhatsApp badala yake' : 'Use WhatsApp instead'}
-                  </a>
+                  <Link href={listHref} className={`${pill} border border-ink-200 text-ink-900 hover:bg-ink-50`}>
+                    <Home size={18} aria-hidden="true" />{sw ? 'Tangaza nyumba yangu bure' : 'List my place for free'}
+                  </Link>
                 </div>
+                <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="mx-auto mt-2 flex min-h-11 w-fit items-center gap-2 px-3 text-sm font-semibold text-ink-700 underline-offset-4 hover:underline">
+                  <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Au tumia WhatsApp' : 'Or use WhatsApp'}
+                </a>
                 <ul className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs font-semibold text-ink-500">
                   {trust.map(({ icon: Icon, label }) => (
                     <li key={label} className="inline-flex items-center gap-1.5"><Icon size={14} className="text-brand-600" aria-hidden="true" />{label}</li>

@@ -9,6 +9,7 @@ import { ShortTermProperty } from '@/API';
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { locationLine } from '@/lib/location/format';
+import { ShareStayButton } from '@/components/refer/ShareStayButton';
 
 interface Props {
   property: ShortTermProperty;
@@ -36,9 +37,12 @@ export function PropertyInfo({ property }: Props) {
     <div className="space-y-8">
       {/* Title & meta */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
-          {property.title}
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-ink-900">
+            {property.title}
+          </h1>
+          <ShareStayButton propertyId={property.propertyId} title={property.title} />
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-ink-500">
           <span className="flex items-center gap-1">
             <MapPinIcon className="h-4 w-4" />

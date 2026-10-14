@@ -42,6 +42,9 @@ export function locationLine(p: LocationParts | null | undefined, form: 'short' 
   const parts = form === 'full'
     ? [street, ward, district, region]
     : ward ? [ward, district || region] : [district, region];
+  const zanzibar = ['mjini magharibi', 'kaskazini unguja', 'kusini unguja', 'unguja kaskazini', 'unguja kusini', 'kaskazini pemba', 'kusini pemba', 'unguja', 'pemba', 'zanzibar']
+    .includes((region || '').toLowerCase());
+  if (zanzibar && !parts.some(part => part?.toLowerCase() === 'zanzibar')) parts.push('Zanzibar');
   return parts
     .filter((x): x is string => !!x)
     .filter((x, i, all) => i === 0 || x.toLowerCase() !== all[i - 1].toLowerCase())

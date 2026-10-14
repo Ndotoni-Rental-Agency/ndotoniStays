@@ -144,7 +144,14 @@ export function searchLocations(
 
   const lowerQuery = query.toLowerCase().trim();
 
-  return flattened.filter(location => 
+  const zanzibarRegions = ['mjini magharibi', 'kaskazini unguja', 'kusini unguja', 'kaskazini pemba', 'kusini pemba'];
+  const candidates: FlattenedLocation[] = [
+    ...(!flattened.some(location => location.name.toLowerCase() === 'zanzibar')
+      ? [{ type: 'region' as const, name: 'Zanzibar', displayName: 'Zanzibar' }] : []),
+    ...flattened.map(location => zanzibarRegions.includes((location.regionName || location.name).toLowerCase().replace(/-/g, ' '))
+      ? { ...location, displayName: `${location.displayName}, Zanzibar` } : location),
+  ];
+  return candidates.filter(location =>
     location.name.toLowerCase().includes(lowerQuery) ||
     location.displayName.toLowerCase().includes(lowerQuery)
   );

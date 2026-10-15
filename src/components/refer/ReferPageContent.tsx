@@ -9,7 +9,9 @@ import { GraphQLClient } from '@/lib/graphql-client';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
 const HERO = 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=75&auto=format&fit=crop';
-const pill = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.98]';
+const pill = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-[background-color,border-color,box-shadow,transform] duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.98]';
+const primary = 'bg-brand-600 text-white shadow-lg shadow-brand-600/30 ring-1 ring-inset ring-white/15 hover:-translate-y-px hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/35 active:translate-y-0 active:shadow-md';
+const secondary = 'border border-ink-300 bg-white text-ink-900 shadow-sm hover:-translate-y-px hover:border-ink-400 hover:bg-ink-50 hover:shadow-md active:translate-y-0 active:shadow-sm';
 
 export function ReferPageContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -119,19 +121,20 @@ export function ReferPageContent() {
                 <p className="text-lg font-bold tracking-tight">{sw ? 'Pata Link yako binafsi' : 'Get your personal Link'}</p>
                 <p className="mt-1 text-sm text-ink-500">{sw ? 'Bure, na ni yako milele.' : 'Free, and yours to keep.'}</p>
                 <div className="mt-4 grid gap-2.5">
-                  <button type="button" onClick={() => setShowAuth(true)} className={`${pill} bg-brand-600 text-white hover:bg-brand-700`}>
-                    {sw ? 'Pata Link yangu' : 'Get my Link'}<ArrowRight size={17} aria-hidden="true" />
-                  </button>
-                  <a href={whatsappChat} target="_blank" rel="noopener noreferrer" className={`${pill} border border-ink-200 text-ink-900 hover:bg-ink-50`}>
-                    <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Ipate WhatsApp, bila akaunti' : 'Get it on WhatsApp, no account'}
+                  <a href={whatsappChat} target="_blank" rel="noopener noreferrer" className={`${pill} ${primary} text-base`}>
+                    <WhatsAppIcon className="h-5 w-5" />{sw ? 'Pata Link kwenye WhatsApp' : 'Get your Link on WhatsApp'}
                   </a>
+                  <p className="text-center text-xs text-ink-500">{sw ? 'Haraka, bila kufungua akaunti.' : 'Fastest, no account needed.'}</p>
+                  <button type="button" onClick={() => setShowAuth(true)} className={`${pill} ${secondary}`}>
+                    {sw ? 'Au fungua akaunti' : 'Or create an account'}<ArrowRight size={17} aria-hidden="true" />
+                  </button>
                 </div>
               </>
             ) : failed ? (
               <div role="alert">
                 <p className="text-lg font-bold tracking-tight">{sw ? 'Link yako haikupatikana' : 'We couldn’t load your Link'}</p>
                 <p className="mt-1 text-sm text-ink-500">{sw ? 'Angalia mtandao kisha ujaribu tena.' : 'Check your connection and try again.'}</p>
-                <button type="button" onClick={() => setRetry(n => n + 1)} className={`${pill} mt-4 w-full bg-ink-900 text-white hover:bg-ink-800`}>
+                <button type="button" onClick={() => setRetry(n => n + 1)} className={`${pill} mt-4 w-full bg-ink-900 text-white shadow-lg shadow-ink-900/25 hover:-translate-y-px hover:bg-ink-800 active:translate-y-0`}>
                   <RotateCw size={16} aria-hidden="true" />{sw ? 'Jaribu tena' : 'Try again'}
                 </button>
               </div>
@@ -140,12 +143,12 @@ export function ReferPageContent() {
                 <label htmlFor="referral-link" className="text-sm font-bold">{sw ? 'Link yako' : 'Your Link'}</label>
                 <div className="mt-2 flex items-center gap-1 rounded-xl border border-ink-200 bg-ink-50 p-1 pl-3.5">
                   <input id="referral-link" ref={linkRef} readOnly value={url.replace('https://www.', '')} onFocus={e => e.target.select()} className="min-w-0 flex-1 bg-transparent text-sm font-medium text-ink-700 outline-none selection:bg-brand-200" />
-                  <button type="button" onClick={copy} className={`${pill} min-h-10 shrink-0 rounded-lg px-3.5 ${copied ? 'bg-brand-100 text-brand-800' : 'bg-white text-ink-900 shadow-sm hover:bg-ink-100'}`}>
+                  <button type="button" onClick={copy} className={`${pill} min-h-10 shrink-0 rounded-lg px-3.5 ${copied ? 'bg-brand-100 text-brand-800' : 'bg-white text-ink-900 shadow-sm ring-1 ring-ink-200 hover:bg-ink-100 hover:shadow'}`}>
                     {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                     {copied ? (sw ? 'Imenakiliwa' : 'Copied') : (sw ? 'Nakili' : 'Copy')}
                   </button>
                 </div>
-                <a href={shareHref} target="_blank" rel="noopener noreferrer" className={`${pill} mt-3 w-full bg-brand-600 text-base text-white hover:bg-brand-700`}>
+                <a href={shareHref} target="_blank" rel="noopener noreferrer" className={`${pill} ${primary} mt-3 w-full text-base`}>
                   <WhatsAppIcon className="h-5 w-5" />{sw ? 'Shiriki kwenye WhatsApp' : 'Share on WhatsApp'}
                 </a>
                 {canShare && (
@@ -204,13 +207,13 @@ export function ReferPageContent() {
 
       <div aria-hidden={cardVisible} className={`fixed inset-x-0 bottom-0 z-40 border-t border-ink-200 bg-white/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-transform duration-300 ease-out sm:hidden ${cardVisible || isLoading || failed ? 'translate-y-full' : 'translate-y-0'}`}>
         {linkReady ? (
-          <a href={shareHref} target="_blank" rel="noopener noreferrer" tabIndex={cardVisible ? -1 : 0} className={`${pill} w-full bg-brand-600 text-base text-white hover:bg-brand-700`}>
+          <a href={shareHref} target="_blank" rel="noopener noreferrer" tabIndex={cardVisible ? -1 : 0} className={`${pill} ${primary} w-full text-base`}>
             <WhatsAppIcon className="h-5 w-5" />{sw ? 'Shiriki kwenye WhatsApp' : 'Share on WhatsApp'}
           </a>
         ) : (
-          <button type="button" tabIndex={cardVisible ? -1 : 0} onClick={() => setShowAuth(true)} className={`${pill} w-full bg-brand-600 text-base text-white hover:bg-brand-700`}>
-            {sw ? 'Pata Link yangu' : 'Get my Link'}<ArrowRight size={17} aria-hidden="true" />
-          </button>
+          <a href={whatsappChat} target="_blank" rel="noopener noreferrer" tabIndex={cardVisible ? -1 : 0} className={`${pill} ${primary} w-full text-base`}>
+            <WhatsAppIcon className="h-5 w-5" />{sw ? 'Pata Link kwenye WhatsApp' : 'Get your Link on WhatsApp'}
+          </a>
         )}
       </div>
     </main>

@@ -34,6 +34,7 @@ export function HomeProperties() {
   const [region, setRegion] = useState(REGIONS[0]);
   const [dates, setDates] = useState<ReturnType<typeof upcomingDates> | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -41,9 +42,9 @@ export function HomeProperties() {
   useEffect(() => {
     if (!dates) return;
     let active = true;
-    setLoading(true); setError(false); setProperties([]);
+    setLoading(true); setError(false); setProperties([]); setVisibleCount(12);
     GraphQLClient.executePublic<{searchShortTermProperties: {properties:Property[]}}>(QUERY, {input:{
-      region, checkInDate:dates.checkIn, checkOutDate:dates.checkOut, numberOfGuests:1, limit:12,
+      region, checkInDate:dates.checkIn, checkOutDate:dates.checkOut, numberOfGuests:1, limit:100,
     }}).then(data => {
       if (active) {
         const seen = new Set<string>();
@@ -51,7 +52,7 @@ export function HomeProperties() {
           // Published integration-test fixtures should not be promoted on the homepage.
           if (/^HydraTest[-_]/i.test(property.title) || seen.has(property.propertyId)) return false;
           seen.add(property.propertyId); return true;
-        }).slice(0, 8));
+        }));
       }
     })
       .catch(() => {if(active) setError(true);})
@@ -95,8 +96,9 @@ export function HomeProperties() {
     </div>
     {error ? <div role="alert" className="rounded-2xl border border-ink-200 bg-ink-50 p-6"><p className="text-sm text-ink-600">{sw ? 'Sehemu hazijapakia. Tafadhali jaribu tena.' : 'Places could not load. Please try again.'}</p><button type="button" onClick={()=>setRetry(value=>value+1)} className="mt-3 min-h-11 text-sm font-semibold text-brand-800 underline">{sw ? 'Jaribu tena' : 'Try again'}</button></div>
       : loading ? <div aria-label={sw ? 'Inapakia sehemu' : 'Loading stays'} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map(key=><div key={key} aria-hidden="true" className="animate-pulse"><div className="aspect-[4/3] rounded-2xl bg-ink-100"/><div className="mt-4 h-4 w-3/4 rounded bg-ink-100"/><div className="mt-3 h-4 w-1/2 rounded bg-ink-100"/></div>)}</div>
-      : properties.length ? <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">{properties.map(property=><PropertyCard key={property.propertyId} property={property} checkIn={dates?.checkIn} checkOut={dates?.checkOut}/>)}</div>
+      : properties.length ? <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">{properties.slice(0, visibleCount).map(property=><PropertyCard key={property.propertyId} property={property} checkIn={dates?.checkIn} checkOut={dates?.checkOut}/>)}</div>
       : <div className="rounded-2xl border border-ink-200 bg-ink-50 p-6 text-sm text-ink-600"><p>{sw ? 'Hakuna sehemu zilizopatikana kwa tarehe hizi. Chagua eneo jingine au badilisha tarehe.' : 'No places found for these dates. Try another region or choose different dates.'}</p><Link href={href} className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand-800 underline">{sw ? 'Badilisha tarehe' : 'Choose other dates'}</Link></div>}
+    {!loading && !error && visibleCount < properties.length && <div className="mt-8 flex justify-center"><button type="button" onClick={() => setVisibleCount(count => count + 12)} className="min-h-12 rounded-full border border-brand-800 px-7 text-sm font-semibold text-brand-800">{sw ? 'Onyesha sehemu zaidi' : 'Show more places'}</button></div>}
     {!loading && !error && <CategoryGrid availableCategories={availableCategories} searchBase={href} />}
   </section>;
 }

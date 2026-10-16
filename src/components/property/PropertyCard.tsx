@@ -22,6 +22,8 @@ interface ShortTermProperty {
   propertyType: string;
   region: string;
   district: string;
+  ward?: string;
+  street?: string;
   address?: { ward?: string | null; street?: string | null } | null;
   thumbnail: string;
   images: string[];
@@ -94,7 +96,7 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
         <h3 className="line-clamp-2 min-h-[3rem] text-sm font-semibold leading-6 text-ink-900 group-hover:text-brand-700 transition-colors">{property.title}</h3>
         <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-500">
           <MapPin size={13} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">{locationLine({ ward: property.address?.ward, district: property.district, region: property.region })}</span>
+          <span className="line-clamp-2">{locationLine({ ward: property.ward || property.address?.ward, street: property.street || property.address?.street, district: property.district, region: property.region })}</span>
         </p>
         <div className="mt-4 flex items-center justify-between gap-2 border-t border-ink-100 pt-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">

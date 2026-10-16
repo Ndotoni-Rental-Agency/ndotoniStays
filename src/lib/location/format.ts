@@ -1,7 +1,7 @@
 /**
  * How a property's location is written.
  *
- *   short: ward, district   "Sinza, Ubungo"   (cards, titles; district, region when there's no ward)
+ *   short: ward, district, region   "Sinza, Ubungo, Dar es Salaam"
  *   full:  street → region  "Mori, Sinza, Ubungo, Dar es Salaam"
  *
  * Values may be official names, typed names or slugs ("mbezi-beach"); all come out title-cased,
@@ -41,7 +41,7 @@ export function locationLine(p: LocationParts | null | undefined, form: 'short' 
   const region = clean(p.region);
   const parts = form === 'full'
     ? [street, ward, district, region]
-    : ward ? [ward, district || region] : [district, region];
+    : [ward || street, district, region];
   const zanzibar = ['mjini magharibi', 'kaskazini unguja', 'kusini unguja', 'unguja kaskazini', 'unguja kusini', 'kaskazini pemba', 'kusini pemba', 'unguja', 'pemba', 'zanzibar']
     .includes((region || '').toLowerCase());
   if (zanzibar && !parts.some(part => part?.toLowerCase() === 'zanzibar')) parts.push('Zanzibar');

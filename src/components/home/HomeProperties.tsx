@@ -13,7 +13,7 @@ type Property = ComponentProps<typeof PropertyCard>['property'] & { stayCategori
 const QUERY = `query HomeStays($input: ShortTermSearchInput!) {
   searchShortTermProperties(input: $input) {
     properties {
-      propertyId title nightlyRate currency propertyType region district
+      propertyId title verified nightlyRate currency propertyType region district
       address { ward street } thumbnail images averageRating
       ratingSummary { averageRating totalReviews } maxGuests bedrooms bathrooms instantBookEnabled stayCategories
     }

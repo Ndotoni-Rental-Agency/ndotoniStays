@@ -1,5 +1,6 @@
 'use client';
 
+import { VerifiedStayBadge } from './VerifiedStayBadge';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ArrowUpRight, MapPin, Users, BedDouble } from 'lucide-react';
@@ -16,6 +17,7 @@ const BLUR_PLACEHOLDER =
 
 interface ShortTermProperty {
   propertyId: string;
+  verified?: boolean | null;
   title: string;
   nightlyRate: number;
   currency: string;
@@ -74,8 +76,9 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
           <HomeIcon className="h-10 w-10" strokeWidth={1} aria-hidden="true" />
           <span className="text-xs">{language === 'sw' ? 'Picha zinakuja hivi karibuni' : 'Photos coming soon'}</span>
         </div>}
+        {property.verified === true && <div className="absolute top-3 left-3"><VerifiedStayBadge /></div>}
         {property.instantBookEnabled && (
-          <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-white text-brand-900 text-xs font-semibold px-3 py-2 rounded-full">
+          <span style={{top: property.verified ? 52 : 12}} className="absolute left-3 inline-flex items-center gap-1 bg-white text-brand-900 text-xs font-semibold px-3 py-2 rounded-full">
             <BoltIcon className="h-3 w-3" />
             {sw ? 'Weka nafasi papo hapo' : 'Instant Book'}
           </span>

@@ -1,5 +1,6 @@
 'use client';
 
+import { VerifiedStayBadge } from './VerifiedStayBadge';
 import { useStayCopy } from '@/hooks/useStayCopy';
 
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import { locationLine } from '@/lib/location/format';
 import { ShareStayButton } from '@/components/refer/ShareStayButton';
 
 interface Props {
-  property: ShortTermProperty;
+  property: ShortTermProperty & {verified?: boolean | null};
 }
 
 function capitalize(name: string): string {
@@ -43,6 +44,7 @@ export function PropertyInfo({ property }: Props) {
           </h1>
           <ShareStayButton propertyId={property.propertyId} title={property.title} />
         </div>
+        {property.verified === true && <div className="mt-3"><VerifiedStayBadge /></div>}
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-ink-500">
           <span className="flex items-center gap-1">
             <MapPinIcon className="h-4 w-4" />

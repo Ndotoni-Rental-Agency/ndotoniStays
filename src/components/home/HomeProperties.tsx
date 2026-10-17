@@ -52,6 +52,10 @@ export function HomeProperties() {
           // Published integration-test fixtures should not be promoted on the homepage.
           if (/^HydraTest[-_]/i.test(property.title) || seen.has(property.propertyId)) return false;
           seen.add(property.propertyId); return true;
+        }).sort((a, b) => {
+          const rate = (p: Property) => (Number(p.nightlyRate) || 0) *
+            (({ TZS: 1, USD: 2650, EUR: 2900, GBP: 3400, KES: 21 } as Record<string, number>)[(p.currency || 'TZS').toUpperCase()] || 1);
+          return rate(b) - rate(a);
         }));
       }
     })

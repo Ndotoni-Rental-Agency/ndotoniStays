@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice, calculateNights } from '@/lib/utils';
 import { CheckCircleIcon, ExclamationCircleIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
+import { resolveGuestManualPaymentOptions } from '@/lib/guestManualPaymentOptions';
 
 type PageState = 'loading' | 'ready' | 'confirmed' | 'failed' | 'already_paid' | 'error';
 
@@ -70,6 +71,9 @@ export default function PayBookingPage() {
   const currency = booking?.pricing?.currency || 'TZS';
   const nights = booking ? calculateNights(booking.checkInDate, booking.checkOutDate) : 0;
   const guestName = booking?.guestName || booking?.guest?.firstName || 'Guest';
+  const manualPaymentOptions = bookingId
+    ? resolveGuestManualPaymentOptions(booking?.guestManualPaymentOptions, bookingId)
+    : null;
 
   // Loading
   if (state === 'loading') {
@@ -199,6 +203,7 @@ export default function PayBookingPage() {
         bookingId={bookingId}
         amount={total}
         currency={currency}
+        manualPaymentOptions={manualPaymentOptions}
         onSuccess={() => setState('confirmed')}
         onError={(msg) => setError(msg)}
       />

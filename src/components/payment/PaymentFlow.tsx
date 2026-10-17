@@ -2,7 +2,7 @@
 
 import { useStayCopy } from '@/hooks/useStayCopy';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Smartphone } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { initiatePayment } from '@/graphql/mutations';
@@ -10,6 +10,8 @@ import { getPayment } from '@/graphql/queries';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import { StripePaymentForm } from './StripePaymentForm';
+import { ManualAlternativePayment } from './ManualAlternativePayment';
+import type { GuestManualPaymentOptions } from '@/lib/guestManualPaymentOptions';
 
 type PaymentMethod = 'mobile_money' | 'card' | null;
 
@@ -17,6 +19,7 @@ interface PaymentFlowProps {
   bookingId: string;
   amount: number;
   currency: string;
+  manualPaymentOptions?: GuestManualPaymentOptions | null;
   onSuccess: () => void;
   onError: (message: string) => void;
 }
@@ -26,7 +29,14 @@ interface PaymentFlowProps {
  * Shows: method selector → form → action
  * Used by both /pay/[id] and /booking/[propertyId] pages.
  */
-export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }: PaymentFlowProps) {
+export function PaymentFlow({
+  bookingId,
+  amount,
+  currency,
+  manualPaymentOptions,
+  onSuccess,
+  onError,
+}: PaymentFlowProps) {
   const { copy, sw } = useStayCopy();
   const [method, setMethod] = useState<PaymentMethod>(null);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -34,6 +44,17 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
   const { isAuthenticated } = useAuth();
 
   const isValidPhone = /^255[67]\d{8}$/.test(phoneNumber);
+
+  function wrap(content: ReactNode) {
+    return (
+      <>
+        {content}
+        {manualPaymentOptions ? (
+          <ManualAlternativePayment options={manualPaymentOptions} className="mt-6" />
+        ) : null}
+      </>
+    );
+  }
 
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
     let v = e.target.value.replace(/\D/g, '');
@@ -61,9 +82,6 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
 
       const result = response.initiatePayment;
 
-      // PROCESSING means the gateway accepted the request and the prompt is on
-      // the guest's phone — it's in-flight, not a failure. The webhook settles
-      // it to CAPTURED/FAILED later, which the poller below picks up.
       if (result.status === 'PENDING' || result.status === 'PROCESSING') {
         console.log('[PaymentFlow] Payment in flight, polling reference:', result.reference);
         pollPaymentStatus(result.reference);
@@ -117,7 +135,6 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
     }, 10000);
   }
 
-  // Processing state
   if (isProcessing) {
     return (
       <div className="text-center py-8">
@@ -129,9 +146,8 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
     );
   }
 
-  // Method selector — initial state
   if (!method) {
-    return (
+    return wrap(
       <div className="space-y-3">
         <button
           onClick={() => setMethod('mobile_money')}
@@ -156,13 +172,12 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
           </div>
           <svg className="h-5 w-5 text-ink-300 group-hover:text-brand-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
         </button>
-      </div>
+      </div>,
     );
   }
 
-  // Mobile Money form
   if (method === 'mobile_money') {
-    return (
+    return wrap(
       <div className="space-y-5">
         <div>
           <label htmlFor="payment-phone" className="block text-sm font-medium text-ink-700 mb-2">{copy("Phone number")}</label>
@@ -203,12 +218,11 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
         >
           {copy("\u2190 Pay with card instead")}
         </button>
-      </div>
+      </div>,
     );
   }
 
-  // Card / Apple Pay form
-  return (
+  return wrap(
     <div className="space-y-5">
       <StripePaymentForm
         bookingId={bookingId}
@@ -224,6 +238,6 @@ export function PaymentFlow({ bookingId, amount, currency, onSuccess, onError }:
       >
         {copy("\u2190 Pay with mobile money instead")}
       </button>
-    </div>
+    </div>,
   );
 }

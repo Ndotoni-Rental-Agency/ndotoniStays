@@ -17,6 +17,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { StripePaymentForm } from '@/components/payment/StripePaymentForm';
 import { PaymentFlow } from '@/components/payment/PaymentFlow';
+import { resolveGuestManualPaymentOptions } from '@/lib/guestManualPaymentOptions';
 import { SERVICE_FEE_ENABLED } from '@/constants/pricing';
 import { locationLine } from '@/lib/location/format';
 import { pendingReferral } from '@/lib/referral/attribution';
@@ -431,6 +432,10 @@ export default function BookingPage() {
                 bookingId={bookingId}
                 amount={total}
                 currency={property.currency}
+                manualPaymentOptions={resolveGuestManualPaymentOptions(
+                  bookingData?.guestManualPaymentOptions,
+                  bookingId,
+                )}
                 onSuccess={() => setStep('confirmed')}
                 onError={(msg) => setError(msg)}
               />

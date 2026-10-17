@@ -741,6 +741,12 @@ export const createBooking = /* GraphQL */ `mutation CreateBooking($input: Creat
       numberOfNights
       paymentIntentId
       paymentStatus
+      guestManualPaymentOptions {
+        lipaNumber
+        accountName
+        paymentReference
+        __typename
+      }
       pricing {
         cleaningFee
         currency

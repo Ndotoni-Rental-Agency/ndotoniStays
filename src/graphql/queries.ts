@@ -338,6 +338,12 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
     numberOfNights
     paymentIntentId
     paymentStatus
+    guestManualPaymentOptions {
+      lipaNumber
+      accountName
+      paymentReference
+      __typename
+    }
     pricing {
       cleaningFee
       currency

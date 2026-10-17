@@ -19,6 +19,7 @@ import {
 import { HostCalendar } from '@/components/host/HostCalendar';
 import { HostPhotos } from '@/components/host/HostPhotos';
 import { HostDetailsTab } from '@/components/host/HostDetailsTab';
+import { VerifiedStayBadge } from '@/components/property/VerifiedStayBadge';
 import { HostSettingsTab } from '@/components/host/HostSettingsTab';
 import { HostCheckInTab } from '@/components/host/HostCheckInTab';
 import { PropertyFormData, EMPTY_CHECKIN_INSTRUCTIONS } from '@/components/host/types';
@@ -339,25 +340,10 @@ export default function EditPropertyPage() {
         )}
       </div>
 
-      {user?.userType === 'ADMIN' && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-y border-ink-100 py-4">
-          <div><p className="text-sm font-semibold">Listing verification</p><p className="mt-1 text-xs text-ink-500">Verify after checking the owner and property. Verified listings can be reviewed for a host referral reward of up to TZS 5,000.</p></div>
-          <button disabled={verifying || verified} className="btn-primary text-sm" onClick={async () => {
-            setVerifying(true);
-            try {
-              await GraphQLClient.executeAuthenticated(updateShortTermProperty, { propertyId, input: { verified: true } });
-              setVerified(true);
-              toast.success('Listing verified');
-            } catch { toast.error('Verification failed. Please try again.'); }
-            finally { setVerifying(false); }
-          }}>{verified ? 'Verified' : verifying ? 'Verifying…' : 'Verify listing'}</button>
-        </div>
-      )}
-
       {user?.userType === 'ADMIN' && verified && (
         <section className="mb-6 border border-ink-100 p-4">
           <h2 className="text-sm font-semibold">Host referral reward</h2>
-          <p className="mt-1 text-xs text-ink-500">One reward per host across all units and platforms. Review location and eligibility. Maximum TZS 5,000; five rewarded hosts per referrer.</p>
+          <p className="mt-1 text-xs text-ink-500">One reward per host across all units and platforms. Review location and eligibility. Maximum TZS 5,000; six rewarded hosts per referrer.</p>
           {hostReward && hostReward.rewardStatus !== 'PENDING_REVIEW' ? <p className="mt-3 text-sm">{hostReward.rewardStatus} · TZS {hostReward.amount?.toLocaleString() || '—'}</p> : <div className="mt-3 space-y-3">
             <label className="block text-xs font-medium">Reward amount (TZS)<input type="number" min="1" max="5000" step="1" value={rewardAmount} onChange={e => setRewardAmount(e.target.value)} className="mt-1 block w-full rounded border border-ink-200 p-2" placeholder="e.g. 3000" /></label>
             <label className="block text-xs font-medium">Internal location and eligibility review<textarea value={reviewNote} onChange={e => setReviewNote(e.target.value)} className="mt-1 block w-full rounded border border-ink-200 p-2" /></label>
@@ -422,7 +408,23 @@ export default function EditPropertyPage() {
         <HostCalendar propertyId={propertyId} />
       )}
 
-      {activeTab === 'settings' && (
+      {activeTab === 'settings' && (<>
+      {user?.userType === 'ADMIN' && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-200 bg-white p-5">
+          <div className="space-y-2"><p className="text-sm font-semibold">Listing verification</p><p className="text-xs text-ink-500">Admin only · Controls the verified badge shown to guests.</p>{verified && <VerifiedStayBadge />}</div>
+          <button disabled={verifying} className="btn-primary text-sm" onClick={async () => {
+            if (!window.confirm(verified ? 'Remove verification from this stay?' : 'Mark this stay as verified?')) return;
+            setVerifying(true);
+            try {
+              await GraphQLClient.executeAuthenticated(updateShortTermProperty, { propertyId, input: { verified: !verified } });
+              setVerified(!verified);
+              toast.success(verified ? 'Verification removed' : 'Listing verified');
+            } catch { toast.error('Verification failed. Please try again.'); }
+            finally { setVerifying(false); }
+          }}>{verifying ? 'Saving…' : verified ? 'Remove verification' : 'Mark verified'}</button>
+        </div>
+      )}
+
         <HostSettingsTab
           form={form}
           onUpdate={updateField}
@@ -431,7 +433,7 @@ export default function EditPropertyPage() {
           propertyId={propertyId}
           onDelete={handleDelete}
         />
-      )}
+      </>)}
 
       {activeTab === 'checkin' && (
         <HostCheckInTab

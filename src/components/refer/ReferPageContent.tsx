@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
+import { StoreButtons } from './StoreButtons';
 import { WhatsAppIcon } from './WhatsAppIcon';
 
 const HERO = 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=75&auto=format&fit=crop';
@@ -76,9 +77,9 @@ export function ReferPageContent() {
     { icon: Gift, label: sw ? 'Unalipwa' : 'You get paid' },
   ];
   const trust = [
-    { icon: BadgeCheck, title: sw ? 'Kila booking kwa mwaka mmoja' : 'Every booking for a year', text: sw ? 'Rafiki akibook tena, unapata tena' : 'Earn again each time a friend books' },
-    { icon: Users, title: sw ? 'Wageni 10 · wenyeji 5' : 'Up to 10 guests · 5 hosts', text: sw ? 'Kwenye Stays, Ndotoni na app' : 'Across Stays, Ndotoni and the app' },
-    { icon: ShieldCheck, title: sw ? 'Inakaguliwa na timu yetu' : 'Reviewed by our team', text: sw ? 'Baada ya safari au nyumba ikichapishwa' : 'After the stay, or once their place is live' },
+    { icon: BadgeCheck, title: sw ? 'Tufuate Instagram' : 'Follow us on Instagram', text: '@ndotoni_rentals' },
+    { icon: Users, title: sw ? 'Pakua app ya Ndotoni' : 'Download the Ndotoni app', text: sw ? 'App Store na Google Play' : 'On the App Store and Google Play' },
+    { icon: ShieldCheck, title: sw ? 'Shiriki Link yako' : 'Share your Link', text: sw ? 'Alika marafiki wanaobook au wenyeji' : 'Invite friends who book or host' },
   ];
   const linkReady = isAuthenticated && !!url;
 
@@ -98,12 +99,12 @@ export function ReferPageContent() {
               </h1>
               <dl className="mt-5 max-w-sm divide-y divide-white/20 border-y border-white/20 text-white">
                 <div className="flex items-baseline justify-between gap-4 py-2.5">
-                  <dt className="text-sm text-white/80">{sw ? 'Rafiki akibook' : 'A friend books'}</dt>
-                  <dd className="text-base font-bold">{sw ? 'hadi TZS 10,000' : 'up to TZS 10,000'}</dd>
+                  <dt className="text-sm text-white/80">{sw ? 'Rufaa za booking' : 'Booking referrals'}</dt>
+                  <dd className="text-base font-bold">{sw ? 'hadi TZS 50,000' : 'up to TZS 50,000'}</dd>
                 </div>
                 <div className="flex items-baseline justify-between gap-4 py-2.5">
-                  <dt className="text-sm text-white/80">{sw ? 'Rafiki akiwa mwenyeji' : 'A friend starts hosting'}</dt>
-                  <dd className="text-base font-bold">{sw ? 'hadi TZS 5,000' : 'up to TZS 5,000'}</dd>
+                  <dt className="text-sm text-white/80">{sw ? 'Rufaa za wenyeji' : 'Host referrals'}</dt>
+                  <dd className="text-base font-bold">{sw ? 'hadi TZS 30,000' : 'up to TZS 30,000'}</dd>
                 </div>
               </dl>
             </div>
@@ -164,6 +165,14 @@ export function ReferPageContent() {
               </>
             )}
           </div>
+        </section>
+
+        <section id="download-app" className="mt-8 scroll-mt-24 rounded-2xl border border-ink-200 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <a href="https://www.instagram.com/ndotoni_rentals/" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 font-semibold text-brand-700 underline underline-offset-4">{sw ? 'Tufuate Instagram' : 'Follow us on Instagram'}<ArrowRight size={16} aria-hidden="true" /></a>
+            <StoreButtons sw={sw} />
+          </div>
+          <Link href="/terms#referral-programme" className="mt-3 inline-block text-xs text-ink-500 underline">{sw ? 'Masharti yanatumika' : 'Terms apply'}</Link>
         </section>
 
         <section aria-label={sw ? 'Inavyofanya kazi' : 'How it works'} className="mx-auto mt-10 max-w-3xl sm:mt-14">

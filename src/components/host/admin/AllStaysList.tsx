@@ -50,10 +50,6 @@ interface AdminStay {
   updatedAt?: string | null;
 }
 
-const setStayVerification = `mutation SetStayVerification($propertyId: ID!, $input: UpdateShortTermPropertyInput!) {
-  updateShortTermProperty(propertyId: $propertyId, input: $input) { propertyId verified }
-}`;
-
 const LIMIT = 200;
 const SEARCH_DELAY_MS = 400;
 const TABS = ['AVAILABLE', 'DRAFT', 'INACTIVE'] as const;
@@ -79,8 +75,6 @@ export function AllStaysList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
-  const [verifying, setVerifying] = useState<string | null>(null);
-  const [verificationError, setVerificationError] = useState<string | null>(null);
   const sw = useLanguage().language === 'sw';
 
   // Search on the server, a moment after typing stops
@@ -114,18 +108,6 @@ export function AllStaysList() {
     if (isAdmin) load();
   }, [isAdmin, load]);
 
-  const toggleVerification = async (stay: AdminStay) => {
-    if (verifying || !window.confirm(stay.verified
-      ? (sw ? 'Ondoa uthibitisho wa sehemu hii?' : 'Remove verification from this stay?')
-      : (sw ? 'Thibitisha sehemu hii?' : 'Mark this stay as verified?'))) return;
-    setVerifying(stay.propertyId); setVerificationError(null);
-    try {
-      const result = await GraphQLClient.executeAuthenticated<{updateShortTermProperty:{propertyId:string;verified:boolean}}>(setStayVerification, {propertyId:stay.propertyId,input:{verified:!stay.verified}});
-      setStays(rows => rows.map(row => row.propertyId === stay.propertyId ? {...row,verified:result.updateShortTermProperty.verified} : row));
-    } catch { setVerificationError(sw ? 'Imeshindikana kubadilisha uthibitisho. Jaribu tena.' : 'Could not change verification. Please try again.'); }
-    finally { setVerifying(null); }
-  };
-
   if (!isAdmin) {
     return <p className="text-ink-500 py-16 text-center">{t('allStays.adminOnly')}</p>;
   }
@@ -134,7 +116,6 @@ export function AllStaysList() {
     <div className="space-y-6">
       <p className="text-ink-500 text-sm max-w-2xl">{t('allStays.subtitle')}</p>
 
-      {verificationError && <p role="alert" className="text-sm text-red-600">{verificationError}</p>}
       <label className="relative block">
         <MagnifyingGlassIcon className="h-4 w-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
@@ -220,9 +201,6 @@ export function AllStaysList() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 sm:flex-shrink-0 sm:justify-end">
-                      <button type="button" disabled={!!verifying} onClick={() => toggleVerification(s)} className="min-h-11 px-4 py-2 rounded-xl text-sm font-medium border border-emerald-200 text-emerald-800 disabled:opacity-50">
-                        {verifying === s.propertyId ? (sw ? 'Inahifadhi…' : 'Saving…') : s.verified ? (sw ? 'Ondoa uthibitisho' : 'Remove verification') : (sw ? 'Thibitisha' : 'Mark verified')}
-                      </button>
                       <Link href={`/host/property/${s.propertyId}/edit`} className="btn-primary flex-1 sm:flex-none text-center px-4 py-2 text-sm">
                         {t('managed.manage')}
                       </Link>

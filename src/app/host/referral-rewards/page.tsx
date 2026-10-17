@@ -68,7 +68,7 @@ export default function ReferralRewardsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-ink-900">Booking referral rewards</h1>
-        <p className="mt-1 max-w-2xl text-sm text-ink-500">Referred stays appear here the day after checkout, once paid and not cancelled. The maximum is this booking’s internal ceiling (never above TZS 10,000). Ten rewarded guests per referrer; repeat stays by a counted guest don’t use another place. Pay approved rewards manually.</p>
+        <p className="mt-1 max-w-2xl text-sm text-ink-500">Referred stays appear here the day after checkout, once paid and not cancelled. The maximum is this booking’s internal ceiling (never above TZS 10,000). Five rewarded bookings per referrer, including repeat stays; up to TZS 50,000 in total. Confirm the referrer follows Ndotoni on Instagram and has downloaded the app before payout. Pay approved rewards manually.</p>
       </div>
       <div role="tablist" className="flex flex-wrap gap-2">
         {STATUSES.map(s => (

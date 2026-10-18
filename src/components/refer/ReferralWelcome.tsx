@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BadgeCheck, Check, Copy, Home, MessageCircle, RotateCw, Search, Smartphone, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Copy, Home, RotateCw, Search, Smartphone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { CLAIM_REFERRAL, clearPendingReferral, rememberReferral } from '@/lib/referral/attribution';
@@ -9,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { WhatsAppIcon } from './WhatsAppIcon';
 import { StoreButtons } from './StoreButtons';
 
-const HERO = 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=75&auto=format&fit=crop';
 const pill = 'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 active:scale-[0.98]';
 
 export function ReferralWelcome({ code }: { code: string }) {
@@ -51,112 +50,81 @@ export function ReferralWelcome({ code }: { code: string }) {
 
   const invited = state === 'ready' || state === 'error';
   const listHref = invited ? `/become-host?referralCode=${attributionCode}` : '/become-host';
-  const whatsapp = `https://wa.me/255790720329?text=${encodeURIComponent(`${sw ? 'Habari! Nimealikwa na rafiki.' : 'Hi! A friend invited me.'}${invited ? `\nReferral: ${attributionCode}` : ''}`)}`;
+  const whatsappFor = (host: boolean) => `https://wa.me/255790720329?text=${encodeURIComponent(
+    (host ? (sw ? 'Habari! Nataka kutangaza nyumba yangu kwenye Ndotoni.' : 'Hi! I would like to list my property on Ndotoni.')
+      : (sw ? 'Habari! Natafuta malazi Tanzania.' : 'Hi! I am looking for a place to stay in Tanzania.'))
+    + (invited ? `\nReferral: ${attributionCode}` : '')
+  )}`;
   async function copyCode() {
     try { await navigator.clipboard.writeText(attributionCode); setCopied(true); setCopyError(false); }
     catch { setCopyError(true); }
   }
-  const trust = [
-    { icon: BadgeCheck, label: sw ? 'Nyumba zinathibitishwa' : 'Verified listings' },
-    { icon: Sparkles, label: sw ? 'Bure kutangaza' : 'Free to list' },
-    { icon: MessageCircle, label: sw ? 'Msaada WhatsApp' : 'Help on WhatsApp' },
-  ];
-
   return (
     <main className="bg-white text-ink-900">
-      <div className="mx-auto max-w-6xl px-3 pb-14 pt-3 sm:px-6 sm:pb-20 sm:pt-6">
-        <section className="relative">
-          <div className="relative h-[340px] overflow-hidden rounded-[28px] sm:h-[440px] lg:h-[540px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${HERO}&w=1600`} srcSet={`${HERO}&w=800 800w, ${HERO}&w=1600 1600w, ${HERO}&w=2200 2200w`} sizes="(min-width: 1152px) 1152px, 100vw" alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/40 lg:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-5 pb-16 sm:p-10 sm:pb-20 lg:inset-y-0 lg:flex lg:max-w-xl lg:flex-col lg:justify-center lg:pb-10">
-              <h1 className="text-balance text-[2.3rem] font-bold leading-[0.95] tracking-[-0.035em] text-white sm:text-6xl">
-                {sw ? 'Karibu ' : 'Welcome to '}<span className="text-brand-400">Ndotoni Stays.</span>
-              </h1>
-              <p className="mt-3 text-base font-medium text-white/85 sm:text-lg">{state === 'invalid' ? (sw ? 'Malazi mazuri kote Tanzania.' : 'Great places to stay across Tanzania.') : (sw ? 'Rafiki amekualika. Book malazi, au tangaza nyumba yako bure.' : 'A friend invited you. Book a stay, or list your place for free.')}</p>
+      <div className="mx-auto max-w-5xl px-4 pb-12 pt-7 sm:px-6 sm:py-12">
+        <header className="max-w-2xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-800">Ndotoni Stays · Tanzania</p>
+          <h1 className="mt-3 text-balance text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{sw ? 'Malazi yako yanaanzia hapa.' : 'Your next stay starts here.'}</h1>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-600">{sw ? 'Tafuta malazi au tangaza nyumba yako. Anza kwa kututumia ujumbe WhatsApp.' : 'Find a place to stay or list your property. Start with a message on WhatsApp.'}</p>
+        </header>
+
+        <div className="mt-6 grid items-start gap-5 lg:grid-cols-2 lg:gap-8">
+          <section aria-labelledby="whatsapp-heading" className="rounded-3xl border border-brand-200 bg-brand-50 p-5 sm:p-7">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-800"><WhatsAppIcon className="h-6 w-6" /></span>
+              <div><p className="text-[11px] font-semibold uppercase tracking-wider text-brand-800">{sw ? 'Anza hapa' : 'Start here'}</p><h2 id="whatsapp-heading" className="text-xl font-bold">{sw ? 'Tumia WhatsApp' : 'Continue on WhatsApp'}</h2></div>
             </div>
-          </div>
-
-          <div aria-live="polite" className="relative z-10 mx-2 -mt-10 rounded-3xl bg-white p-5 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] ring-1 ring-black/5 sm:mx-auto sm:max-w-lg sm:p-6 lg:absolute lg:bottom-10 lg:right-10 lg:mt-0 lg:w-[420px]">
-            {state === 'loading' ? (
-              <div role="status" aria-label={sw ? 'Tunafungua mwaliko wako' : 'Opening your invitation'} className="space-y-3">
-                <div className="h-12 animate-pulse rounded-full bg-ink-100" />
-                <div className="h-12 animate-pulse rounded-full bg-ink-100" />
-              </div>
-            ) : (
-              <>
-                {state !== 'ready' && (
-                  <div role="alert" className="mb-4 rounded-2xl bg-ink-50 p-4 text-sm text-ink-700">
-                    <p className="font-bold text-ink-900">{state === 'invalid' ? (sw ? 'Link hii ya mwaliko haipo' : 'This invitation Link isn’t valid') : (sw ? 'Hatukuweza kuthibitisha mwaliko' : 'We couldn’t check your invitation')}</p>
-                    <p className="mt-1">{state === 'invalid' ? (sw ? 'Bado unaweza kutangaza nyumba yako.' : 'You can still list your place.') : (sw ? 'Endelea; tutauthibitisha ukitangaza.' : 'Carry on; we’ll check it when you list.')}</p>
-                    {state === 'error' && (
-                      <button type="button" onClick={() => setRetry(n => n + 1)} className="mt-1 inline-flex min-h-10 items-center gap-1.5 font-bold text-ink-900 underline underline-offset-4">
-                        <RotateCw size={15} aria-hidden="true" />{sw ? 'Jaribu tena' : 'Try again'}
-                      </button>
-                    )}
-                  </div>
-                )}
-                <div className="grid gap-2.5">
-                  <Link href="/search" className={`${pill} bg-brand-600 text-base text-white hover:bg-brand-700`}>
-                    <Search size={18} aria-hidden="true" />{sw ? 'Tafuta malazi' : 'Find a place to stay'}
-                  </Link>
-                  <Link href={listHref} className={`${pill} border border-ink-200 text-ink-900 hover:bg-ink-50`}>
-                    <Home size={18} aria-hidden="true" />{sw ? 'Tangaza nyumba yangu bure' : 'List my place for free'}
-                  </Link>
-                </div>
-                <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="mx-auto mt-2 flex min-h-11 w-fit items-center gap-2 px-3 text-sm font-semibold text-ink-700 underline-offset-4 hover:underline">
-                  <WhatsAppIcon className="h-[18px] w-[18px] text-brand-600" />{sw ? 'Au tumia WhatsApp' : 'Or use WhatsApp'}
-                </a>
-                <ul className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs font-semibold text-ink-500">
-                  {trust.map(({ icon: Icon, label }) => (
-                    <li key={label} className="inline-flex items-center gap-1.5"><Icon size={14} className="text-brand-600" aria-hidden="true" />{label}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-        </section>
-
-        <section className="mx-auto mt-8 grid max-w-5xl gap-3 sm:mt-12 lg:grid-cols-2 lg:gap-4">
-          <div className="rounded-3xl bg-ink-50 p-5 sm:p-6">
-            <div className="flex items-start gap-3.5">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-ink-900 shadow-sm"><Smartphone size={20} aria-hidden="true" /></span>
-              <div>
-                <h2 className="text-lg font-bold tracking-tight">{sw ? 'Au tumia app' : 'Or use the app'}</h2>
-                <p className="mt-0.5 text-sm text-ink-500">{sw ? 'Simamia nafasi na ujibu wageni popote.' : 'Manage bookings and reply to guests on the go.'}</p>
-              </div>
+            <p className="mt-3 hidden text-sm leading-relaxed text-ink-600 sm:block">{sw ? 'Tueleze unachotafuta, tarehe na bajeti yako. Au tutumie maelezo ya nyumba yako ili uitangaze bure.' : 'Tell us your destination, dates and budget. Or send your property details to list it for free.'}</p>
+            <div className="mt-5 grid gap-3">
+              <a href={whatsappFor(false)} target="_blank" rel="noopener noreferrer" aria-disabled={state === 'loading'} onClick={e => { if (state === 'loading') e.preventDefault(); }} className={`${pill} min-h-14 bg-brand-800 text-base text-white shadow-sm hover:bg-brand-900 aria-disabled:opacity-60`}>
+                <WhatsAppIcon className="h-5 w-5" />{sw ? 'Tafuta malazi WhatsApp' : 'Find a stay on WhatsApp'}<ArrowRight size={17} aria-hidden="true" />
+              </a>
+              <a href={whatsappFor(true)} target="_blank" rel="noopener noreferrer" aria-disabled={state === 'loading'} onClick={e => { if (state === 'loading') e.preventDefault(); }} className={`${pill} border border-brand-200 bg-white text-brand-900 hover:bg-brand-100 aria-disabled:opacity-60`}>
+                <Home size={18} aria-hidden="true" />{sw ? 'Tangaza nyumba WhatsApp' : 'List a property on WhatsApp'}
+              </a>
             </div>
-            <div className="mt-5"><StoreButtons sw={sw} /></div>
-            {invited && (
-              <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-white p-2 pl-4">
-                <span className="min-w-0 text-xs text-ink-500">
-                  {sw ? 'Msimbo wako wa mwaliko' : 'Your invitation code'}
-                  <code className="block select-all truncate text-sm font-bold tracking-wide text-ink-900">{attributionCode}</code>
-                </span>
-                <button type="button" onClick={copyCode} className={`inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-xs font-bold transition-colors ${copied ? 'bg-brand-100 text-brand-800' : 'bg-ink-100 text-ink-900 hover:bg-ink-200'}`}>
-                  {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}{copied ? (sw ? 'Imenakiliwa' : 'Copied') : (sw ? 'Nakili' : 'Copy')}
-                </button>
+            <div className="mt-4 hidden flex-wrap gap-x-5 gap-y-2 text-sm sm:flex">
+              <Link href="/search" className="inline-flex min-h-10 items-center gap-1.5 font-medium text-ink-600 underline underline-offset-4"><Search size={14} aria-hidden="true" />{sw ? 'Tafuta kwenye tovuti' : 'Browse stays online'}</Link>
+              <Link href={listHref} className="inline-flex min-h-10 items-center font-medium text-ink-600 underline underline-offset-4">{sw ? 'Tangaza kwenye tovuti' : 'List online'}</Link>
+            </div>
+          </section>
+
+          <section aria-labelledby="app-heading" className="rounded-3xl border border-ink-200 bg-white p-5 sm:p-7">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ink-50"><Smartphone size={24} aria-hidden="true" /></span>
+              <h2 id="app-heading" className="text-xl font-bold">{sw ? 'Pakua app ya Ndotoni' : 'Download the Ndotoni app'}</h2>
+            </div>
+            <p className="mb-5 mt-3 text-sm leading-relaxed text-ink-600">{sw ? 'Picha, malazi unayopenda na booking zako sehemu moja.' : 'Photos, favourites and bookings in one place.'}</p>
+            <StoreButtons sw={sw} />
+            <p className="mt-3 text-center text-xs text-ink-500">{sw ? 'Kwa iPhone na Android' : 'For iPhone and Android'}</p>
+            {invited && <details className="mt-5 rounded-2xl border border-ink-100 bg-ink-50 p-4">
+              <summary className="cursor-pointer text-sm font-semibold">{sw ? 'Una app tayari? Msimbo wa mwaliko' : 'Already have the app? Invitation code'}</summary>
+              <p className="mt-3 text-xs leading-relaxed text-ink-500">{sw ? 'Fungua “Rufaa” kwenye app na uweke msimbo huu wa rafiki yako.' : 'Open “Refer” in the app and enter this code from your friend.'}</p>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                <code className="select-all text-sm font-semibold tracking-wide">{attributionCode}</code>
+                <button type="button" onClick={copyCode} className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-ink-200 bg-white px-4 text-xs font-semibold hover:bg-ink-100">{copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}{copied ? (sw ? 'Imenakiliwa' : 'Copied') : (sw ? 'Nakili msimbo' : 'Copy code')}</button>
               </div>
-            )}
-            {invited && <p role="status" className="mt-2 text-xs text-ink-500">{copyError ? (sw ? 'Bonyeza msimbo kwa muda kuunakili.' : 'Press and hold the code to copy it.') : (sw ? 'Uweke kwenye “Rufaa” ndani ya app.' : 'Enter it under “Refer” in the app.')}</p>}
-          </div>
+              {copyError && <p role="status" className="mt-2 text-xs text-ink-500">{sw ? 'Bonyeza msimbo kwa muda kuunakili.' : 'Press and hold the code to copy it.'}</p>}
+            </details>}
+          </section>
+        </div>
 
-          <a href={invited ? `https://www.ndotoni.com/r/${attributionCode}` : 'https://www.ndotoni.com/property/create'} className="group flex items-center justify-between gap-4 rounded-3xl border border-ink-200 p-5 transition-colors hover:border-ink-900 sm:p-6">
-            <span>
-              <span className="block text-lg font-bold tracking-tight">{sw ? 'Unapangisha kwa muda mrefu?' : 'Renting out long-term?'}</span>
-              <span className="mt-0.5 block text-sm text-ink-500">{sw ? 'Endelea kwenye Ndotoni.' : 'Continue on Ndotoni.'}</span>
-            </span>
-            <ArrowRight size={20} className="shrink-0 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-          </a>
-        </section>
-
-        {state === 'ready' && (
-          <p className="mx-auto mt-6 max-w-5xl px-2 text-center text-xs text-ink-500">
-            {sw ? 'Mwaliko umehifadhiwa kwa siku 30. ' : 'Your invitation is saved for 30 days. '}
-            <Link href="/terms#referral-programme" className="font-semibold underline underline-offset-4">{sw ? 'Masharti' : 'Terms'}</Link>
-          </p>
-        )}
+        <div aria-live="polite" className="mt-5 text-sm text-ink-500">
+          {state === 'loading' && <p role="status">{sw ? 'Tunafungua mwaliko wako…' : 'Opening your invitation…'}</p>}
+          {state === 'ready' && <p>{sw ? 'Mwaliko wa rafiki yako umehifadhiwa.' : 'Your friend’s invitation has been saved.'}</p>}
+          {(state === 'invalid' || state === 'error') && <div role="alert" className="rounded-2xl bg-ink-50 p-4">
+            <p>{state === 'invalid' ? (sw ? 'Mwaliko huu haupatikani. Bado unaweza kutumia WhatsApp au app.' : 'This invitation isn’t available. You can still use WhatsApp or the app.') : (sw ? 'Hatukuweza kuthibitisha mwaliko. Unaweza kuendelea kwenye WhatsApp.' : 'We couldn’t check your invitation. You can still continue on WhatsApp.')}</p>
+            {state === 'error' && <button type="button" onClick={() => setRetry(n => n + 1)} className="mt-2 inline-flex min-h-10 items-center gap-1.5 font-semibold text-ink-700 underline"><RotateCw size={14} aria-hidden="true" />{sw ? 'Jaribu tena' : 'Try again'}</button>}
+          </div>}
+        </div>
+        <div className="mt-5 flex flex-wrap gap-x-5 text-sm sm:hidden">
+          <Link href="/search" className="inline-flex min-h-11 items-center font-medium text-ink-600 underline underline-offset-4">{sw ? 'Tafuta kwenye tovuti' : 'Browse stays online'}</Link>
+          <Link href={listHref} className="inline-flex min-h-11 items-center font-medium text-ink-600 underline underline-offset-4">{sw ? 'Tangaza kwenye tovuti' : 'List online'}</Link>
+        </div>
+        <footer className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-5 text-xs text-ink-500">
+          <a href={invited ? `https://www.ndotoni.com/r/${attributionCode}` : 'https://www.ndotoni.com/property/create'} className="inline-flex min-h-10 items-center gap-2 font-medium underline underline-offset-4">{sw ? 'Unapangisha kwa muda mrefu? Ndotoni' : 'Long-term rentals? Visit Ndotoni'}<ArrowRight size={13} aria-hidden="true" /></a>
+          <Link href="/terms#referral-programme" className="inline-flex min-h-10 items-center underline underline-offset-4">{sw ? 'Masharti' : 'Terms'}</Link>
+        </footer>
       </div>
     </main>
   );

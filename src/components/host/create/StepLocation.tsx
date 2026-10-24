@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 import { useState, useEffect, useMemo } from 'react';
 import { MapPin } from 'lucide-react';
 import { fetchLocations, LocationData } from '@/lib/location/cloudfront-locations';
@@ -243,7 +245,7 @@ export function StepLocation({ form, setForm }: StepProps) {
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
               {t('create.location.region')} <span className="text-red-500">*</span>
             </label>
-            <select
+            <LocationSelect
               value={form.region}
               onChange={(e) => handleRegionChange(e.target.value)}
               className="w-full px-3 py-3 bg-ink-50 text-ink-900 border border-ink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-base"
@@ -255,7 +257,7 @@ export function StepLocation({ form, setForm }: StepProps) {
                   {toTitleCase(r)}
                 </option>
               ))}
-            </select>
+            </LocationSelect>
           </div>
 
           {/* District */}
@@ -263,7 +265,7 @@ export function StepLocation({ form, setForm }: StepProps) {
             <label className="block text-sm font-medium text-ink-700 mb-1.5">
               {t('create.location.district')} <span className="text-red-500">*</span>
             </label>
-            <select
+            <LocationSelect
               value={form.district}
               onChange={(e) => handleDistrictChange(e.target.value)}
               disabled={!form.region || districts.length === 0}
@@ -278,7 +280,7 @@ export function StepLocation({ form, setForm }: StepProps) {
                   {toTitleCase(d)}
                 </option>
               ))}
-            </select>
+            </LocationSelect>
           </div>
 
           <WardStreetFields

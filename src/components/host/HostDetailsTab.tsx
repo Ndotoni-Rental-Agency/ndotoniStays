@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 import { useState, useEffect, useRef } from 'react';
 import { PlusIcon, XMarkIcon, SparklesIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { PROPERTY_TYPES, REGIONS, AMENITIES, STAY_CATEGORIES } from './constants';
@@ -310,7 +312,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
         <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">Region</label>
-            <select
+            <LocationSelect
               value={regionOption}
               onChange={(e) => { onUpdate('region', e.target.value); onUpdate('district', ''); onUpdate('ward', ''); onUpdate('street', ''); }}
               className="input text-base"
@@ -319,11 +321,11 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
               {withSaved(regionOptions, form.region).map((r) => (
                 <option key={r} value={r}>{titleCase(r)}</option>
               ))}
-            </select>
+            </LocationSelect>
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-1.5">District</label>
-            <select
+            <LocationSelect
               value={districtOption}
               onChange={(e) => { onUpdate('district', e.target.value); onUpdate('ward', ''); onUpdate('street', ''); }}
               disabled={!form.region}
@@ -333,7 +335,7 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
               {withSaved(districtOptions, form.district).map((d) => (
                 <option key={d} value={d}>{titleCase(d)}</option>
               ))}
-            </select>
+            </LocationSelect>
           </div>
           <WardStreetFields
             region={form.region}

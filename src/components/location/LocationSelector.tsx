@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 import { useState, useEffect, useCallback } from 'react';
 import { useHierarchicalLocation } from '@/hooks/useHierarchicalLocation';
 import LocationPreview from './LocationPreview';
@@ -161,7 +163,7 @@ export default function LocationSelector({
           <label className="block text-sm font-medium text-ink-700 mb-1.5">
             Region {required && <span className="text-red-500">*</span>}
           </label>
-          <select
+          <LocationSelect
             value={value.region}
             onChange={(e) => handleRegionChange(e.target.value)}
             className={selectClass(errors.region)}
@@ -172,7 +174,7 @@ export default function LocationSelector({
                 {toTitleCase(region.name)}
               </option>
             ))}
-          </select>
+          </LocationSelect>
           {errors.region && (
             <p className="text-xs text-red-500 mt-1">{errors.region}</p>
           )}
@@ -183,7 +185,7 @@ export default function LocationSelector({
           <label className="block text-sm font-medium text-ink-700 mb-1.5">
             District {required && <span className="text-red-500">*</span>}
           </label>
-          <select
+          <LocationSelect
             value={value.district}
             onChange={(e) => handleDistrictChange(e.target.value)}
             disabled={!value.region || districts.length === 0}
@@ -195,7 +197,7 @@ export default function LocationSelector({
                 {toTitleCase(district.name)}
               </option>
             ))}
-          </select>
+          </LocationSelect>
           {errors.district && (
             <p className="text-xs text-red-500 mt-1">{errors.district}</p>
           )}
@@ -209,7 +211,7 @@ export default function LocationSelector({
           <label className="block text-sm font-medium text-ink-700 mb-1.5">
             Ward
           </label>
-          <select
+          <LocationSelect
             value={value.ward || ''}
             onChange={(e) => handleWardChange(e.target.value)}
             disabled={!value.district || wards.length === 0}
@@ -221,7 +223,7 @@ export default function LocationSelector({
                 {toTitleCase(ward.name)}
               </option>
             ))}
-          </select>
+          </LocationSelect>
           {errors.ward && (
             <p className="text-xs text-red-500 mt-1">{errors.ward}</p>
           )}
@@ -233,7 +235,7 @@ export default function LocationSelector({
             Street Address
           </label>
           {value.ward && streets.length > 0 && !showCustomStreet ? (
-            <select
+            <LocationSelect
               value={value.street || ''}
               onChange={(e) => handleStreetDropdownChange(e.target.value)}
               className={selectClass()}
@@ -245,7 +247,7 @@ export default function LocationSelector({
                 </option>
               ))}
               <option value="custom">Other (Enter custom street)</option>
-            </select>
+            </LocationSelect>
           ) : (
             <input
               type="text"

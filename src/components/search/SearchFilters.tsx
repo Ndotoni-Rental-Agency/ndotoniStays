@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 import { stayCategoryLabel } from '@/lib/stay-categories';
 import { useStayCopy } from '@/hooks/useStayCopy';
 
@@ -147,7 +149,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-2 sm:gap-3 bg-ink-50 rounded-2xl p-3 sm:p-4">
         <div className="flex-1 min-w-[120px]">
           <label htmlFor="search-region" className="block text-xs font-medium text-ink-500 mb-1">{copy("Location")}</label>
-          <select
+          <LocationSelect
             id="search-region" value={localRegion}
             onChange={(e) => setLocalRegion(e.target.value)}
             className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
@@ -156,7 +158,7 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
             {REGIONS.map((r) => (
               <option key={r} value={r}>{r}</option>
             ))}
-          </select>
+          </LocationSelect>
         </div>
 
         <div className="hidden sm:block min-w-[130px]">

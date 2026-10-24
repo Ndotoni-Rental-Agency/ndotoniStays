@@ -2,80 +2,27 @@
 
 import StayDescriptionSearch from './StayDescriptionSearch';
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/react/24/solid';
-import { MapPinIcon } from '@heroicons/react/24/solid';
-import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
-import { useRegionSearch } from '@/hooks/useRegionSearch';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/solid';
+import StayDateRangePicker from './StayDateRangePicker';
+import StayLocationPicker from './StayLocationPicker';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { FlattenedLocation } from '@/lib/location/cloudfront-locations';
 
-function toTitleCase(str: string): string {
-  return str.replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-const ROTATING_KEYS = [
-  'hero.rotating.tonight',
-  'hero.rotating.party',
-  'hero.rotating.photoshoot',
-  'hero.rotating.getaway',
-  'hero.rotating.meeting',
-  'hero.rotating.celebration',
-];
-
 export function HeroSection() {
   const router = useRouter();
-  const { t } = useLanguage();
-  const [searchQuery, setSearchQuery] = useState('Dar es Salaam');
-  const [modalSearchQuery, setModalSearchQuery] = useState('');
+  const { t, language } = useLanguage();
+  const sw = language === 'sw';
   const [selectedLocation, setSelectedLocation] = useState<FlattenedLocation | null>({
     type: 'region',
     name: 'DAR-ES-SALAAM',
     displayName: 'Dar es Salaam',
   } as FlattenedLocation);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(1);
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const { results: filteredLocations } = useRegionSearch(modalSearchQuery, 8);
-
-  // Dar es Salaam is the flagship market — surface it above the alphabetical
-  // region list rather than making guests scan ~25 regions to find it.
-  const isBrowsingAll = !modalSearchQuery.trim();
-  const popularLocations = isBrowsingAll
-    ? filteredLocations.filter((loc) => loc.type === 'region' && loc.name === 'DAR-ES-SALAAM')
-    : [];
-  const remainingLocations = isBrowsingAll
-    ? filteredLocations.filter((loc) => !(loc.type === 'region' && loc.name === 'DAR-ES-SALAAM'))
-    : filteredLocations;
-
-  useEffect(() => setMounted(true), []);
-
-  // Rotate words
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setWordIndex((prev) => (prev + 1) % ROTATING_KEYS.length);
-        setIsAnimating(false);
-      }, 300);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleLocationSelect = (location: FlattenedLocation) => {
-    setSelectedLocation(location);
-    setSearchQuery(toTitleCase(location.displayName));
-    setModalSearchQuery('');
-    setShowLocationDropdown(false);
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,178 +48,30 @@ export function HeroSection() {
   const minCheckIn = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Background image with overlay */}
-      <div className="absolute inset-0">
-        <img
-          src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=1280&auto=format&fit=crop"
-          srcSet={[640, 960, 1280, 1920].map(width => `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=${width}&auto=format&fit=crop ${width}w`).join(', ')}
-          sizes="100vw"
-          fetchPriority="high"
-          decoding="async"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-      </div>
-
-      {/* Content */}
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
-        <div className="text-center max-w-4xl mx-auto">
-
-
-          {/* Headline with rotating text */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-            {t('hero.title')}
-            <br />
-            {t('hero.titleFor')}{' '}
-            <span
-              className={`inline-block text-brand-400 transition-all duration-300 ${
-                isAnimating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'
-              }`}
-            >
-              {t(ROTATING_KEYS[wordIndex])}
-            </span>
+    <section className="bg-white px-4 pb-3 pt-5 sm:px-6 sm:pt-8 lg:px-8" aria-labelledby="stay-hero-title">
+      <div className="mx-auto max-w-7xl pb-2 sm:pb-5">
+        <div className="relative overflow-hidden rounded-t-[28px] bg-brand-900">
+          <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=960&auto=format&fit=crop"
+            srcSet={[480,640,960,1280,1920].map(width => `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=${width}&auto=format&fit=crop ${width}w`).join(', ')}
+            sizes="(max-width: 1279px) 100vw, 1280px" alt="" fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-black/35" />
+          <h1 id="stay-hero-title" className="relative px-7 py-12 text-left text-[38px] font-semibold leading-[1.1] tracking-[-0.04em] text-white sm:px-12 sm:py-20 sm:text-[60px]">
+            {sw ? 'Stay nzuri kwa' : 'Find your next'}<br /><span className="text-brand-200">{sw ? 'mapumziko yako' : 'stay.'}</span>
           </h1>
         </div>
+        <form onSubmit={handleSearch} aria-label={sw ? 'Tafuta malazi' : 'Search stays'} className="rounded-b-[28px] border border-t-0 border-ink-200 bg-white p-3 sm:p-4">
+            <div className="grid grid-cols-2 items-stretch gap-2 sm:gap-3 lg:grid-cols-12">
+              <StayLocationPicker selected={selectedLocation} onSelect={setSelectedLocation} />
 
-        {/* Search Card */}
-        <form onSubmit={handleSearch} className="mt-8 max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-2xl p-3 sm:p-4">
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-              {/* Location — fuzzy search modal */}
-              <div className="relative col-span-2 lg:col-span-1">
-                <div className="relative">
-                  <MapPinIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onFocus={() => setShowLocationDropdown(true)}
-                    placeholder={t('hero.search.where')}
-                    className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 pt-5 pb-2 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer hover:bg-ink-100 transition-colors"
-                    aria-label="Location"
-                    readOnly
-                  />
-                  <span className="absolute left-10 top-1.5 text-[11px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
-                    {t('hero.search.locationLabel')}
-                  </span>
-                </div>
-
-                {/* Location search modal */}
-                {showLocationDropdown && mounted && createPortal(
-                  <>
-                    <div
-                      className="fixed inset-0 bg-black/40 z-[9998]"
-                      onClick={() => setShowLocationDropdown(false)}
-                    />
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
-                      <div className="bg-white rounded-2xl shadow-2xl border border-ink-100 w-full max-w-md max-h-[70vh] overflow-y-auto pointer-events-auto">
-                        <div className="sticky top-0 bg-white px-4 pt-4 pb-2 border-b border-ink-100">
-                          <input
-                            type="text"
-                            value={modalSearchQuery}
-                            onChange={(e) => setModalSearchQuery(e.target.value)}
-                            placeholder={t('hero.search.region')}
-                            className="w-full rounded-xl bg-ink-50 border-0 px-4 py-3 text-base sm:text-sm text-ink-900 font-medium placeholder:text-ink-400 focus:ring-2 focus:ring-brand-500 focus:outline-none"
-                            autoFocus
-                          />
-                        </div>
-                        <div className="p-2">
-                          {filteredLocations.length > 0 ? (
-                            <>
-                              {popularLocations.length > 0 && (
-                                <>
-                                  <div className="px-4 pt-2 pb-1 text-[11px] font-semibold text-ink-400 uppercase tracking-wide">
-                                    {t('hero.search.popular')}
-                                  </div>
-                                  {popularLocations.map((location, index) => (
-                                    <button
-                                      key={`popular-${location.type}-${location.name}-${index}`}
-                                      type="button"
-                                      onClick={() => handleLocationSelect(location)}
-                                      className="w-full px-4 py-3 text-left hover:bg-ink-50 rounded-xl transition-colors"
-                                    >
-                                      <div className="text-sm font-medium text-ink-900">
-                                        {toTitleCase(location.displayName)}
-                                      </div>
-                                      <div className="text-xs text-ink-500">
-                                        {location.type === 'region' ? t('common.region') : t('common.district')}
-                                      </div>
-                                    </button>
-                                  ))}
-                                  <div className="px-4 pt-3 pb-1 text-[11px] font-semibold text-ink-400 uppercase tracking-wide">
-                                    {t('hero.search.allRegions')}
-                                  </div>
-                                </>
-                              )}
-                              {remainingLocations.map((location, index) => (
-                                <button
-                                  key={`${location.type}-${location.name}-${index}`}
-                                  type="button"
-                                  onClick={() => handleLocationSelect(location)}
-                                  className="w-full px-4 py-3 text-left hover:bg-ink-50 rounded-xl transition-colors"
-                                >
-                                  <div className="text-sm font-medium text-ink-900">
-                                    {toTitleCase(location.displayName)}
-                                  </div>
-                                  <div className="text-xs text-ink-500">
-                                    {location.type === 'region' ? t('common.region') : t('common.district')}
-                                  </div>
-                                </button>
-                              ))}
-                            </>
-                          ) : (
-                            <div className="px-4 py-6 text-center text-sm text-ink-400">
-                              {t('hero.search.noLocations')}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>,
-                  document.body
-                )}
-              </div>
-
-              {/* Check-in */}
-              <CalendarDatePicker
-                value={checkIn}
-                onChange={(val) => {
-                  setCheckIn(val);
-                  if (checkOut && val >= checkOut) setCheckOut('');
-                }}
-                min={minCheckIn}
-                label={t('hero.search.checkInLabel')}
-                placeholder={t('hero.search.checkIn')}
-                rangeStart={checkIn}
-                rangeEnd={checkOut}
-                rangeMode
-                onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
-              />
-
-              {/* Check-out */}
-              <CalendarDatePicker
-                value={checkOut}
-                onChange={setCheckOut}
-                minExclusive={checkIn || undefined}
-                min={minCheckIn}
-                label={t('hero.search.checkOutLabel')}
-                placeholder={t('hero.search.checkOut')}
-                rangeStart={checkIn}
-                rangeEnd={checkOut}
-                rangeMode
-                rangePhaseStart="checkOut"
-                onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
-              />
+              <StayDateRangePicker checkIn={checkIn} checkOut={checkOut} min={minCheckIn} onChange={(start, end) => { setCheckIn(start); setCheckOut(end); }} />
 
               {/* Guests */}
-              <div className="relative">
-                <UserGroupIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400 pointer-events-none" />
+              <div className="relative lg:col-span-2">
                 <select
                   value={guests}
                   onChange={(e) => setGuests(Number(e.target.value))}
-                  className="w-full rounded-xl bg-ink-50 border-0 pl-10 pr-4 pt-5 pb-2 text-sm text-ink-900 font-medium focus:ring-2 focus:ring-brand-500 appearance-none cursor-pointer"
-                  aria-label="Number of guests"
+                  className="stays-search-field h-[76px] w-full cursor-pointer appearance-none rounded-xl border border-ink-200 bg-ink-50/60 pl-4 pr-9 pt-7 pb-2 text-base text-ink-700 transition-colors hover:border-brand-600 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                  aria-label={sw ? 'Idadi ya wageni' : 'Number of guests'}
                 >
                   {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 50].map((n) => (
                     <option key={n} value={n}>
@@ -280,18 +79,18 @@ export function HeroSection() {
                     </option>
                   ))}
                 </select>
-                <span className="absolute left-10 top-1.5 text-[10px] font-semibold text-ink-500 uppercase tracking-wide pointer-events-none">
-                  {t('hero.search.guestsLabel')}
+                <span className="absolute left-4 top-3 text-sm font-semibold text-ink-900 pointer-events-none">
+                  {sw ? 'Wageni' : 'Guests'}
                 </span>
               </div>
 
               {/* Search Button */}
               <button
                 type="submit"
-                className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-brand-600/30 hover:bg-brand-700 hover:shadow-brand-700/30 transition-all active:scale-[0.98]"
+                className="stays-press flex min-h-[76px] items-center justify-center gap-2 rounded-full bg-brand-700 px-3 text-sm font-bold text-white transition-colors hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 lg:col-span-2"
               >
                 <MagnifyingGlassIcon className="h-5 w-5" />
-                <span>{t('hero.search.button')}</span>
+                <span>{sw ? 'Tafuta malazi' : 'Search stays'}</span>
               </button>
             </div>
 
@@ -300,31 +99,7 @@ export function HeroSection() {
             district: selectedLocation?.type === 'district' ? selectedLocation.name : undefined,
             checkIn, checkOut, guests,
           }} />
-          </div>
 
-          {/* Quick filters below search */}
-          <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {[
-              { label: t('hero.filter.instantBook'), action: () => router.push('/search?instantBook=true') },
-              { label: t('hero.filter.under50k'), action: () => router.push('/search?maxPrice=50000') },
-              { label: t('hero.filter.zanzibar'), action: () => router.push('/search?region=Zanzibar') },
-              { label: t('hero.filter.beachfront'), action: () => router.push('/search?amenities=Beachfront') },
-              { label: t('hero.filter.longTerm'), action: () => window.open('https://www.ndotoni.com', '_blank'), highlight: true },
-            ].map((tag) => (
-              <button
-                key={tag.label}
-                type="button"
-                onClick={tag.action}
-                className={`px-3.5 py-1.5 rounded-full backdrop-blur-sm border text-sm transition-colors ${
-                  tag.highlight
-                    ? 'bg-brand-500/20 border-brand-300/30 text-white hover:bg-brand-500/30'
-                    : 'bg-white/15 border-white/25 text-white/90 hover:bg-white/25'
-                }`}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
         </form>
       </div>
     </section>

@@ -1,12 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, CalendarDays, Moon, PartyPopper, Camera, Waves } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { CategoryGrid } from './CategoryGrid';
-import { StayCategory } from '@/API';
 import { QUERY, prepareStays, type Property, type HomeStaysData } from '@/lib/home-stays';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -27,13 +26,15 @@ export function HomeProperties({ initialData = null }: { initialData?: HomeStays
   const [properties, setProperties] = useState<Property[]>(initialData?.properties || []);
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(!initialData);
-  const useInitial = useRef(!!initialData);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
   useEffect(() => { if (!initialData) setDates(upcomingDates()); }, [initialData]);
   useEffect(() => {
     if (!dates) return;
-    if (useInitial.current) { useInitial.current = false; return; }
+    if (initialData && region === REGIONS[0] && retry === 0 && dates.checkIn === initialData.dates.checkIn && dates.checkOut === initialData.dates.checkOut) {
+      setProperties(initialData.properties); setLoading(false); setError(false); setVisibleCount(12);
+      return;
+    }
     let active = true;
     setLoading(true); setError(false); setProperties([]); setVisibleCount(12);
     GraphQLClient.executePublic<{searchShortTermProperties: {properties:Property[]}}>(QUERY, {input:{
@@ -46,41 +47,24 @@ export function HomeProperties({ initialData = null }: { initialData?: HomeStays
       .catch(() => {if(active) setError(true);})
       .finally(() => {if(active) setLoading(false);});
     return () => {active = false;};
-  }, [region, dates, retry]);
+  }, [region, dates, retry, initialData]);
   const params = new URLSearchParams({region});
   if(dates) {params.set('checkIn',dates.checkIn);params.set('checkOut',dates.checkOut);}
   const href = `/search?${params}`;
-  const weekend = new Date();
-  weekend.setDate(weekend.getDate() + ((5 - weekend.getDay() + 7) % 7 || 7));
-  const localDate = (value: Date) => `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
-  const weekendIn = localDate(weekend);
-  weekend.setDate(weekend.getDate()+2);
-  const weekendHref = `/search?${new URLSearchParams({region,checkIn:weekendIn,checkOut:localDate(weekend)})}`;
   const availableCategories = new Set(properties.flatMap(property => property.stayCategories || []));
   const dateLabel = (value:string) => new Date(`${value}T12:00:00`).toLocaleDateString(sw ? 'sw-TZ' : 'en-GB',{day:'numeric',month:'short'});
   return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8" aria-labelledby="home-stays-title">
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-800">{sw ? 'Anza na sehemu hizi' : 'Your next stay starts here'}</p>
         <h2 id="home-stays-title" className="text-2xl font-semibold tracking-tight text-ink-900 sm:text-3xl">{sw ? 'Sehemu za kuangalia' : 'Places to explore'}</h2>
-        <p className="mt-2 text-sm text-ink-500">{sw ? 'Angalia picha, bei na maelezo kabla ya kuchagua.' : 'Explore photos, prices and the details before you decide.'}</p>
       </div>
       <Link href={href} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand-800 hover:underline">{sw ? 'Angalia zote' : 'Explore all places'}<ArrowRight size={17} aria-hidden="true" /></Link>
     </div>
-    <div className="my-5 flex flex-wrap items-center justify-between gap-3">
-      <div role="group" aria-label={sw ? 'Chagua eneo' : 'Choose a region'} className="flex flex-wrap gap-2">
-        {REGIONS.map(value => <button key={value} type="button" aria-pressed={region===value} onClick={()=>setRegion(value)} className={`min-h-11 rounded-full border px-4 text-sm font-medium transition-colors ${region===value ? 'border-brand-800 bg-brand-800 text-white' : 'border-ink-200 bg-white text-ink-600 hover:border-brand-700'}`}>{value}</button>)}
+    <div className="mb-6 mt-4 flex min-w-0 flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div role="group" aria-label={sw ? 'Chagua eneo' : 'Choose a region'} className="flex w-full min-w-0 gap-6 overflow-x-auto border-b border-ink-100 lg:w-auto">
+        {REGIONS.map(value => <button key={value} type="button" aria-pressed={region===value} onClick={()=>setRegion(value)} className={`min-h-12 shrink-0 border-b-2 text-sm font-semibold transition-colors ${region===value ? 'border-brand-700 text-brand-800' : 'border-transparent text-ink-500 hover:text-brand-800'}`}>{value}</button>)}
       </div>
-      {dates && <Link href={href} className="text-xs leading-relaxed text-ink-500 underline underline-offset-4">{dateLabel(dates.checkIn)} – {dateLabel(dates.checkOut)} · {sw ? 'mgeni 1 · Badilisha tarehe' : '1 guest · Change dates'}</Link>}
-    </div>
-    <div className="mb-6 flex flex-wrap gap-2" aria-label={sw ? 'Tafuta kwa aina ya sehemu' : 'Explore by stay type'}>
-      {dates && <Link href={weekendHref} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-ink-200 px-3 text-xs font-medium text-ink-600 hover:border-brand-700 hover:text-brand-800"><CalendarDays size={15} aria-hidden="true" />{sw ? 'Mapumziko ya wikiendi' : 'Weekend escapes'}</Link>}
-      {[
-        {category:StayCategory.NIGHTLY_STAY, label:sw ? 'Malazi ya usiku' : 'Overnight stays', icon:Moon},
-        {category:StayCategory.PARTY, label:sw ? 'Sehemu za sherehe' : 'Party venues', icon:PartyPopper},
-        {category:StayCategory.PHOTOSHOOT, label:sw ? 'Sehemu za picha' : 'Photoshoot spaces', icon:Camera},
-        {category:StayCategory.BEACH, label:sw ? 'Karibu na ufukwe' : 'Beach escapes', icon:Waves},
-      ].filter(({category}) => availableCategories.has(category)).map(({category,label,icon:Icon}) => <Link key={category} href={`${href}&category=${category}`} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-ink-200 px-3 text-xs font-medium text-ink-600 hover:border-brand-700 hover:text-brand-800"><Icon size={15} aria-hidden="true" />{label}</Link>)}
+      {dates && <Link href={href} className="shrink-0 text-sm leading-relaxed text-ink-500 underline underline-offset-4">{dateLabel(dates.checkIn)} – {dateLabel(dates.checkOut)} · {sw ? 'mgeni 1 · Badilisha tarehe' : '1 guest · Change dates'}</Link>}
     </div>
     {error ? <div role="alert" className="rounded-2xl border border-ink-200 bg-ink-50 p-6"><p className="text-sm text-ink-600">{sw ? 'Sehemu hazijapakia. Tafadhali jaribu tena.' : 'Places could not load. Please try again.'}</p><button type="button" onClick={()=>setRetry(value=>value+1)} className="mt-3 min-h-11 text-sm font-semibold text-brand-800 underline">{sw ? 'Jaribu tena' : 'Try again'}</button></div>
       : loading ? <div aria-label={sw ? 'Inapakia sehemu' : 'Loading stays'} className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map(key=><div key={key} aria-hidden="true" className="animate-pulse"><div className="aspect-[4/3] rounded-2xl bg-ink-100"/><div className="mt-4 h-4 w-3/4 rounded bg-ink-100"/><div className="mt-3 h-4 w-1/2 rounded bg-ink-100"/></div>)}</div>

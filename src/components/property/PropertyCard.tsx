@@ -3,7 +3,7 @@
 import { VerifiedStayBadge } from './VerifiedStayBadge';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ArrowUpRight, MapPin, Users, BedDouble } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { HomeIcon } from '@heroicons/react/24/outline';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Image from 'next/image';
@@ -60,7 +60,7 @@ export function PropertyCard({ property, checkIn, checkOut, priority = false }: 
   }`;
 
   return (
-    <Link href={href} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-ink-200/80 bg-white transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-[0_16px_40px_-16px_rgba(17,24,39,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-700 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+    <Link href={href} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-ink-200/80 bg-white transition-[box-shadow,border-color] duration-200 hover:border-brand-300 hover:shadow-[0_16px_40px_-16px_rgba(17,24,39,0.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-700 motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       {/* Image */}
       <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-ink-100">
         {firstImage && failedImage !== imageUrl ? <Image
@@ -68,7 +68,7 @@ export function PropertyCard({ property, checkIn, checkOut, priority = false }: 
           onError={() => setFailedImage(imageUrl)}
           alt={property.title}
           fill
-          className="object-cover group-hover:scale-[1.03] transition-transform duration-300 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          className="object-cover group-hover:scale-[1.02] transition-transform duration-200 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
           placeholder="blur"
           blurDataURL={BLUR_PLACEHOLDER}
@@ -92,22 +92,15 @@ export function PropertyCard({ property, checkIn, checkOut, priority = false }: 
         )}
       </div>
 
-      {/* Price leads, with the same framed structure as the rental cards. */}
-      <div className="flex flex-1 flex-col p-5">
-        <p className="mb-3 flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-          <span className="text-xl font-bold tracking-tight tabular-nums text-ink-900">{formatPrice(property.nightlyRate, property.currency)}</span>
-          <span className="text-xs text-ink-500">/ {sw ? 'usiku' : 'night'}</span>
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <h3 className="line-clamp-2 min-h-[3rem] text-base font-semibold leading-6 text-ink-900 transition-colors group-hover:text-brand-700">{property.title}</h3>
+        <p className="mt-1 line-clamp-2 text-sm leading-5 text-ink-500">{locationLine({ ward: property.ward || property.address?.ward, street: property.street || property.address?.street, district: property.district, region: property.region })}</p>
+        <p className="mb-5 mt-3 text-sm text-ink-500">
+          {property.maxGuests} {sw ? 'wageni' : property.maxGuests === 1 ? 'guest' : 'guests'}
+          {property.bedrooms != null && property.bedrooms > 0 && <> · {property.bedrooms} {sw ? 'vyumba' : property.bedrooms === 1 ? 'bedroom' : 'bedrooms'}</>}
         </p>
-        <h3 className="line-clamp-2 min-h-[3rem] text-sm font-semibold leading-6 text-ink-900 group-hover:text-brand-700 transition-colors">{property.title}</h3>
-        <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-500">
-          <MapPin size={13} className="shrink-0" aria-hidden="true" />
-          <span className="line-clamp-2">{locationLine({ ward: property.ward || property.address?.ward, street: property.street || property.address?.street, district: property.district, region: property.region })}</span>
-        </p>
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-ink-100 pt-3">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-500">
-            <span className="inline-flex items-center gap-1"><Users size={13} aria-hidden="true" />{property.maxGuests} {sw ? 'wageni' : property.maxGuests === 1 ? 'guest' : 'guests'}</span>
-            {property.bedrooms != null && property.bedrooms > 0 && <span className="inline-flex items-center gap-1"><BedDouble size={13} aria-hidden="true" />{property.bedrooms} {sw ? 'vyumba' : property.bedrooms === 1 ? 'bedroom' : 'bedrooms'}</span>}
-          </div>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-ink-100 pt-4">
+          <p className="flex flex-wrap items-baseline gap-x-1.5"><span className="text-xl font-bold tracking-tight tabular-nums text-ink-900">{formatPrice(property.nightlyRate, property.currency)}</span><span className="text-sm text-ink-500">/ {sw ? 'usiku' : 'night'}</span></p>
           <ArrowUpRight size={18} aria-hidden="true" className="shrink-0 text-brand-700 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:transform-none" />
         </div>
       </div>

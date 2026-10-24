@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChat } from '@/contexts/ChatContext';
@@ -13,10 +14,28 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 export function Header() {
   const { user, isAuthenticated, signOut } = useAuth();
   const { unreadCount } = useChat();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const sw = language === 'sw';
+  const pathname = usePathname();
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => { setMobileMenuOpen(false); }, [pathname]);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const outside = (event: PointerEvent) => {
+      if (!mobileMenuRef.current?.contains(event.target as Node)) setMobileMenuOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setMobileMenuOpen(false); mobileButtonRef.current?.focus(); }
+    };
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('keydown', escape);
+    return () => { document.removeEventListener('pointerdown', outside); document.removeEventListener('keydown', escape); };
+  }, [mobileMenuOpen]);
 
   return (
     <>
@@ -141,29 +160,23 @@ export function Header() {
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              type="button"
-              className="md:hidden p-2 rounded-lg text-ink-600 hover:bg-ink-50"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
-            </button>
-          </div>
-
+            <div ref={mobileMenuRef} className="relative md:hidden" onBlur={event => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setMobileMenuOpen(false);
+            }}>
+              <button ref={mobileButtonRef} type="button" className="relative flex h-11 w-12 items-center justify-center rounded-full border border-ink-200 text-ink-700 transition-colors hover:border-brand-300 hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label={sw ? 'Menyu na akaunti' : 'Menu and account'} aria-expanded={mobileMenuOpen} aria-controls="stays-mobile-menu">
+                {mobileMenuOpen ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
+                {unreadCount > 0 && <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand-600" />}
+              </button>
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-ink-100">
-              <div className="flex flex-col gap-2">
+            <div id="stays-mobile-menu" className="absolute right-0 top-full z-50 mt-3 max-h-[calc(100dvh-6rem)] w-72 max-w-[calc(100vw-2rem)] overflow-y-auto rounded-2xl border border-ink-200 bg-white p-2 shadow-xl">
+              <Link href="/search" aria-current={pathname === '/search' ? 'page' : undefined} onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-xl px-4 py-3 text-sm font-semibold text-brand-800 hover:bg-brand-50">{sw ? 'Tafuta malazi' : 'Find a stay'}</Link>
+              <div className="flex flex-col gap-0.5">
                 {isAuthenticated && (user?.userType === 'LANDLORD' || user?.hasProperties) ? (
                   <Link
                     href="/host"
-                    className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                    className="min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {t('nav.myProperties')}
@@ -171,29 +184,27 @@ export function Header() {
                 ) : (
                   <Link
                     href="/become-host"
-                    className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                    className="min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {t('nav.becomeHost')}
                   </Link>
                 )}
 
-                <div className="px-3 py-2.5">
-                  <LanguageToggle />
-                </div>
+
 
                 {isAuthenticated ? (
                   <>
                     <Link
                       href="/profile"
-                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                      className="min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t('nav.profile')}
                     </Link>
                     <Link
                       href="/chat"
-                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50 flex items-center"
+                      className="min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50 flex items-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t('nav.messages') || 'Messages'}
@@ -205,14 +216,14 @@ export function Header() {
                     </Link>
                     <Link
                       href="/bookings"
-                      className="px-3 py-2.5 rounded-lg text-sm font-medium text-ink-700 hover:bg-ink-50"
+                      className="min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {t('nav.myBookings')}
                     </Link>
                     <button
                       onClick={() => { signOut(); setMobileMenuOpen(false); }}
-                      className="text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50"
+                      className="text-left min-h-11 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
                     >
                       {t('nav.signOut')} ({user?.firstName})
                     </button>
@@ -225,9 +236,17 @@ export function Header() {
                     {t('nav.signIn')}
                   </button>
                 )}
+                <div className="my-2 border-t border-ink-100" />
+                {[{ href: '/refer', label: sw ? 'Pata pesa kwa kututambulisha' : 'Refer & earn' }, { href: '/about', label: sw ? 'Kuhusu sisi' : 'About us' }, { href: '/invest', label: sw ? 'Wekeza' : 'Invest' }].map(item => <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-xl px-4 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50">{item.label}</Link>)}
+                <div className="my-2 border-t border-ink-100" />
+                <div className="flex min-h-11 items-center px-2"><LanguageToggle /></div>
               </div>
             </div>
           )}
+            </div>
+          </div>
+
+
         </nav>
       </header>
 

@@ -50,6 +50,7 @@ export function SearchContent() {
   const [error, setError] = useState<string | null>(null);
 
   const regionParam = searchParams.get('region');
+  const district = searchParams.get('district') || undefined;
   const checkIn = searchParams.get('checkIn') || getDefaultCheckIn();
   const checkOut = searchParams.get('checkOut') || getDefaultCheckOut();
   const guests = parseInt(searchParams.get('guests') || '1');
@@ -67,7 +68,7 @@ export function SearchContent() {
   useEffect(() => {
     fetchProperties();
     return () => { requestId.current += 1; };
-  }, [regionParam, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
+  }, [regionParam, district, checkIn, checkOut, guests, propertyType, stayCategory, validMinPrice, validMaxPrice, instantBookOnly, bedrooms]);
 
   async function fetchProperties() {
     const currentRequest = ++requestId.current;
@@ -75,6 +76,7 @@ export function SearchContent() {
     setError(null);
     try {
       const baseInput = {
+        ...(district && { district }),
         checkInDate: checkIn,
         checkOutDate: checkOut,
         numberOfGuests: guests,

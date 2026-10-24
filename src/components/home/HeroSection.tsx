@@ -1,5 +1,7 @@
 'use client';
 
+import StayDescriptionSearch from './StayDescriptionSearch';
+
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -288,6 +290,12 @@ export function HeroSection() {
                 <span>{t('hero.search.button')}</span>
               </button>
             </div>
+
+          <StayDescriptionSearch base={{
+            region: selectedLocation?.type === 'region' ? selectedLocation.name : selectedLocation?.regionName,
+            district: selectedLocation?.type === 'district' ? selectedLocation.name : undefined,
+            checkIn, checkOut, guests,
+          }} />
           </div>
 
           {/* Quick filters below search */}

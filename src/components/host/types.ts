@@ -15,6 +15,7 @@ export interface PropertyFormData {
   maxGuests: string;
   bedrooms: string;
   bathrooms: string;
+  kitchenCount?: string; kitchenAccess?: string;
   amenities: string[];
   minimumStay: string;
   maximumStay: string;

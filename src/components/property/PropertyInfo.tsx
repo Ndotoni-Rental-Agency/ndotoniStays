@@ -65,6 +65,7 @@ export function PropertyInfo({ property }: Props) {
           {property.bathrooms && (
             <span>{property.bathrooms} bath{property.bathrooms > 1 ? 's' : ''}</span>
           )}
+          {property.kitchenCount != null && <span>{property.kitchenCount === 0 ? (sw ? 'Hakuna jiko' : 'No kitchen') : `${property.kitchenCount} ${sw ? (property.kitchenCount === 1 ? 'jiko' : 'majiko') : (property.kitchenCount === 1 ? 'kitchen' : 'kitchens')}${property.kitchenAccess === 'SHARED' ? (sw ? ' · la pamoja' : ' · shared') : property.kitchenAccess === 'PRIVATE' ? (sw ? ' · binafsi' : ' · private') : ''}`}</span>}
           {property.ratingSummary && property.ratingSummary.totalReviews > 0 && (
             <span className="flex items-center gap-1">
               <StarIcon className="h-4 w-4 text-amber-500" />

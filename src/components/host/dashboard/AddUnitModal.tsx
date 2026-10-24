@@ -132,6 +132,8 @@ export function AddUnitModal({ sourcePropertyId, onClose, onSuccess }: Props) {
           maxGuests: parseInt(form.maxGuests) || 2,
           bedrooms: parseInt(form.bedrooms) || undefined,
           bathrooms: parseInt(form.bathrooms) || undefined,
+          kitchenCount: form.kitchenCount ? Number(form.kitchenCount) : null,
+          kitchenAccess: Number(form.kitchenCount) > 0 ? form.kitchenAccess || null : null,
           instantBookEnabled: form.instantBookEnabled,
           images: form.images,
           videos: form.videos,

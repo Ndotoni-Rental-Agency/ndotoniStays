@@ -1,4 +1,5 @@
 'use client';
+import KitchenFields from '@/components/property/KitchenFields';
 
 import { useState } from 'react';
 import { Banknote, Zap } from 'lucide-react';
@@ -180,6 +181,8 @@ export function StepPricing({ form, updateField, setForm }: StepProps) {
             </select>
           </div>
         </div>
+
+      <KitchenFields count={form.kitchenCount} access={form.kitchenAccess} onChange={value => { updateField('kitchenCount', value.kitchenCount?.toString() ?? ''); updateField('kitchenAccess', value.kitchenAccess || ''); }} />
 
         {/* Instant Book Toggle */}
         <div className="flex items-center justify-between p-4 rounded-xl border border-ink-200 bg-ink-50/50">

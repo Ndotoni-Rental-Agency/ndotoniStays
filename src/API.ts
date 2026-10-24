@@ -186,6 +186,8 @@ export enum PropertyType {
 export type PropertySpecifications = {
   __typename: "PropertySpecifications",
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   floors?: number | null,
   furnished?: boolean | null,
@@ -279,6 +281,8 @@ export type ShortTermProperty = {
   amenities?: Array< string > | null,
   averageRating?: number | null,
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   cancellationPolicy?: CancellationPolicy | null,
   checkInInstructions?: CheckInInstructions | null,
@@ -616,6 +620,8 @@ export type PropertyPricingInput = {
 
 export type PropertySpecificationsInput = {
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   floors?: number | null,
   furnished?: boolean | null,
@@ -635,6 +641,8 @@ export type CreatePropertyResponse = {
 export type CreatePropertyDraftInput = {
   available: boolean,
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   currency: string,
   district: string,
@@ -723,6 +731,9 @@ export type CreateShortTermPropertyInput = {
   thumbnail: string,
   title: string,
   videos?: Array< string > | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
+
 };
 
 export type ShortTermAddressInput = {
@@ -748,6 +759,8 @@ export type CheckInInstructionsInput = {
 
 export type CreateShortTermPropertyDraftInput = {
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   cleaningFee?: number | null,
   currency: string,
@@ -1301,6 +1314,8 @@ export type UpdateShortTermPropertyInput = {
   allowsSmoking?: boolean | null,
   amenities?: Array< string > | null,
   bathrooms?: number | null,
+  kitchenCount?: number | null,
+  kitchenAccess?: string | null,
   bedrooms?: number | null,
   cancellationPolicy?: CancellationPolicy | null,
   checkInInstructions?: CheckInInstructionsInput | null,
@@ -2150,6 +2165,8 @@ export type AdminUpdateApplicationStatusMutation = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -2253,6 +2270,8 @@ export type ApproveBookingMutation = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -2442,6 +2461,8 @@ export type AssociateMediaWithPropertyMutation = {
     specifications?:  {
       __typename: "PropertySpecifications",
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       floors?: number | null,
       furnished?: boolean | null,
@@ -2538,6 +2559,8 @@ export type CancelBookingMutation = {
         amenities?: Array< string > | null,
         averageRating?: number | null,
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         cancellationPolicy?: CancellationPolicy | null,
         checkInInstructions?:  {
@@ -2720,6 +2743,8 @@ export type CreateBookingMutation = {
         amenities?: Array< string > | null,
         averageRating?: number | null,
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         cancellationPolicy?: CancellationPolicy | null,
         checkInInstructions?:  {
@@ -2986,6 +3011,8 @@ export type CreateShortTermPropertyMutation = {
     amenities?: Array< string > | null,
     averageRating?: number | null,
     bathrooms?: number | null,
+    kitchenCount?: number | null,
+    kitchenAccess?: string | null,
     bedrooms?: number | null,
     cancellationPolicy?: CancellationPolicy | null,
     checkInInstructions?:  {
@@ -3172,6 +3199,8 @@ export type DeclineBookingMutation = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -3597,6 +3626,8 @@ export type MarkPropertyAsAvailableMutation = {
     specifications?:  {
       __typename: "PropertySpecifications",
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       floors?: number | null,
       furnished?: boolean | null,
@@ -3678,6 +3709,8 @@ export type MarkPropertyAsRentedMutation = {
     specifications?:  {
       __typename: "PropertySpecifications",
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       floors?: number | null,
       furnished?: boolean | null,
@@ -3793,6 +3826,8 @@ export type PublishPropertyUpdateEventMutation = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -3834,6 +3869,8 @@ export type PublishShortTermPropertyMutation = {
     amenities?: Array< string > | null,
     averageRating?: number | null,
     bathrooms?: number | null,
+    kitchenCount?: number | null,
+    kitchenAccess?: string | null,
     bedrooms?: number | null,
     cancellationPolicy?: CancellationPolicy | null,
     checkInInstructions?:  {
@@ -4325,6 +4362,8 @@ export type SubmitApplicationMutation = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -4555,6 +4594,8 @@ export type UpdateApplicationMutation = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -4678,6 +4719,8 @@ export type UpdateApplicationStatusMutation = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -4850,6 +4893,8 @@ export type UpdatePropertyStatusMutation = {
     specifications?:  {
       __typename: "PropertySpecifications",
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       floors?: number | null,
       furnished?: boolean | null,
@@ -4904,6 +4949,8 @@ export type UpdateShortTermPropertyMutation = {
     amenities?: Array< string > | null,
     averageRating?: number | null,
     bathrooms?: number | null,
+    kitchenCount?: number | null,
+    kitchenAccess?: string | null,
     bedrooms?: number | null,
     cancellationPolicy?: CancellationPolicy | null,
     checkInInstructions?:  {
@@ -5246,6 +5293,8 @@ export type GetApplicationQuery = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -5383,6 +5432,8 @@ export type GetBookingQuery = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -6165,6 +6216,8 @@ export type GetLandlordPropertiesInfoQuery = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -6597,6 +6650,8 @@ export type GetPropertyQuery = {
     specifications?:  {
       __typename: "PropertySpecifications",
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       floors?: number | null,
       furnished?: boolean | null,
@@ -6793,6 +6848,8 @@ export type GetShortTermPropertyQuery = {
     amenities?: Array< string > | null,
     averageRating?: number | null,
     bathrooms?: number | null,
+    kitchenCount?: number | null,
+    kitchenAccess?: string | null,
     bedrooms?: number | null,
     cancellationPolicy?: CancellationPolicy | null,
     checkInInstructions?:  {
@@ -7444,6 +7501,8 @@ export type ListAgentPropertiesQuery = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -7560,6 +7619,8 @@ export type ListAllApplicationsQuery = {
         specifications?:  {
           __typename: "PropertySpecifications",
           bathrooms?: number | null,
+          kitchenCount?: number | null,
+          kitchenAccess?: string | null,
           bedrooms?: number | null,
           floors?: number | null,
           furnished?: boolean | null,
@@ -7692,6 +7753,8 @@ export type ListAllPropertiesQuery = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -7724,6 +7787,8 @@ export type ListAllPropertiesQuery = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -8114,6 +8179,8 @@ export type ListLandlordPropertiesQuery = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,
@@ -8257,6 +8324,8 @@ export type ListMyApplicationsQuery = {
         specifications?:  {
           __typename: "PropertySpecifications",
           bathrooms?: number | null,
+          kitchenCount?: number | null,
+          kitchenAccess?: string | null,
           bedrooms?: number | null,
           floors?: number | null,
           furnished?: boolean | null,
@@ -8351,6 +8420,8 @@ export type ListMyBookingsQuery = {
         amenities?: Array< string > | null,
         averageRating?: number | null,
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         cancellationPolicy?: CancellationPolicy | null,
         checkInInstructions?:  {
@@ -8478,6 +8549,8 @@ export type ListMyShortTermPropertiesQuery = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -8656,6 +8729,8 @@ export type ListPropertyApplicationsQuery = {
         specifications?:  {
           __typename: "PropertySpecifications",
           bathrooms?: number | null,
+          kitchenCount?: number | null,
+          kitchenAccess?: string | null,
           bedrooms?: number | null,
           floors?: number | null,
           furnished?: boolean | null,
@@ -8753,6 +8828,8 @@ export type ListPropertyBookingsQuery = {
         amenities?: Array< string > | null,
         averageRating?: number | null,
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         cancellationPolicy?: CancellationPolicy | null,
         checkInInstructions?:  {
@@ -9046,6 +9123,8 @@ export type SearchShortTermPropertiesQuery = {
       amenities?: Array< string > | null,
       averageRating?: number | null,
       bathrooms?: number | null,
+      kitchenCount?: number | null,
+      kitchenAccess?: string | null,
       bedrooms?: number | null,
       cancellationPolicy?: CancellationPolicy | null,
       checkInInstructions?:  {
@@ -9298,6 +9377,8 @@ export type OnPropertyUpdatedSubscription = {
       specifications?:  {
         __typename: "PropertySpecifications",
         bathrooms?: number | null,
+        kitchenCount?: number | null,
+        kitchenAccess?: string | null,
         bedrooms?: number | null,
         floors?: number | null,
         furnished?: boolean | null,

@@ -917,6 +917,8 @@ type PropertySnapshotAddress @aws_api_key @aws_cognito_user_pools {
 
 type PropertySpecifications @aws_api_key @aws_cognito_user_pools {
   bathrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
+  kitchenCount: Int @aws_iam @aws_api_key @aws_cognito_user_pools
+  kitchenAccess: String @aws_iam @aws_api_key @aws_cognito_user_pools
   bedrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
   floors: Int @aws_api_key @aws_cognito_user_pools @aws_iam
   furnished: Boolean @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1124,6 +1126,8 @@ type ShortTermProperty @aws_api_key @aws_cognito_user_pools {
   amenities: [String!] @aws_api_key @aws_cognito_user_pools @aws_iam
   averageRating: Float @aws_api_key @aws_cognito_user_pools @aws_iam
   bathrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
+  kitchenCount: Int @aws_iam @aws_api_key @aws_cognito_user_pools
+  kitchenAccess: String @aws_iam @aws_api_key @aws_cognito_user_pools
   bedrooms: Int @aws_api_key @aws_cognito_user_pools @aws_iam
   cancellationPolicy: CancellationPolicy @aws_api_key @aws_cognito_user_pools @aws_iam
   checkInInstructions: CheckInInstructions @aws_api_key @aws_cognito_user_pools @aws_iam
@@ -1673,6 +1677,8 @@ input CreateLocationInput {
 input CreatePropertyDraftInput {
   available: Boolean!
   bathrooms: Int
+  kitchenCount: Int
+  kitchenAccess: String
   bedrooms: Int
   currency: String!
   district: String!
@@ -1718,6 +1724,8 @@ input CreateReviewInput {
 
 input CreateShortTermPropertyDraftInput {
   bathrooms: Int
+  kitchenCount: Int
+  kitchenAccess: String
   bedrooms: Int
   cleaningFee: Float
   currency: String!
@@ -1764,6 +1772,8 @@ input CreateShortTermPropertyInput {
   instantBookEnabled: Boolean!
   maxAdults: Int
   maxChildren: Int
+  kitchenCount: Int
+  kitchenAccess: String
   maxGuests: Int!
   maxInfants: Int
   maximumStay: Int
@@ -1855,6 +1865,8 @@ input PropertySearchInput {
 
 input PropertySpecificationsInput {
   bathrooms: Int
+  kitchenCount: Int
+  kitchenAccess: String
   bedrooms: Int
   floors: Int
   furnished: Boolean
@@ -1987,6 +1999,8 @@ input UpdateShortTermPropertyInput {
   allowsSmoking: Boolean
   amenities: [String!]
   bathrooms: Int
+  kitchenCount: Int
+  kitchenAccess: String
   bedrooms: Int
   cancellationPolicy: CancellationPolicy
   checkInInstructions: CheckInInstructionsInput

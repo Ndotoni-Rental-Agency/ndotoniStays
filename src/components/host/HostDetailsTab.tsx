@@ -1,4 +1,5 @@
 'use client';
+import KitchenFields from '@/components/property/KitchenFields';
 
 import LocationSelect from '@/components/location/LocationSelect';
 
@@ -495,6 +496,8 @@ export function HostDetailsTab({ form, onUpdate, onToggleAmenity, onSave, saving
           </div>
         </div>
       </section>
+
+      <KitchenFields count={form.kitchenCount} access={form.kitchenAccess} onChange={value => { onUpdate('kitchenCount', value.kitchenCount?.toString() ?? ''); onUpdate('kitchenAccess', value.kitchenAccess || ''); }} />
 
       {/* Amenities */}
       <section>

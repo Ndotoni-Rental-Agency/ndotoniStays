@@ -172,6 +172,8 @@ export const onPropertyUpdated = /* GraphQL */ `subscription OnPropertyUpdated($
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished

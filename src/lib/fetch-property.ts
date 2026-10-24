@@ -22,6 +22,8 @@ const GET_SHORT_TERM_PROPERTY_QUERY = `query GetShortTermProperty($propertyId: I
     maxGuests
     bedrooms
     bathrooms
+    kitchenCount
+    kitchenAccess
     averageRating
     coordinates {
       latitude
@@ -63,6 +65,8 @@ export interface PropertySEOData {
   maxGuests: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
+  kitchenCount?: number | null;
+  kitchenAccess?: string | null;
   averageRating: number | null;
   coordinates: { latitude: number; longitude: number } | null;
   address: {

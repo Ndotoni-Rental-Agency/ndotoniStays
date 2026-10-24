@@ -13,8 +13,8 @@ const nightCount = (start: string, end: string) => {
   return Math.max(0, Math.round((utc(end) - utc(start)) / 86400000));
 };
 
-export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, className = 'col-span-2 lg:col-span-4' }: {
-  checkIn: string; checkOut: string; min: string; className?: string; onChange: (start: string, end: string) => void;
+export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, blockedDates, minimumNights = 1, className = 'col-span-2 lg:col-span-4' }: {
+  checkIn: string; checkOut: string; min: string; blockedDates?: Set<string>; minimumNights?: number; className?: string; onChange: (start: string, end: string) => void;
 }) {
   const { language } = useLanguage();
   const sw = language === 'sw';
@@ -28,7 +28,11 @@ export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, 
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
   const nights = nightCount(start, end);
-  const canApply = nights > 0 || (!start && !end && !!(checkIn || checkOut));
+  const rangeBlocked = (from: string, to: string) => {
+    if (!blockedDates?.size || !from || !to) return false;
+    return Array.from(blockedDates).some(date => date >= from && date <= to);
+  };
+  const canApply = (nights >= minimumNights && !rangeBlocked(start, end)) || (!start && !end && !!(checkIn || checkOut));
   const short = (value: string) => value ? parse(value).toLocaleDateString(locale, { day: 'numeric', month: 'short' }) : sw ? 'Chagua tarehe' : 'Add date';
   function show() {
     setStart(checkIn); setEnd(checkOut); setHover('');
@@ -76,7 +80,7 @@ export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, 
       <div className="grid grid-cols-7 gap-y-1">{Array.from({length: firstDay}, (_, index) => <span key={`blank-${index}`} />)}{Array.from({length: days}, (_, index) => {
         const day = index + 1;
         const value = iso(new Date(date.getFullYear(), date.getMonth(), day));
-        const disabled = value < min;
+        const disabled = value < min || !!blockedDates?.has(value) || (phase === 'out' && !!start && value > start && rangeBlocked(start, value));
         const endpoint = value === start || value === end;
         const inside = start && rangeEnd && value > start && value < rangeEnd;
         return <button key={value} type="button" data-date={value} disabled={disabled} aria-pressed={endpoint}
@@ -111,7 +115,7 @@ export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, 
         </div>
         <div className="flex items-center justify-between gap-3 border-t border-ink-100 px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-7">
           <button type="button" onClick={() => { setStart(''); setEnd(''); setPhase('in'); setHover(''); }} className="min-h-11 text-sm font-semibold text-ink-700 underline underline-offset-4">{sw ? 'Futa tarehe' : 'Clear dates'}</button>
-          <div className="flex items-center gap-4"><span className="text-sm text-ink-500" aria-live="polite">{nights > 0 ? `${nights} ${sw ? 'usiku' : nights === 1 ? 'night' : 'nights'}` : ''}</span><button type="button" disabled={!canApply} onClick={() => { onChange(start,end); setOpen(false); }} className="stays-press min-h-12 rounded-full bg-brand-800 px-5 text-sm font-semibold text-white hover:bg-brand-900 disabled:opacity-40">{sw ? 'Tumia tarehe' : 'Apply dates'}</button></div>
+          <div className="flex items-center gap-4"><span className="text-sm text-ink-500" aria-live="polite">{nights > 0 ? (nights < minimumNights ? (sw ? `Angalau usiku ${minimumNights}` : `${minimumNights} nights minimum`) : `${nights} ${sw ? 'usiku' : nights === 1 ? 'night' : 'nights'}`) : ''}</span><button type="button" disabled={!canApply} onClick={() => { onChange(start,end); setOpen(false); }} className="stays-press min-h-12 rounded-full bg-brand-800 px-5 text-sm font-semibold text-white hover:bg-brand-900 disabled:opacity-40">{sw ? 'Tumia tarehe' : 'Apply dates'}</button></div>
         </div>
       </div>
     </div>, document.body)}

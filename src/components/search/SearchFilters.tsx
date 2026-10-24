@@ -8,7 +8,7 @@ import { useStayCopy } from '@/hooks/useStayCopy';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import CalendarDatePicker from '@/components/ui/CalendarDatePicker';
+import StayDateRangePicker from '@/components/home/StayDateRangePicker';
 
 const REGIONS = [
   'Dar es Salaam', 'Arusha', 'Dodoma', 'Mwanza', 'Zanzibar',
@@ -55,6 +55,10 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
   const panelRef = useRef<HTMLDivElement>(null);
   const [showFilters, setShowFilters] = useState(false);
 
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minCheckIn = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+
   // Count active advanced filters
   const activeFilterCount = [localMinPrice, localMaxPrice, localBedrooms, localCategory, localType, localInstant].filter(Boolean).length;
 
@@ -76,15 +80,14 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
 
   // Auto-search when main filters change (debounced 400ms)
   // Don't trigger if check-in changed but check-out is empty (user still picking dates)
-  const isInitialMount = useRef(true);
+  const lastSearch = useRef(JSON.stringify([localRegion, localCheckIn, localCheckOut, localGuests]));
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Skip auto-search on initial mount (URL params already trigger search in SearchContent)
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
+    // Search only after a real selection change, including under Strict Mode's repeated effects.
+    const selection = JSON.stringify([localRegion, localCheckIn, localCheckOut, localGuests]);
+    if (selection === lastSearch.current) return;
+    lastSearch.current = selection;
     // Don't auto-search if user selected check-in but hasn't picked check-out yet
     if (localCheckIn && !localCheckOut) return;
 
@@ -146,11 +149,10 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
   return (
     <>
       {/* Main filter bar — always visible */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-2 sm:gap-3 bg-ink-50 rounded-2xl p-3 sm:p-4">
+      <div className="grid grid-cols-2 lg:flex lg:flex-wrap items-end gap-2 sm:gap-3 bg-ink-50 rounded-2xl p-3 sm:p-4">
         <div className="flex-1 min-w-[120px]">
-          <label htmlFor="search-region" className="block text-xs font-medium text-ink-500 mb-1">{copy("Location")}</label>
           <LocationSelect
-            id="search-region" value={localRegion}
+            id="search-region" fieldLabel={copy("Location")} value={localRegion}
             onChange={(e) => setLocalRegion(e.target.value)}
             className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
           >
@@ -161,43 +163,12 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           </LocationSelect>
         </div>
 
-        <div className="hidden sm:block min-w-[130px]">
-          <CalendarDatePicker
-            value={localCheckIn}
-            onChange={(val) => {
-              setLocalCheckIn(val);
-              if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
-            }}
-            label={copy("Check-in")}
-            placeholder={copy("Check-in")}
-            rangeStart={localCheckIn}
-            rangeEnd={localCheckOut}
-            rangeMode
-            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
-          />
-        </div>
-
-        <div className="hidden sm:block min-w-[130px]">
-          <CalendarDatePicker
-            value={localCheckOut}
-            onChange={setLocalCheckOut}
-            minExclusive={localCheckIn || undefined}
-            label={copy("Check-out")}
-            placeholder={copy("Check-out")}
-            rangeStart={localCheckIn}
-            rangeEnd={localCheckOut}
-            rangeMode
-            rangePhaseStart="checkOut"
-            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
-          />
-        </div>
-
-        <div className="min-w-[90px]">
-          <label htmlFor="search-guests" className="block text-xs font-medium text-ink-500 mb-1">{copy("Guests")}</label>
+        <div className="relative min-w-[100px] sm:min-w-[120px]">
+          <label htmlFor="search-guests" className="pointer-events-none absolute left-4 top-3 text-sm font-semibold text-ink-900">{copy("Guests")}</label>
           <select
             id="search-guests" value={localGuests}
             onChange={(e) => setLocalGuests(Number(e.target.value))}
-            className="w-full rounded-xl border-ink-200 bg-white px-3 py-2.5 text-sm focus:ring-brand-500 focus:border-brand-500"
+            className="stays-search-field h-[76px] w-full cursor-pointer rounded-xl border border-ink-200 bg-ink-50/60 pb-2 pl-4 pr-8 pt-7 text-base text-ink-900 hover:border-brand-600 hover:bg-brand-50/40 focus:ring-brand-500 focus:border-brand-500"
           >
             {[1, 2, 3, 4, 5, 6, 8, 10, 15, 20].map((n) => (
               <option key={n} value={n}>{n}</option>
@@ -205,44 +176,19 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
           </select>
         </div>
 
-      {/* Mobile date pickers — below bar on small screens */}
-      <div className="col-span-2 grid grid-cols-2 gap-2 sm:hidden">
-        <div className="flex-1">
-          <CalendarDatePicker
-            value={localCheckIn}
-            onChange={(val) => {
-              setLocalCheckIn(val);
-              if (localCheckOut && val >= localCheckOut) setLocalCheckOut('');
-            }}
-            label={copy("Check-in")}
-            placeholder={copy("Check-in")}
-            rangeStart={localCheckIn}
-            rangeEnd={localCheckOut}
-            rangeMode
-            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
-          />
-        </div>
-        <div className="flex-1">
-          <CalendarDatePicker
-            value={localCheckOut}
-            onChange={setLocalCheckOut}
-            minExclusive={localCheckIn || undefined}
-            label={copy("Check-out")}
-            placeholder={copy("Check-out")}
-            rangeStart={localCheckIn}
-            rangeEnd={localCheckOut}
-            rangeMode
-            rangePhaseStart="checkOut"
-            onRangeComplete={(ci, co) => { setLocalCheckIn(ci); setLocalCheckOut(co); }}
-          />
-        </div>
-      </div>
+        <StayDateRangePicker
+          className="col-span-2 min-w-0 sm:min-w-[280px] sm:flex-1"
+          checkIn={localCheckIn}
+          checkOut={localCheckOut}
+          min={minCheckIn}
+          onChange={(start, end) => { setLocalCheckIn(start); setLocalCheckOut(end); }}
+        />
 
         {/* Filters button */}
         <button
           type="button"
           onClick={() => setShowFilters(true)}
-          className="relative inline-flex min-h-11 justify-center items-center gap-1.5 rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors"
+          className="relative inline-flex h-[76px] w-full items-center justify-center gap-2 rounded-xl border border-ink-200 bg-white px-4 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-50 sm:w-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-700"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4" />
           <span>{copy("Filters")}</span>
@@ -256,7 +202,8 @@ export function SearchFilters({ region, checkIn, checkOut, guests, minPrice, max
         {/* Search button */}
         <button
           onClick={handleApply}
-          className="btn-primary min-h-11 w-full sm:w-auto py-2.5 px-4 sm:px-5 text-sm"
+          type="button"
+          className="stays-press inline-flex h-[76px] w-full items-center justify-center rounded-xl bg-brand-700 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 sm:w-auto"
         >
           {copy("Search")}
         </button>

@@ -87,7 +87,7 @@ export function HeroSection() {
               {/* Search Button */}
               <button
                 type="submit"
-                className="stays-press flex min-h-[76px] items-center justify-center gap-2 rounded-full bg-brand-700 px-3 text-sm font-bold text-white transition-colors hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 lg:col-span-2"
+                className="stays-press flex min-h-[76px] items-center justify-center gap-2 rounded-xl bg-brand-700 px-3 text-sm font-bold text-white transition-colors hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 lg:col-span-2"
               >
                 <MagnifyingGlassIcon className="h-5 w-5" />
                 <span>{sw ? 'Tafuta malazi' : 'Search stays'}</span>

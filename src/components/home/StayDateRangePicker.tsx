@@ -13,8 +13,8 @@ const nightCount = (start: string, end: string) => {
   return Math.max(0, Math.round((utc(end) - utc(start)) / 86400000));
 };
 
-export default function StayDateRangePicker({ checkIn, checkOut, min, onChange }: {
-  checkIn: string; checkOut: string; min: string; onChange: (start: string, end: string) => void;
+export default function StayDateRangePicker({ checkIn, checkOut, min, onChange, className = 'col-span-2 lg:col-span-4' }: {
+  checkIn: string; checkOut: string; min: string; className?: string; onChange: (start: string, end: string) => void;
 }) {
   const { language } = useLanguage();
   const sw = language === 'sw';
@@ -89,7 +89,7 @@ export default function StayDateRangePicker({ checkIn, checkOut, min, onChange }
     </div>;
   }
   return <>
-    <div className="col-span-2 lg:col-span-4">
+    <div className={className}>
       <button ref={trigger} type="button" onClick={show} aria-haspopup="dialog" aria-expanded={open}
         aria-label={`${sw ? 'Tarehe za malazi' : 'Stay dates'}: ${short(checkIn)} — ${short(checkOut)}`}
         className="stays-search-field grid h-[76px] w-full cursor-pointer grid-cols-2 rounded-xl border border-ink-200 bg-ink-50/60 text-left transition-colors hover:border-brand-600 hover:bg-brand-50/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-600">

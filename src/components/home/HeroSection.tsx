@@ -105,7 +105,11 @@ export function HeroSection() {
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=1920&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=1280&auto=format&fit=crop"
+          srcSet={[640, 960, 1280, 1920].map(width => `https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=75&w=${width}&auto=format&fit=crop ${width}w`).join(', ')}
+          sizes="100vw"
+          fetchPriority="high"
+          decoding="async"
           alt=""
           className="w-full h-full object-cover"
         />

@@ -38,12 +38,13 @@ interface ShortTermProperty {
 }
 
 interface Props {
+  priority?: boolean;
   property: ShortTermProperty;
   checkIn?: string;
   checkOut?: string;
 }
 
-export function PropertyCard({ property, checkIn, checkOut }: Props) {
+export function PropertyCard({ property, checkIn, checkOut, priority = false }: Props) {
   const { language } = useLanguage();
   const sw = language === 'sw';
   const [failedImage, setFailedImage] = useState<string | null>(null);
@@ -71,7 +72,8 @@ export function PropertyCard({ property, checkIn, checkOut }: Props) {
           sizes="(max-width: 640px) 100vw, (max-width: 1023px) 50vw, (max-width: 1279px) 33vw, 25vw"
           placeholder="blur"
           blurDataURL={BLUR_PLACEHOLDER}
-          loading="lazy"
+          priority={priority}
+          loading={priority ? undefined : 'lazy'}
         /> : <div className="flex h-full flex-col items-center justify-center gap-3 bg-ink-50 text-ink-400">
           <HomeIcon className="h-10 w-10" strokeWidth={1} aria-hidden="true" />
           <span className="text-xs">{language === 'sw' ? 'Picha zinakuja hivi karibuni' : 'Photos coming soon'}</span>

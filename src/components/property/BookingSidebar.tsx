@@ -4,6 +4,7 @@ import { useStayCopy } from "@/hooks/useStayCopy";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { WhatsAppIcon } from '@/components/refer/WhatsAppIcon';
 import { BoltIcon } from "@heroicons/react/24/solid";
 import { formatPrice, calculateNights, findAvailableRanges } from "@/lib/utils";
 import { GraphQLClient } from "@/lib/graphql-client";
@@ -346,6 +347,15 @@ export function BookingSidebar({
           {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
           {copy(property.instantBookEnabled ? "Reserve & Pay" : "Request to Book")}
         </button>
+
+        <a
+          href={`/enquire/${encodeURIComponent(property.propertyId)}?lang=${sw ? 'sw' : 'en'}`}
+          target="_blank" rel="noopener noreferrer"
+          className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-brand-600 px-4 text-sm font-semibold text-brand-700 hover:bg-brand-50"
+        >
+          <WhatsAppIcon className="h-5 w-5" />
+          {sw ? 'Uliza kuhusu stay hii · WhatsApp' : 'Enquire about this stay · WhatsApp'}
+        </a>
 
         {/* Reassurance */}
         <p className="mt-3 text-center text-xs text-ink-400">

@@ -305,8 +305,10 @@ export default function MyBookingsPage() {
               : STATUS_BADGE[booking.status] || STATUS_BADGE.PENDING;
             const canReview = (
               !reviewedBookingIds.has(booking.bookingId) &&
+              booking.paymentStatus === 'CAPTURED' &&
+              booking.checkOutDate <= today &&
               (booking.status === 'COMPLETED' ||
-              (booking.status === 'CONFIRMED' && booking.paymentStatus === 'CAPTURED' && booking.checkInDate <= today))
+                (booking.status === 'CONFIRMED' && booking.checkOutDate <= today))
             );
             const propertyImage = booking.property?.thumbnail || booking.property?.images?.[0] || '';
             const days = daysUntil(booking.checkInDate);

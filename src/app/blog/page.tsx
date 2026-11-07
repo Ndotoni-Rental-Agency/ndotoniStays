@@ -1,28 +1,60 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
-import Image from 'next/image';
-import { photography } from './photography';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { BlogExplorer } from '@/components/blog/BlogExplorer';
-import { blogPosts } from './posts';
+import { Cover } from '@/components/blog/Cover';
+import { stayCategoryLabel } from '@/lib/stay-categories';
+import { blogPosts, readingMinutes, guideSearchHref } from './posts';
+import { photography } from './photography';
 
 export const metadata: Metadata = {
   title: 'Stay guides & travel ideas in Tanzania | Ndotoni Stays',
-  description: 'Practical guides to short-stay apartments, beach escapes, business travel and celebration venues, with links to real stays in Tanzania.',
+  description: 'Practical guides to short stays, monthly apartments, beach escapes, business trips, safari bases, party venues, photoshoot and meeting spaces in Tanzania.',
   alternates: { canonical: 'https://www.ndotonistays.com/blog' },
-  openGraph: { title: 'Find your kind of stay | Ndotoni Stays', description: 'Explore practical stay guides and real places in Tanzania.', url: 'https://www.ndotonistays.com/blog', type: 'website' },
+  openGraph: { title: 'Stay guides | Ndotoni Stays', description: 'Practical guides and real places to stay in Tanzania.', url: 'https://www.ndotonistays.com/blog', type: 'website', images: [{ url: photography[0].src, alt: photography[0].alt }] },
 };
+
 export default function BlogPage() {
-  const featured = blogPosts[0];
-  return <div className="bg-[#f5f3ed] pb-16 text-ink-900">
-    <header className="mx-auto max-w-7xl px-5 pt-9 sm:px-8 lg:pt-12">
-      <div className="flex items-center justify-between border-b border-stone-300 pb-4 text-[10px] font-semibold uppercase tracking-[0.22em] sm:text-xs"><span>The Stays journal</span><span>Places. People. Tanzania.</span></div>
-      <div className="grid items-end gap-6 py-8 md:grid-cols-[1.4fr_1fr] lg:py-10"><h1 className="font-serif text-6xl leading-[0.95] tracking-[-0.045em] sm:text-8xl lg:text-[104px]">A change<br/>of <em className="font-normal text-brand-900">scenery.</em></h1><p className="max-w-sm pb-2 text-base leading-7 text-stone-600 md:justify-self-end">For slow weekends, city visits and trips worth taking. Find your next corner of Tanzania.</p></div>
-      <div className="grid gap-6 lg:grid-cols-[1.75fr_1fr] lg:gap-8">
-        <figure className="relative"><Link href={`/blog/${featured.slug}`} className="group relative block aspect-[4/3] overflow-hidden sm:aspect-[16/10]"><Image src={photography[0].src} alt={photography[0].alt} fill priority sizes="(max-width: 1023px) 100vw, 65vw" className="object-cover transition-transform duration-700 group-hover:scale-[1.025] motion-reduce:transition-none"/><div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent"/><div className="absolute bottom-0 p-6 text-white sm:p-9"><p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/80">The city edit / Dar es Salaam</p><h2 className="max-w-xl font-serif text-4xl leading-[1.08] tracking-tight text-white sm:text-5xl">Check in.<br/>Feel at home.</h2><span className="mt-5 inline-flex items-center gap-3 border-b border-white/50 pb-2 text-sm font-semibold">Your guide to a Dar stay <ArrowUpRight size={17}/></span></div></Link><figcaption className="mt-2 text-[10px] text-stone-500">Photography: <Link href={`/property/${photography[0].id}`} className="underline underline-offset-2">{photography[0].alt}</Link></figcaption></figure>
-        <div className="flex flex-col border-t border-stone-300 pt-5 lg:border-t-0 lg:pt-0"><Link href={`/blog/${blogPosts[2].slug}`} className="group"><div className="relative aspect-[2/1] overflow-hidden"><Image src={photography[2].src} alt={photography[2].alt} fill sizes="(max-width:1023px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transition-none"/></div><p className="mb-3 mt-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-900">On the road / Dodoma</p><h2 className="font-serif text-3xl leading-tight tracking-tight">Business trip.<br/>A better base.</h2><p className="mt-3 text-sm leading-7 text-stone-600">A stay that works around your meetings, your schedule, your day.</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-semibold underline decoration-stone-300 underline-offset-8">Read the Dodoma guide <ArrowUpRight size={16}/></span></Link><p className="mt-auto border-t border-stone-300 pt-5 text-xs leading-6 text-stone-500 lg:mt-6">Real places from the Ndotoni Stays collection. Practical advice for choosing yours.</p></div>
+  const [lead, ...rest] = blogPosts;
+  const occasions = Array.from(new Map(blogPosts.map(p => [p.stayCategory + p.region, p])).values());
+  return <div className="bg-ink-50 pb-20 text-ink-900">
+    <header className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">Stay guides</p>
+      <div className="mt-4 grid gap-4 md:grid-cols-[1.5fr_1fr] md:items-end">
+        <h1 className="text-4xl font-bold leading-[1.05] tracking-[-0.035em] sm:text-6xl">Plan the stay,<span className="block text-brand-600">enjoy the trip.</span></h1>
+        <p className="max-w-md text-base leading-7 text-ink-500 md:justify-self-end">Practical checklists for city breaks, longer stays, business trips and celebrations across Tanzania — with real places to book.</p>
       </div>
+
+      <Link href={`/blog/${lead.slug}`} className="group mt-10 grid overflow-hidden rounded-3xl bg-white ring-1 ring-ink-100 transition-shadow hover:shadow-xl hover:shadow-ink-900/5 lg:grid-cols-[1.4fr_1fr]">
+        <Cover photo={photography[lead.photo!]} label={lead.category} index={0} priority sizes="(max-width: 1023px) 100vw, 60vw" className="aspect-[16/10] rounded-none lg:aspect-auto lg:min-h-[420px]" />
+        <div className="flex flex-col justify-center p-6 sm:p-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">Featured · {lead.region}</p>
+          <h2 className="mt-4 text-3xl font-bold leading-tight tracking-tight group-hover:text-brand-700 sm:text-4xl">{lead.title}</h2>
+          <p className="mt-4 leading-7 text-ink-500">{lead.description}</p>
+          <span className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-brand-600 px-5 py-3 text-sm font-semibold text-white transition-colors group-hover:bg-brand-700">Read the guide <ArrowRight size={16} aria-hidden="true" /></span>
+        </div>
+      </Link>
+
+      <nav aria-label="Browse stays by occasion" className="mt-6 rounded-3xl bg-white p-5 ring-1 ring-ink-100 sm:p-6">
+        <p className="mb-4 text-sm font-semibold">Already know what you need? Jump straight to the stays.</p>
+        <ul className="flex flex-wrap gap-2">
+          {occasions.map(p => <li key={p.slug}><Link href={guideSearchHref(p)} className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-ink-50 px-4 text-sm font-semibold text-ink-700 hover:bg-brand-50 hover:text-brand-700">{stayCategoryLabel(p.stayCategory)} · {p.region}<ArrowUpRight size={14} aria-hidden="true" /></Link></li>)}
+        </ul>
+      </nav>
     </header>
-    <div className="mx-auto max-w-7xl px-5 pt-14 sm:px-8"><div className="mb-7 flex items-baseline justify-between border-b border-stone-300 pb-5"><h2 className="font-serif text-4xl tracking-tight sm:text-5xl">Where to next?</h2><span className="hidden text-xs uppercase tracking-widest text-stone-500 sm:block">The latest stories</span></div><BlogExplorer posts={blogPosts.map((p,i) => ({...p, image: photography[i % photography.length].src, imageAlt: photography[i % photography.length].alt}))}/><aside className="mt-16 grid gap-6 bg-[#183e31] p-8 text-white sm:grid-cols-[1fr_auto] sm:items-center sm:p-10"><div><p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#d5debe]">Make room for a little adventure</p><h2 className="font-serif text-3xl text-white sm:text-4xl">Find somewhere that feels like you.</h2></div><Link href="/search" className="inline-flex items-center gap-3 border-b border-white/50 pb-2 text-sm font-semibold">Explore the stays <ArrowUpRight size={18}/></Link></aside><a href="https://www.ndotoni.com/blog" className="mt-8 inline-flex items-center gap-2 text-sm text-stone-600 hover:text-brand-900">Staying longer? Read our rental journal <ArrowUpRight size={16}/></a></div>
+
+    <div className="mx-auto max-w-7xl px-4 pt-16 sm:px-6 lg:px-8">
+      <h2 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl">All guides</h2>
+      <BlogExplorer posts={rest.map(p => ({ slug: p.slug, title: p.title, description: p.description, category: p.category, date: p.updated || p.date, minutes: readingMinutes(p), photo: p.photo === undefined ? undefined : photography[p.photo] }))} />
+
+      <aside className="mt-20 flex flex-col gap-6 rounded-3xl bg-brand-900 p-8 text-white sm:flex-row sm:items-center sm:justify-between sm:p-12">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-200">Make room for a little adventure</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Find somewhere that feels like you.</h2>
+        </div>
+        <Link href="/search" className="inline-flex w-fit flex-none items-center gap-2 rounded-full bg-brand-600 px-6 py-3.5 font-semibold text-white hover:bg-brand-500">Explore stays <ArrowRight size={18} aria-hidden="true" /></Link>
+      </aside>
+      <a href="https://www.ndotoni.com/blog" className="mt-8 inline-flex items-center gap-2 text-sm text-ink-500 hover:text-brand-700">Staying longer? Read our rental guides on ndotoni.com <ArrowUpRight size={16} aria-hidden="true" /></a>
+    </div>
   </div>;
 }

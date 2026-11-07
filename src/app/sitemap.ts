@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { blogPosts } from './blog/posts';
 
 const BASE_URL = 'https://www.ndotonistays.com';
 
@@ -141,5 +142,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Failed to fetch properties for sitemap:', error);
   }
 
-  return [...staticPages, ...categoryPages, ...propertyPages];
+  return [...staticPages, { url: `${BASE_URL}/blog`, lastModified: new Date(blogPosts.reduce((latest, post) => post.date > latest ? post.date : latest, blogPosts[0].date)), changeFrequency: 'weekly', priority: 0.8 }, ...blogPosts.map(post => ({ url: `${BASE_URL}/blog/${post.slug}`, lastModified: new Date(post.date), changeFrequency: 'monthly' as const, priority: 0.7 })), ...categoryPages, ...propertyPages];
 }

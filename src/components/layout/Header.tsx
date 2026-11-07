@@ -60,6 +60,7 @@ export function Header() {
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-5">
               <Link href="/search" className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-900">{t('hero.search.button')}</Link>
+              <Link href="/blog" className="inline-flex min-h-11 items-center text-sm font-medium text-ink-600 hover:text-brand-700">{sw ? 'Miongozo' : 'Stay guides'}</Link>
               <LanguageToggle />
 
               {isAuthenticated && (user?.userType === 'LANDLORD' || user?.hasProperties) ? (
@@ -237,7 +238,7 @@ export function Header() {
                   </button>
                 )}
                 <div className="my-2 border-t border-ink-100" />
-                {[{ href: '/refer', label: sw ? 'Pata pesa kwa kututambulisha' : 'Refer & earn' }, { href: '/about', label: sw ? 'Kuhusu sisi' : 'About us' }, { href: '/invest', label: sw ? 'Wekeza' : 'Invest' }].map(item => <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-xl px-4 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50">{item.label}</Link>)}
+                {[{ href: '/blog', label: sw ? 'Blog na miongozo' : 'Blog & stay guides' }, { href: '/refer', label: sw ? 'Pata pesa kwa kututambulisha' : 'Refer & earn' }, { href: '/about', label: sw ? 'Kuhusu sisi' : 'About us' }, { href: '/invest', label: sw ? 'Wekeza' : 'Invest' }].map(item => <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-xl px-4 py-3 text-sm font-medium text-ink-700 hover:bg-ink-50">{item.label}</Link>)}
                 <div className="my-2 border-t border-ink-100" />
                 <div className="flex min-h-11 items-center px-2"><LanguageToggle /></div>
               </div>

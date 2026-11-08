@@ -1917,8 +1917,8 @@ input ShortTermAddressInput {
 input ShortTermSearchInput {
   amenities: [String!]
   bedrooms: Int
-  checkInDate: AWSDate!
-  checkOutDate: AWSDate!
+  checkInDate: AWSDate
+  checkOutDate: AWSDate
   district: String
   instantBookOnly: Boolean
   limit: Int
@@ -1928,7 +1928,7 @@ input ShortTermSearchInput {
   nextToken: String
   numberOfAdults: Int
   numberOfChildren: Int
-  numberOfGuests: Int!
+  numberOfGuests: Int
   numberOfInfants: Int
   propertyType: ShortTermPropertyType
   region: String!

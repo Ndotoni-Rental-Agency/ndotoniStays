@@ -23,11 +23,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 // Not yet in the generated ShortTermProperty type — see queries.ts note on getShortTermProperty.
 type PropertyWithGroup = ShortTermProperty & { groupId?: string | null };
 
-export function PropertyDetailClient() {
+export function PropertyDetailClient({ initialProperty }: { initialProperty?: PropertyWithGroup }) {
   const { id } = useParams();
   const searchParams = useSearchParams();
-  const [property, setProperty] = useState<PropertyWithGroup | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [property, setProperty] = useState<PropertyWithGroup | null>(initialProperty || null);
+  const [loading, setLoading] = useState(!initialProperty);
   const [error, setError] = useState<string | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -41,7 +41,7 @@ export function PropertyDetailClient() {
   const coords = usePropertyCoordinates(property);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || initialProperty?.propertyId === id) return;
     fetchProperty();
   }, [id]);
 
@@ -69,7 +69,6 @@ export function PropertyDetailClient() {
         getShortTermProperty,
         { propertyId: id }
       );
-      console.log('[PropertyDetail] host data:', data.getShortTermProperty?.host ?? '⚠️ host is null');
       setProperty(data.getShortTermProperty);
     } catch (err) {
       console.error('Error fetching property:', err);

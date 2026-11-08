@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { QUERY, prepareStays } from '@/lib/home-stays';
 import { HomeProperties } from '@/components/home/HomeProperties';
@@ -6,6 +7,8 @@ import { LongTermBanner } from '@/components/home/LongTermBanner';
 import { TrustSection } from '@/components/home/TrustSection';
 import { HowItWorks } from '@/components/home/HowItWorks';
 import { CTASection } from '@/components/home/CTASection';
+
+export const metadata: Metadata = { alternates: { canonical: 'https://www.ndotonistays.com' } };
 
 export default function HomePage() {
   return (

@@ -153,3 +153,37 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+
+/* Interaction feedback only: content and photos never wait for entrance animations. */
+.stays-search-field {
+  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+}
+.stays-press {
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+.stays-press:active:not(:disabled) { transform: scale(.98); }
+.stays-picker-backdrop { animation: stays-backdrop-in 150ms ease-out; }
+.stays-picker-panel { animation: stays-sheet-in 180ms cubic-bezier(.2,.8,.2,1); }
+.stays-popover-panel,
+.stays-description[open] > .stays-description-panel { animation: stays-panel-in 150ms ease-out; }
+@keyframes stays-backdrop-in { from { background-color: rgb(17 24 39 / 0); } }
+@keyframes stays-sheet-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes stays-panel-in { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 640px) {
+  .stays-picker-panel { animation: stays-panel-in 150ms ease-out; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stays-search-field, .stays-press { transition: none; }
+  .stays-press:active:not(:disabled) { transform: none; }
+  .stays-picker-backdrop, .stays-picker-panel, .stays-popover-panel,
+  .stays-description[open] > .stays-description-panel { animation: none; }
+}
+
+/* Location sheets share the same restrained motion across search and forms. */
+.location-choice-dialog[open] { animation: location-sheet-enter 180ms ease-out; }
+.location-choice-dialog::backdrop { animation: location-backdrop-enter 150ms ease-out; }
+@keyframes location-sheet-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes location-backdrop-enter { from { background-color: transparent; } }
+@media (min-width: 640px) { .location-choice-dialog[open] { animation-name: location-fade-enter; } }
+@keyframes location-fade-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .location-choice-dialog[open], .location-choice-dialog::backdrop { animation: none; } }

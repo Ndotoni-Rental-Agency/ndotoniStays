@@ -4,12 +4,13 @@ import { useStayCopy } from "@/hooks/useStayCopy";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { WhatsAppIcon } from '@/components/refer/WhatsAppIcon';
 import { BoltIcon } from "@heroicons/react/24/solid";
 import { formatPrice, calculateNights, findAvailableRanges } from "@/lib/utils";
 import { GraphQLClient } from "@/lib/graphql-client";
 import { calculateBookingPrice, getBlockedDates, checkAvailability } from "@/graphql/queries";
 import { useAuth } from "@/contexts/AuthContext";
-import CalendarDatePicker from "@/components/ui/CalendarDatePicker";
+import StayDateRangePicker from "@/components/home/StayDateRangePicker";
 
 import { ShortTermProperty } from '@/API';
 
@@ -246,37 +247,15 @@ export function BookingSidebar({
 
         {/* Date & guest inputs */}
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <CalendarDatePicker
-              value={checkIn}
-              onChange={(val) => {
-                setCheckIn(val);
-                if (checkOut && val >= checkOut) setCheckOut('');
-              }}
-              min={minDate}
-              label={copy("Check-in")}
-              placeholder={copy("Add date")}
-              blockedDates={blockedDates}
-              rangeStart={checkIn}
-              rangeEnd={checkOut}
-              rangeMode
-              onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
-            />
-            <CalendarDatePicker
-              value={checkOut}
-              onChange={setCheckOut}
-              minExclusive={checkIn || undefined}
-              min={minDate}
-              label={copy("Check-out")}
-              placeholder={copy("Add date")}
-              blockedDates={blockedDates}
-              rangeStart={checkIn}
-              rangeEnd={checkOut}
-              rangeMode
-              rangePhaseStart="checkOut"
-              onRangeComplete={(ci, co) => { setCheckIn(ci); setCheckOut(co); }}
-            />
-          </div>
+          <StayDateRangePicker
+            className="w-full"
+            checkIn={checkIn}
+            checkOut={checkOut}
+            min={minDate}
+            blockedDates={blockedDates}
+            minimumNights={minStay}
+            onChange={(start, end) => { setCheckIn(start); setCheckOut(end); }}
+          />
 
           {unavailableMessage && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
@@ -368,6 +347,15 @@ export function BookingSidebar({
           {property.instantBookEnabled && <BoltIcon className="h-4 w-4" />}
           {copy(property.instantBookEnabled ? "Reserve & Pay" : "Request to Book")}
         </button>
+
+        <a
+          href={`/enquire/${encodeURIComponent(property.propertyId)}?lang=${sw ? 'sw' : 'en'}`}
+          target="_blank" rel="noopener noreferrer"
+          className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-brand-600 px-4 text-sm font-semibold text-brand-700 hover:bg-brand-50"
+        >
+          <WhatsAppIcon className="h-5 w-5" />
+          {sw ? 'Uliza kuhusu stay hii · WhatsApp' : 'Enquire about this stay · WhatsApp'}
+        </a>
 
         {/* Reassurance */}
         <p className="mt-3 text-center text-xs text-ink-400">

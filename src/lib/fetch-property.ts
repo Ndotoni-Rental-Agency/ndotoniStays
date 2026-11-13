@@ -1,103 +1,130 @@
-/**
- * Server-side property fetching using raw fetch (no Amplify client dependency).
- * Used by generateMetadata and JSON-LD generation in property pages.
- */
+import 'server-only';
+import { cache } from 'react';
+import type { ShortTermProperty } from '@/API';
 
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT!;
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY!;
+export type PropertySEOData = ShortTermProperty & { groupId?: string | null; isPrimaryUnit?: boolean | null; unitLabel?: string | null };
 
-const GET_SHORT_TERM_PROPERTY_QUERY = `query GetShortTermProperty($propertyId: ID!) {
+// Public API projection only. Private contact/check-in data is loaded by authenticated flows.
+const QUERY = `query GetShortTermProperty($propertyId: ID!) {
   getShortTermProperty(propertyId: $propertyId) {
-    propertyId
-    title
-    description
-    propertyType
-    nightlyRate
-    currency
-    region
-    district
-    amenities
-    images
-    thumbnail
-    maxGuests
-    bedrooms
-    bathrooms
-    averageRating
-    coordinates {
-      latitude
-      longitude
-    }
+    verified
     address {
       city
       country
       district
+      postalCode
       region
       street
+      ward
+      __typename
     }
+    advanceBookingDays
+    allowsChildren
+    allowsInfants
+    allowsPets
+    allowsSmoking
+    amenities
+    averageRating
+    bathrooms
+    kitchenCount
+    kitchenAccess
+    bedrooms
+    cancellationPolicy
+    checkInTime
+    checkOutTime
+    cleaningFee
+    coordinates {
+      latitude
+      longitude
+      __typename
+    }
+    createdAt
+    currency
+    description
+    district
+    googleMapsUrl
+    groupId
     host {
       firstName
       lastName
+      profileImage
+      __typename
     }
-    ratingSummary {
-      averageRating
-      totalReviews
-    }
-    checkInTime
-    checkOutTime
+    hostId
+    houseRules
+    images
     instantBookEnabled
-  }
-}`;
-
-export interface PropertySEOData {
-  propertyId: string;
-  title: string;
-  description: string;
-  propertyType: string;
-  nightlyRate: number;
-  currency: string;
-  region: string;
-  district: string;
-  amenities: string[];
-  images: string[];
-  thumbnail: string;
-  maxGuests: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
-  averageRating: number | null;
-  coordinates: { latitude: number; longitude: number } | null;
-  address: {
-    city: string;
-    country: string;
-    district: string;
-    region: string;
-    street: string;
-  } | null;
-  host: { firstName: string; lastName: string } | null;
-  ratingSummary: { averageRating: number; totalReviews: number } | null;
-  checkInTime: string | null;
-  checkOutTime: string | null;
-  instantBookEnabled: boolean;
-}
-
-export async function fetchPropertyForSEO(propertyId: string): Promise<PropertySEOData | null> {
-  try {
-    const response = await fetch(GRAPHQL_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-      },
-      body: JSON.stringify({
-        query: GET_SHORT_TERM_PROPERTY_QUERY,
-        variables: { propertyId },
-      }),
-      next: { revalidate: 3600 }, // Cache for 1 hour
-    });
-
-    const data = await response.json();
-    return data?.data?.getShortTermProperty || null;
-  } catch (error) {
-    console.error('[fetchPropertyForSEO] Error:', error);
-    return null;
+    isPrimaryUnit
+    maxAdults
+    maxChildren
+    maxGuests
+    maxInfants
+    maximumStay
+    minimumStay
+    nightlyRate
+    propertyId
+    propertyType
+    publishedAt
+    ratingSummary {
+      accuracy
+      averageRating
+      cleanliness
+      communication
+      fiveStars
+      fourStars
+      location
+      oneStar
+      threeStars
+      totalReviews
+      twoStars
+      value
+      __typename
+    }
+    region
+    serviceFeePercentage
+    status
+    stayCategories
+    taxPercentage
+    thumbnail
+    title
+    unitLabel
+    updatedAt
+    videos
+    __typename
   }
 }
+`;
+
+/** Null means a confirmed missing/unpublished listing; upstream failures must remain errors. */
+export const fetchPropertyForSEO = cache(async (propertyId: string): Promise<PropertySEOData | null> => {
+  const endpoint = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT;
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  if (!endpoint || !apiKey) throw new Error('Public property API is not configured');
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+    body: JSON.stringify({ query: QUERY, variables: { propertyId } }),
+    next: { revalidate: 300 },
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!response.ok) throw new Error(`Public property API returned ${response.status}`);
+  const result = await response.json();
+  if (result.errors?.length) {
+    // AppSync currently wraps NdotoniError.notFound as Lambda:Unhandled.
+    // Recognize only the exact application response, never generic upstream errors.
+    const missing = result.data?.getShortTermProperty === null && result.errors.every((error: {
+      message?: string; errorType?: string; path?: string[]; extensions?: { code?: string };
+    }) => error.path?.length === 1 && error.path[0] === 'getShortTermProperty' && (
+      error.extensions?.code === 'NOT_FOUND' || error.errorType === 'NOT_FOUND' ||
+      (error.errorType === 'Lambda:Unhandled' && error.message === 'The requested property could not be found.')
+    ));
+    if (missing) return null;
+    throw new Error('Public property API could not load the listing');
+  }
+  if (!result.data || !Object.prototype.hasOwnProperty.call(result.data, 'getShortTermProperty')) {
+    throw new Error('Public property API returned an invalid response');
+  }
+  const property: PropertySEOData | null = result.data.getShortTermProperty;
+  if (!property || property.status === 'DRAFT' || property.status === 'DELETED') return null;
+  return property;
+});

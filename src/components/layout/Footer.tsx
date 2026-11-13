@@ -34,6 +34,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-sm text-ink-900 mb-3">{t('footer.explore')}</h3>
             <ul className="space-y-2 text-sm text-ink-500">
+              <li><Link href="/blog" className="hover:text-ink-900 transition-colors">{language === 'sw' ? 'Blog na miongozo' : 'Blog & stay guides'}</Link></li>
               <li>
                 <Link href="/search" className="hover:text-ink-900 transition-colors">
                   {t('footer.searchPlaces')}

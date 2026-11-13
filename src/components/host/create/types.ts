@@ -12,6 +12,7 @@ export interface CreatePropertyFormData {
   maxGuests: string;
   bedrooms: string;
   bathrooms: string;
+  kitchenCount?: string; kitchenAccess?: string;
   instantBookEnabled: boolean;
   images: string[];
   videos: string[];

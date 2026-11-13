@@ -223,6 +223,8 @@ export const getApplication = /* GraphQL */ `query GetApplication($applicationId
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished
@@ -376,6 +378,8 @@ export const getBooking = /* GraphQL */ `query GetBooking($bookingId: ID!) {
       amenities
       averageRating
       bathrooms
+      kitchenCount
+      kitchenAccess
       bedrooms
       cancellationPolicy
       checkInInstructions {
@@ -1152,6 +1156,8 @@ export const getLandlordPropertiesInfo = /* GraphQL */ `query GetLandlordPropert
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished
@@ -1599,6 +1605,8 @@ export const getProperty = /* GraphQL */ `query GetProperty($propertyId: ID!) {
     propertyType
     specifications {
       bathrooms
+      kitchenCount
+      kitchenAccess
       bedrooms
       floors
       furnished
@@ -1801,6 +1809,8 @@ export const getShortTermProperty = /* GraphQL */ `query GetShortTermProperty($p
     amenities
     averageRating
     bathrooms
+    kitchenCount
+    kitchenAccess
     bedrooms
     cancellationPolicy
     checkInInstructions {
@@ -1900,6 +1910,8 @@ export const getPropertyGroupUnits = /* GraphQL */ `query GetPropertyGroupUnits(
       maxGuests
       bedrooms
       bathrooms
+      kitchenCount
+      kitchenAccess
       status
       __typename
     }
@@ -2461,6 +2473,8 @@ export const listAgentProperties = /* GraphQL */ `query ListAgentProperties($lim
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished
@@ -2577,6 +2591,8 @@ export const listAllApplications = /* GraphQL */ `query ListAllApplications(
         propertyType
         specifications {
           bathrooms
+          kitchenCount
+          kitchenAccess
           bedrooms
           floors
           furnished
@@ -2722,6 +2738,8 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished
@@ -2756,6 +2774,8 @@ export const listAllProperties = /* GraphQL */ `query ListAllProperties(
       amenities
       averageRating
       bathrooms
+      kitchenCount
+      kitchenAccess
       bedrooms
       cancellationPolicy
       checkInInstructions {
@@ -3142,6 +3162,8 @@ export const listLandlordProperties = /* GraphQL */ `query ListLandlordPropertie
       propertyType
       specifications {
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         floors
         furnished
@@ -3290,6 +3312,8 @@ export const listMyApplications = /* GraphQL */ `query ListMyApplications(
         propertyType
         specifications {
           bathrooms
+          kitchenCount
+          kitchenAccess
           bedrooms
           floors
           furnished
@@ -3383,6 +3407,8 @@ export const listMyBookings = /* GraphQL */ `query ListMyBookings($limit: Int, $
         amenities
         averageRating
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         cancellationPolicy
         checkInInstructions {
@@ -3510,6 +3536,8 @@ export const listMyShortTermProperties = /* GraphQL */ `query ListMyShortTermPro
       amenities
       averageRating
       bathrooms
+      kitchenCount
+      kitchenAccess
       bedrooms
       cancellationPolicy
       checkInInstructions {
@@ -3695,6 +3723,8 @@ export const listPropertyApplications = /* GraphQL */ `query ListPropertyApplica
         propertyType
         specifications {
           bathrooms
+          kitchenCount
+          kitchenAccess
           bedrooms
           floors
           furnished
@@ -3802,6 +3832,8 @@ export const listPropertyBookings = /* GraphQL */ `query ListPropertyBookings(
         amenities
         averageRating
         bathrooms
+        kitchenCount
+        kitchenAccess
         bedrooms
         cancellationPolicy
         checkInInstructions {
@@ -4111,6 +4143,8 @@ export const searchShortTermProperties = /* GraphQL */ `query SearchShortTermPro
       amenities
       averageRating
       bathrooms
+      kitchenCount
+      kitchenAccess
       bedrooms
       cancellationPolicy
       checkInInstructions {

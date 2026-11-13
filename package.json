@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:seo": "node scripts/verify-property-seo.cjs",
     "amplify:statements": "pnpm amplify codegen statements",
     "amplify:types": "pnpm amplify codegen types",
     "amplify:codegen": "pnpm run amplify:statements && pnpm run amplify:types",

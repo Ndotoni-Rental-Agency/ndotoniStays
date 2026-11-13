@@ -237,6 +237,8 @@ export default function ListYourPlacePage() {
           maxGuests: parseInt(form.maxGuests),
           bedrooms: parseInt(form.bedrooms) || 1,
           bathrooms: parseInt(form.bathrooms) || 1,
+          kitchenCount: form.kitchenCount ? Number(form.kitchenCount) : null,
+          kitchenAccess: Number(form.kitchenCount) > 0 ? form.kitchenAccess || null : null,
           instantBookEnabled: form.instantBookEnabled,
           images: form.images.length > 0 ? form.images : thumbnail ? [thumbnail] : undefined,
           videos: form.videos.length > 0 ? form.videos : undefined,

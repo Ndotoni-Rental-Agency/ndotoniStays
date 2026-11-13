@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 /**
  * Hierarchical Location Selector Component
  * 
@@ -136,7 +138,7 @@ export default function HierarchicalLocationSelector({
         <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">
           Region {required && <span className="text-red-500">*</span>}
         </label>
-        <select
+        <LocationSelect
           id="region"
           value={selected.region?.id || ''}
           onChange={handleRegionChange}
@@ -152,7 +154,7 @@ export default function HierarchicalLocationSelector({
               {region.name}
             </option>
           ))}
-        </select>
+        </LocationSelect>
       </div>
 
       {/* District Selector */}
@@ -161,7 +163,7 @@ export default function HierarchicalLocationSelector({
           <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
             District
           </label>
-          <select
+          <LocationSelect
             id="district"
             value={selected.district?.id || ''}
             onChange={handleDistrictChange}
@@ -180,7 +182,7 @@ export default function HierarchicalLocationSelector({
                 {district.name}
               </option>
             ))}
-          </select>
+          </LocationSelect>
         </div>
       )}
 
@@ -190,7 +192,7 @@ export default function HierarchicalLocationSelector({
           <label htmlFor="ward" className="block text-sm font-medium text-gray-700 mb-1">
             Ward
           </label>
-          <select
+          <LocationSelect
             id="ward"
             value={selected.ward?.id || ''}
             onChange={handleWardChange}
@@ -209,7 +211,7 @@ export default function HierarchicalLocationSelector({
                 {ward.name}
               </option>
             ))}
-          </select>
+          </LocationSelect>
         </div>
       )}
 
@@ -219,7 +221,7 @@ export default function HierarchicalLocationSelector({
           <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
             Street
           </label>
-          <select
+          <LocationSelect
             id="street"
             value={selected.street?.id || ''}
             onChange={handleStreetChange}
@@ -238,7 +240,7 @@ export default function HierarchicalLocationSelector({
                 {street.name}
               </option>
             ))}
-          </select>
+          </LocationSelect>
         </div>
       )}
 

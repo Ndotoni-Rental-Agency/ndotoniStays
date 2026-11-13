@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Serve CDN originals directly: Vercel's optimizer can reject image requests
+    // when its paid image allowance is unavailable, hiding otherwise valid photos.
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: '**' },
     ],

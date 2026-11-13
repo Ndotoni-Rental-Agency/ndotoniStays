@@ -34,13 +34,6 @@ export function PropertyJsonLd({ property }: PropertyJsonLdProps) {
           longitude: property.coordinates.longitude,
         }
       : undefined,
-    starRating: property.ratingSummary?.averageRating
-      ? {
-          '@type': 'Rating',
-          ratingValue: property.ratingSummary.averageRating,
-          bestRating: 5,
-        }
-      : undefined,
     aggregateRating: property.ratingSummary?.totalReviews
       ? {
           '@type': 'AggregateRating',
@@ -64,8 +57,8 @@ export function PropertyJsonLd({ property }: PropertyJsonLdProps) {
       '@type': 'Offer',
       price: property.nightlyRate,
       priceCurrency: property.currency === 'TZS' ? 'TZS' : property.currency === '$' ? 'USD' : property.currency,
-      availability: 'https://schema.org/InStock',
-      validFrom: new Date().toISOString().split('T')[0],
+      // A listed nightly rate does not establish availability for any particular dates.
+      url: `https://www.ndotonistays.com/property/${property.propertyId}`,
     },
   };
 
@@ -75,7 +68,7 @@ export function PropertyJsonLd({ property }: PropertyJsonLdProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(cleanJsonLd) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(cleanJsonLd).replace(/</g, '\\u003c') }}
     />
   );
 }

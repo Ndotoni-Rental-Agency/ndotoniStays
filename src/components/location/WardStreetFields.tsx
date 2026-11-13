@@ -1,5 +1,7 @@
 'use client';
 
+import LocationSelect from '@/components/location/LocationSelect';
+
 import { useEffect, useMemo, useState } from 'react';
 import { GraphQLClient } from '@/lib/graphql-client';
 import { getWards, getStreets } from '@/graphql/queries';
@@ -115,7 +117,7 @@ export function WardStreetFields({ region, district, ward, street, onChange }: W
             placeholder={t('create.location.wardPlaceholder')}
           />
         ) : (
-          <select
+          <LocationSelect
             value={matchedWard?.name || ''}
             onChange={(e) => onChange({ ward: e.target.value, street: '' })}
             className={inputClass}
@@ -124,7 +126,7 @@ export function WardStreetFields({ region, district, ward, street, onChange }: W
             {wards.map((w) => (
               <option key={w.id} value={w.name}>{titleCase(w.name)}</option>
             ))}
-          </select>
+          </LocationSelect>
         )}
       </div>
 
@@ -149,7 +151,7 @@ export function WardStreetFields({ region, district, ward, street, onChange }: W
             placeholder={t('create.location.streetPlaceholder')}
           />
         ) : (
-          <select
+          <LocationSelect
             value={matchedStreet?.name || ''}
             onChange={(e) => onChange({ street: e.target.value })}
             className={inputClass}
@@ -158,7 +160,7 @@ export function WardStreetFields({ region, district, ward, street, onChange }: W
             {streets.map((s) => (
               <option key={s.id} value={s.name}>{titleCase(s.name)}</option>
             ))}
-          </select>
+          </LocationSelect>
         )}
       </div>
     </>

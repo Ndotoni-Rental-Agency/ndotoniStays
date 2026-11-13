@@ -90,7 +90,7 @@ export const sw: Record<string, string> = {
 
   // Footer
   'footer.description': 'Book malazi ya usiku, maeneo ya sherehe, maeneo ya picha, na kumbi za hafla kote Tanzania. Rahisi, haraka, na ya kuaminika.',
-  'footer.explore': 'Gundua',
+  'footer.explore': 'Tazama',
   'footer.searchPlaces': 'Tafuta Maeneo',
   'footer.becomeHost': 'Kuwa Mwenyeji',
   'footer.invest': 'Wekeza',

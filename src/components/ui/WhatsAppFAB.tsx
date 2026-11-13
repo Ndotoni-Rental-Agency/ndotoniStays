@@ -36,7 +36,7 @@ export default function WhatsAppFAB() {
         position: 'fixed',
         bottom: '24px',
         right: '24px',
-        zIndex: 9999,
+        zIndex: 40, // Stay below the navbar and modal dialogs.
         alignItems: 'center',
         opacity: nearOwnEntryPoint ? 0 : 1,
         pointerEvents: nearOwnEntryPoint ? 'none' : 'auto',

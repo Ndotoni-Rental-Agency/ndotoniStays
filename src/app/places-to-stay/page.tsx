@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BASE_PATH, REGIONS, fetchRegionStays, formatNightly, pageUrl, priceStats } from '@/lib/seo/stayPages';
+import { BASE_PATH, MIN_LISTINGS_TO_INDEX, REGIONS, fetchRegionStays, formatNightly, pageUrl, priceStats } from '@/lib/seo/stayPages';
 
 export const revalidate = 3600;
 
@@ -22,7 +22,8 @@ export default async function PlacesToStayHub() {
       return { region, count: stays.length, stats: priceStats(stays) };
     }),
   );
-  const visible = regions.filter((r) => r.count > 0).sort((a, b) => b.count - a.count);
+  // Only link regions that have enough listings to be indexable pages.
+  const visible = regions.filter((r) => r.count >= MIN_LISTINGS_TO_INDEX).sort((a, b) => b.count - a.count);
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',

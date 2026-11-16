@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { blogPosts } from './blog/posts';
 import { getSitemapListings } from '@/lib/sitemap-listings';
+import { MIN_LISTINGS_TO_INDEX, REGIONS, categoriesWithStays, fetchRegionStays, pageUrl } from '@/lib/seo/stayPages';
 
 const BASE_URL = 'https://www.ndotonistays.com';
 export const revalidate = 3600;
@@ -49,5 +50,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(property.updatedAt && Number.isFinite(Date.parse(property.updatedAt)) ? { lastModified: new Date(property.updatedAt) } : {}),
     changeFrequency: 'weekly', priority: 0.8,
   }));
-  return [...staticPages, ...blogPages, ...categoryPages, ...propertyPages];
+  // Destination landing pages: hub, regions, and region+category combinations with enough listings.
+  const placePages: MetadataRoute.Sitemap = [{ url: pageUrl(), changeFrequency: 'daily', priority: 0.9 }];
+  for (const region of REGIONS) {
+    const stays = await fetchRegionStays(region.name);
+    if (stays.length < MIN_LISTINGS_TO_INDEX) continue;
+    placePages.push({ url: pageUrl(region.slug), changeFrequency: 'daily', priority: 0.9 });
+    for (const { category } of categoriesWithStays(stays)) {
+      placePages.push({ url: pageUrl(region.slug, category.slug), changeFrequency: 'weekly', priority: 0.8 });
+    }
+  }
+  return [...staticPages, ...placePages, ...blogPages, ...categoryPages, ...propertyPages];
 }
